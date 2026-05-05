@@ -50,13 +50,23 @@ export default function Index() {
   const handleWishSent = () => {
     setShowModal(false);
     setStarsCount(prev => prev + 1);
+    const newStar: Star = {
+      id: Date.now(),
+      x: 5 + Math.random() * 85,
+      y: 2 + Math.random() * 45,
+      size: 1.5 + Math.random() * 1.5,
+      delay: Math.random() * 3,
+      lit: true,
+      isNew: true,
+    };
     setStars(prev => {
-      const unlitIdx = prev.findIndex(s => !s.lit);
-      if (unlitIdx === -1) return prev;
-      const updated = [...prev];
-      updated[unlitIdx] = { ...updated[unlitIdx], lit: true };
-      return updated;
+      const updated = prev.map(s => ({ ...s, isNew: false }));
+      return [...updated, newStar];
     });
+    // Снимаем флаг isNew через 3 секунды
+    setTimeout(() => {
+      setStars(prev => prev.map(s => s.id === newStar.id ? { ...s, isNew: false } : s));
+    }, 3000);
   };
 
   return (
