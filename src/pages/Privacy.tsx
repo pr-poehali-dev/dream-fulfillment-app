@@ -1,0 +1,69 @@
+export default function Privacy() {
+  return (
+    <div className="min-h-screen" style={{ background: '#060810' }}>
+      <header className="flex items-center justify-between px-6 py-5 md:px-12"
+        style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
+        <a href="/" className="flex items-center gap-2" style={{ textDecoration: 'none' }}>
+          <span style={{ color: '#c9a84c' }}>✦</span>
+          <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>Загадай</span>
+        </a>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <h1 className="font-cormorant text-4xl md:text-5xl mb-2" style={{ color: '#f0e8d0' }}>Конфиденциальность</h1>
+        <p className="font-golos text-sm mb-10" style={{ color: 'rgba(200,210,240,0.4)' }}>
+          Политика обработки персональных данных · Редакция от 01.01.2024
+        </p>
+
+        {[
+          {
+            title: "Какие данные мы собираем",
+            content: "Имя и фото профиля ВКонтакте (через VK ID). Электронная почта (при желании пользователя). История желаний и платежей. Технические данные: IP-адрес, браузер, устройство — для безопасности и аналитики."
+          },
+          {
+            title: "Как мы используем данные",
+            content: "Идентификация пользователя в личном кабинете. Отображение истории желаний и платежей. Улучшение работы сервиса через аналитику. Отправка уведомлений об исполнении желания (только при согласии)."
+          },
+          {
+            title: "Авторизация через ВКонтакте",
+            content: "Мы используем официальный VK ID для авторизации. Мы не получаем доступ к вашим сообщениям, друзьям или иным приватным данным. Публикация постов происходит только с явного согласия пользователя."
+          },
+          {
+            title: "Хранение и безопасность",
+            content: "Данные хранятся на серверах в России в соответствии с ФЗ-152. Соединение защищено SSL-шифрованием. Мы не передаём данные третьим лицам без вашего согласия, кроме случаев, предусмотренных законом."
+          },
+          {
+            title: "Платёжные данные",
+            content: "Мы не храним данные банковских карт. Все платежи обрабатываются ЮKassa — сертифицированным платёжным оператором. Мы получаем только подтверждение факта платежа и его сумму."
+          },
+          {
+            title: "Файлы cookie",
+            content: "Мы используем cookie для сохранения сессии пользователя и предпочтений интерфейса. Вы можете отключить cookie в настройках браузера, однако некоторые функции сайта могут перестать работать."
+          },
+          {
+            title: "Права пользователя",
+            content: "Вы имеете право: запросить копию своих данных; потребовать удаления аккаунта и всех данных; отозвать согласие на обработку. Для реализации прав обратитесь в техподдержку через форму на сайте."
+          },
+          {
+            title: "Контакты",
+            content: "По вопросам обработки персональных данных: privacy@zagadai.online"
+          },
+        ].map((section, i) => (
+          <div key={i} className="mb-6 glass-panel rounded-xl p-6"
+            style={{ border: '1px solid rgba(201,168,76,0.08)' }}>
+            <h2 className="font-cormorant text-xl mb-3" style={{ color: '#c9a84c' }}>{i + 1}. {section.title}</h2>
+            <p className="font-golos text-sm leading-relaxed" style={{ color: 'rgba(200,210,240,0.6)' }}>
+              {section.content}
+            </p>
+          </div>
+        ))}
+
+        <div className="text-center mt-8">
+          <a href="/" className="font-golos text-sm" style={{ color: 'rgba(200,210,240,0.35)', textDecoration: 'none' }}>
+            ← Вернуться на главную
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
