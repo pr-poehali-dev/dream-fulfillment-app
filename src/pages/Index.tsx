@@ -31,15 +31,7 @@ export default function Index() {
     if (!hasSeenVideo) {
       setTimeout(() => setShowVideo(true), 500);
     }
-    const generated: Star[] = Array.from({ length: 60 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 50,
-      size: Math.random() * 2 + 0.5,
-      delay: Math.random() * 5,
-      lit: Math.random() > 0.65,
-    }));
-    setStars(generated);
+    setStars([]);
   }, []);
 
   const handleWellClick = () => {
