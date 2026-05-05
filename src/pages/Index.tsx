@@ -4,7 +4,7 @@ import WishModal from "@/components/WishModal";
 import VideoPreview from "@/components/VideoPreview";
 import StarsCanvas from "@/components/StarsCanvas";
 
-const BG_IMAGE = "https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/files/90f0e037-ce00-4527-93a3-900c0cba6b4b.jpg";
+const BG_IMAGE = "https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/bucket/44ca2f43-19c6-45a5-824f-8662569e1ee3.jpeg";
 
 const PARTNERS = [
   { name: "Ангел №1", subtitle: "Первый партнёр", url: "#" },
@@ -82,11 +82,11 @@ export default function Index() {
         <img
           src={BG_IMAGE}
           alt="Ночной берег с колодцем"
-          className="w-full h-full object-cover object-center"
-          style={{ filter: 'brightness(0.72) contrast(1.05) saturate(0.75)' }}
+          className="w-full h-full object-cover"
+          style={{ objectPosition: 'center bottom', filter: 'brightness(0.85) contrast(1.05)' }}
         />
         <div className="absolute inset-0" style={{
-          background: 'linear-gradient(to bottom, rgba(6,8,16,0.25) 0%, rgba(6,8,16,0.05) 35%, rgba(6,8,16,0.55) 72%, rgba(6,8,16,0.97) 100%)'
+          background: 'linear-gradient(to bottom, rgba(6,8,16,0.1) 0%, rgba(6,8,16,0.0) 30%, rgba(6,8,16,0.4) 70%, rgba(6,8,16,0.97) 100%)'
         }} />
         <StarsCanvas stars={stars} />
       </div>
