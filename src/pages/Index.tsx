@@ -147,9 +147,32 @@ export default function Index() {
     }, 2200);
   };
 
+  const playStarAppear = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioCtx();
+      // Высокий хрустальный звон — звезда зажигается
+      [0, 0.12, 0.28, 0.48].forEach((delay, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        const freqs = [1800, 2400, 3000, 2200];
+        osc.frequency.setValueAtTime(freqs[i], ctx.currentTime + delay);
+        osc.frequency.exponentialRampToValueAtTime(freqs[i] * 1.3, ctx.currentTime + delay + 0.4);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.5);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + 1.5);
+      });
+    } catch (_) { /* silent */ }
+  };
+
   const handleWishSent = () => {
     setShowModal(false);
     setStarsCount(prev => prev + 1);
+    setTimeout(() => playStarAppear(), 300);
     const newStar: Star = {
       id: Date.now(),
       x: 5 + Math.random() * 85,
@@ -258,25 +281,118 @@ export default function Index() {
         <div className="animate-fade-in relative my-4" style={{ animationDelay: '0.8s', opacity: 0 }}>
           <button
             onClick={handleWellClick}
-            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-            aria-label="Нажми на колодец, чтобы загадать желание"
-            className="well-glow focus:outline-none"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            aria-label="Нажми на монету, чтобы загадать желание"
+            className="focus:outline-none group"
           >
-            <div className="w-44 h-44 md:w-56 md:h-56 flex flex-col items-center justify-center rounded-full transition-all"
+            <svg
+              width="160" height="160"
+              viewBox="0 0 160 160"
+              xmlns="http://www.w3.org/2000/svg"
               style={{
-                background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)',
-                border: '1px solid rgba(201,168,76,0.18)',
-              }}>
-              <div className="text-5xl md:text-7xl mb-1 select-none">🪣</div>
-              <p className="font-cormorant text-xs tracking-[0.25em] uppercase mt-1" style={{ color: 'rgba(201,168,76,0.6)' }}>
-                загадать
-              </p>
-            </div>
+                filter: 'drop-shadow(0 0 18px rgba(201,168,76,0.55)) drop-shadow(0 0 40px rgba(201,168,76,0.2))',
+                transition: 'filter 0.3s ease, transform 0.3s ease',
+                display: 'block',
+              }}
+              className="group-hover:scale-105"
+              onMouseEnter={e => (e.currentTarget.style.filter = 'drop-shadow(0 0 30px rgba(201,168,76,0.9)) drop-shadow(0 0 70px rgba(201,168,76,0.35))')}
+              onMouseLeave={e => (e.currentTarget.style.filter = 'drop-shadow(0 0 18px rgba(201,168,76,0.55)) drop-shadow(0 0 40px rgba(201,168,76,0.2))')}
+            >
+              <defs>
+                <radialGradient id="coinFace" cx="42%" cy="38%" r="60%">
+                  <stop offset="0%" stopColor="#f5e17a"/>
+                  <stop offset="35%" stopColor="#d4a832"/>
+                  <stop offset="70%" stopColor="#a07820"/>
+                  <stop offset="100%" stopColor="#7a5510"/>
+                </radialGradient>
+                <radialGradient id="coinEdge" cx="50%" cy="50%" r="50%">
+                  <stop offset="85%" stopColor="#8a6010" stopOpacity="0"/>
+                  <stop offset="100%" stopColor="#5a3d08"/>
+                </radialGradient>
+                <radialGradient id="coinShine" cx="35%" cy="30%" r="40%">
+                  <stop offset="0%" stopColor="rgba(255,248,180,0.7)"/>
+                  <stop offset="100%" stopColor="rgba(255,248,180,0)"/>
+                </radialGradient>
+                <filter id="emboss">
+                  <feGaussianBlur stdDeviation="0.6" result="blur"/>
+                  <feSpecularLighting result="spec" in="blur" surfaceScale="4" specularConstant="1.2" specularExponent="20" lightingColor="#ffe88a">
+                    <fePointLight x="55" y="45" z="80"/>
+                  </feSpecularLighting>
+                  <feComposite in="spec" in2="SourceAlpha" operator="in" result="specClip"/>
+                  <feBlend in="SourceGraphic" in2="specClip" mode="screen"/>
+                </filter>
+              </defs>
+
+              {/* Тень под монетой */}
+              <ellipse cx="82" cy="148" rx="52" ry="8" fill="rgba(0,0,0,0.4)"/>
+
+              {/* Боковой обод — толщина монеты */}
+              <ellipse cx="80" cy="86" rx="62" ry="10" fill="#6b4a0e"/>
+              <ellipse cx="80" cy="84" rx="62" ry="10" fill="#8a6010"/>
+
+              {/* Основной диск */}
+              <circle cx="80" cy="78" r="62" fill="url(#coinFace)"/>
+
+              {/* Рифлёный край */}
+              {Array.from({length: 48}, (_, i) => {
+                const angle = (i / 48) * Math.PI * 2;
+                const r1 = 60, r2 = 63;
+                const x1 = 80 + r1 * Math.cos(angle);
+                const y1 = 78 + r1 * Math.sin(angle);
+                const x2 = 80 + r2 * Math.cos(angle + 0.06);
+                const y2 = 78 + r2 * Math.sin(angle + 0.06);
+                return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#7a5510" strokeWidth="1.5" opacity="0.7"/>;
+              })}
+
+              {/* Внешнее кольцо */}
+              <circle cx="80" cy="78" r="62" fill="none" stroke="#a07820" strokeWidth="1.5" opacity="0.6"/>
+              <circle cx="80" cy="78" r="56" fill="none" stroke="#c9a84c" strokeWidth="0.8" opacity="0.4"/>
+
+              {/* Звезда на монете */}
+              <g filter="url(#emboss)">
+                <path
+                  d="M80,44 L85.9,61.8 H104.7 L90.4,72.1 L96.3,89.9 L80,79.6 L63.7,89.9 L69.6,72.1 L55.3,61.8 H74.1 Z"
+                  fill="#f5e17a"
+                  stroke="#c9a84c"
+                  strokeWidth="0.5"
+                  opacity="0.95"
+                />
+              </g>
+
+              {/* Надписи */}
+              <text x="80" y="106" textAnchor="middle" fontFamily="Cormorant Garamond, serif"
+                fontSize="9" fill="#e8c85a" letterSpacing="3" opacity="0.85">ЗАГАДАЙ</text>
+              <text x="80" y="118" textAnchor="middle" fontFamily="Cormorant Garamond, serif"
+                fontSize="7.5" fill="#c9a84c" letterSpacing="2" opacity="0.65">ONLINE</text>
+
+              {/* Блик */}
+              <ellipse cx="62" cy="58" rx="22" ry="14" fill="url(#coinShine)" style={{transform: 'rotate(-20deg)', transformOrigin: '62px 58px'}}/>
+
+              {/* Внутренняя тень по краю */}
+              <circle cx="80" cy="78" r="62" fill="url(#coinEdge)"/>
+            </svg>
+
+            <p className="font-cormorant text-xs tracking-[0.3em] uppercase mt-3 text-center"
+              style={{ color: 'rgba(201,168,76,0.55)' }}>
+              бросить монетку
+            </p>
           </button>
 
           {coinAnim && (
-            <div className="animate-coin-fall absolute left-1/2 -top-10 -translate-x-1/2 text-3xl pointer-events-none z-20 select-none">
-              🪙
+            <div className="animate-coin-fall absolute left-1/2 -top-10 -translate-x-1/2 pointer-events-none z-20 select-none">
+              <svg width="32" height="32" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg"
+                style={{ filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.8))' }}>
+                <circle cx="80" cy="80" r="62" fill="url(#coinFace2)"/>
+                <defs>
+                  <radialGradient id="coinFace2" cx="42%" cy="38%" r="60%">
+                    <stop offset="0%" stopColor="#f5e17a"/>
+                    <stop offset="60%" stopColor="#d4a832"/>
+                    <stop offset="100%" stopColor="#8a6010"/>
+                  </radialGradient>
+                </defs>
+                <path d="M80,44 L85.9,61.8 H104.7 L90.4,72.1 L96.3,89.9 L80,79.6 L63.7,89.9 L69.6,72.1 L55.3,61.8 H74.1 Z"
+                  fill="#f5e17a" opacity="0.9"/>
+              </svg>
             </div>
           )}
           {rippleAnim && (
