@@ -3,202 +3,213 @@ interface Props {
   glow?: boolean;
 }
 
-export default function GoldCoin({ size = 72, glow = true }: Props) {
-  const s = size;
-  // Монета наклонена — рисуем как эллипс (перспектива сверху-сбоку)
-  const cx = s * 0.5;
-  const cy = s * 0.47;
-  const rx = s * 0.44;        // горизонтальный радиус
-  const ry = s * 0.38;        // вертикальный (сплюснут — наклон)
-  const edgeH = s * 0.13;     // высота видимой грани (монета толстая)
+export default function GoldCoin({ size = 80, glow = true }: Props) {
+  const W = size;
+  const H = size * 1.1;
 
-  const id = `coin_${s}`;
+  const faceCX = W * 0.44;
+  const faceCY = H * 0.47;
+  const faceRX = W * 0.40;
+  const faceRY = H * 0.44;
+  const edgeW  = W * 0.16;
+
+  const id = `rc_${size}`;
 
   return (
     <div style={{ display: 'inline-block', position: 'relative' }}>
       <style>{`
-        @keyframes coin-wobble {
-          0%   { transform: rotate(-6deg) translateY(0px); }
-          25%  { transform: rotate(0deg)  translateY(-3px); }
-          50%  { transform: rotate(6deg)  translateY(0px); }
-          75%  { transform: rotate(0deg)  translateY(-3px); }
-          100% { transform: rotate(-6deg) translateY(0px); }
+        @keyframes coin-wobble-v {
+          0%   { transform: rotate(-4deg) translateY(0px);  }
+          30%  { transform: rotate(2deg)  translateY(-4px); }
+          60%  { transform: rotate(-2deg) translateY(-1px); }
+          80%  { transform: rotate(3deg)  translateY(-3px); }
+          100% { transform: rotate(-4deg) translateY(0px);  }
         }
-        .coin-wobble {
-          animation: coin-wobble 3.5s ease-in-out infinite;
-          transform-origin: center bottom;
+        .coin-v-wobble {
+          animation: coin-wobble-v 4s ease-in-out infinite;
+          transform-origin: 50% 95%;
         }
-        .coin-wobble:hover {
+        .coin-v-wobble:hover {
           animation-play-state: paused;
-          transform: rotate(0deg) scale(1.08) !important;
+          transform: rotate(0deg) scale(1.06) translateY(-2px) !important;
+          transition: transform 0.3s ease;
         }
       `}</style>
 
-      <div className={glow ? 'coin-wobble' : ''} style={{
-        filter: glow
-          ? 'drop-shadow(0 6px 18px rgba(100,70,0,0.7)) drop-shadow(0 0 22px rgba(201,168,76,0.5))'
-          : 'drop-shadow(0 3px 6px rgba(0,0,0,0.6))',
-        transition: 'filter 0.3s',
-      }}>
+      <div
+        className={glow ? 'coin-v-wobble' : ''}
+        style={{
+          filter: glow
+            ? 'drop-shadow(0 12px 28px rgba(80,50,0,0.8)) drop-shadow(0 0 20px rgba(220,170,30,0.45))'
+            : 'drop-shadow(0 4px 8px rgba(0,0,0,0.7))',
+        }}
+      >
         <svg
-          width={s}
-          height={s * 0.95}
-          viewBox={`0 0 ${s} ${s * 0.95}`}
+          width={W}
+          height={H}
+          viewBox={`0 0 ${W} ${H}`}
           xmlns="http://www.w3.org/2000/svg"
           style={{ display: 'block', overflow: 'visible' }}
         >
           <defs>
-            {/* Основной градиент лицевой стороны — фотореализм */}
-            <radialGradient id={`${id}_face`} cx="38%" cy="32%" r="70%">
-              <stop offset="0%"   stopColor="#fff9c0"/>
-              <stop offset="18%"  stopColor="#f0d060"/>
-              <stop offset="42%"  stopColor="#c8920c"/>
-              <stop offset="68%"  stopColor="#9a6808"/>
-              <stop offset="88%"  stopColor="#7a5006"/>
-              <stop offset="100%" stopColor="#5a3a04"/>
+            <radialGradient id={`${id}_face`} cx="34%" cy="28%" r="72%">
+              <stop offset="0%"   stopColor="#fff7a0"/>
+              <stop offset="12%"  stopColor="#fce060"/>
+              <stop offset="30%"  stopColor="#e8b820"/>
+              <stop offset="55%"  stopColor="#c49010"/>
+              <stop offset="78%"  stopColor="#a07010"/>
+              <stop offset="100%" stopColor="#7a5208"/>
             </radialGradient>
 
-            {/* Градиент торца — тёмно-золотой */}
-            <linearGradient id={`${id}_edge`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%"   stopColor="#d4960e"/>
-              <stop offset="30%"  stopColor="#a07010"/>
-              <stop offset="70%"  stopColor="#6a4808"/>
-              <stop offset="100%" stopColor="#3a2804"/>
+            <linearGradient id={`${id}_edge`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stopColor="#c49010"/>
+              <stop offset="25%"  stopColor="#e8c030"/>
+              <stop offset="55%"  stopColor="#b07810"/>
+              <stop offset="80%"  stopColor="#7a5008"/>
+              <stop offset="100%" stopColor="#3a2404"/>
             </linearGradient>
 
-            {/* Блик — яркое пятно от источника света */}
-            <radialGradient id={`${id}_shine`} cx="30%" cy="25%" r="45%">
-              <stop offset="0%"   stopColor="rgba(255,255,220,0.85)"/>
-              <stop offset="40%"  stopColor="rgba(255,240,160,0.35)"/>
-              <stop offset="100%" stopColor="rgba(255,220,100,0)"/>
+            <radialGradient id={`${id}_shine1`} cx="28%" cy="22%" r="48%">
+              <stop offset="0%"   stopColor="rgba(255,255,220,0.9)"/>
+              <stop offset="35%"  stopColor="rgba(255,245,150,0.45)"/>
+              <stop offset="100%" stopColor="rgba(255,220,80,0)"/>
             </radialGradient>
 
-            {/* Вторичный блик по краю */}
-            <radialGradient id={`${id}_rim`} cx="50%" cy="50%" r="50%">
-              <stop offset="78%"  stopColor="rgba(201,168,76,0)"/>
-              <stop offset="90%"  stopColor="rgba(255,220,80,0.25)"/>
-              <stop offset="100%" stopColor="rgba(180,120,20,0.5)"/>
-            </radialGradient>
+            <linearGradient id={`${id}_edge_shine`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%"   stopColor="rgba(255,240,120,0.7)"/>
+              <stop offset="30%"  stopColor="rgba(220,180,40,0.3)"/>
+              <stop offset="100%" stopColor="rgba(100,60,0,0.1)"/>
+            </linearGradient>
 
-            {/* Тень на лице от рельефа */}
-            <radialGradient id={`${id}_shadow`} cx="65%" cy="65%" r="55%">
-              <stop offset="0%"   stopColor="rgba(60,30,0,0.45)"/>
-              <stop offset="100%" stopColor="rgba(60,30,0,0)"/>
-            </radialGradient>
-
-            {/* Тиснение ₽ */}
-            <filter id={`${id}_emboss`} x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="1.2" result="blur"/>
-              <feOffset dx="1" dy="1.5" result="offset"/>
-              <feComposite in="SourceGraphic" in2="offset" operator="over"/>
-            </filter>
+            <clipPath id={`${id}_clip`}>
+              <ellipse cx={faceCX} cy={faceCY} rx={faceRX} ry={faceRY}/>
+            </clipPath>
           </defs>
 
-          {/* === ГРАНЬ (торец монеты — видна снизу из-за наклона) === */}
-          {/* Основная форма грани — эллипс смещённый вниз */}
-          <ellipse
-            cx={cx} cy={cy + edgeH}
-            rx={rx} ry={ry * 0.55}
-            fill={`url(#${id}_edge)`}
-          />
-          {/* Закрываем боковые стенки */}
+          {/* Тень */}
+          <ellipse cx={W*0.52} cy={H*0.97} rx={W*0.38} ry={H*0.03} fill="rgba(0,0,0,0.5)"/>
+
+          {/* Грань — правый торец */}
           <path
             d={`
-              M ${cx - rx} ${cy}
-              A ${rx} ${ry} 0 0 0 ${cx + rx} ${cy}
-              L ${cx + rx} ${cy + edgeH}
-              A ${rx} ${ry * 0.55} 0 0 1 ${cx - rx} ${cy + edgeH}
+              M ${faceCX + faceRX} ${faceCY - faceRY * 0.12}
+              C ${faceCX + faceRX + edgeW*0.3} ${faceCY - faceRY*0.5},
+                ${faceCX + faceRX + edgeW*0.6} ${faceCY - faceRY*0.2},
+                ${faceCX + faceRX + edgeW}     ${faceCY - faceRY * 0.08}
+              L ${faceCX + faceRX + edgeW}     ${faceCY + faceRY * 0.88}
+              C ${faceCX + faceRX + edgeW*0.6} ${faceCY + faceRY*1.05},
+                ${faceCX + faceRX + edgeW*0.3} ${faceCY + faceRY*1.02},
+                ${faceCX + faceRX}             ${faceCY + faceRY * 0.92}
               Z
             `}
             fill={`url(#${id}_edge)`}
           />
+          <path
+            d={`
+              M ${faceCX + faceRX} ${faceCY - faceRY * 0.12}
+              C ${faceCX + faceRX + edgeW*0.3} ${faceCY - faceRY*0.5},
+                ${faceCX + faceRX + edgeW*0.6} ${faceCY - faceRY*0.2},
+                ${faceCX + faceRX + edgeW}     ${faceCY - faceRY * 0.08}
+              L ${faceCX + faceRX + edgeW}     ${faceCY + faceRY * 0.88}
+              C ${faceCX + faceRX + edgeW*0.6} ${faceCY + faceRY*1.05},
+                ${faceCX + faceRX + edgeW*0.3} ${faceCY + faceRY*1.02},
+                ${faceCX + faceRX}             ${faceCY + faceRY * 0.92}
+              Z
+            `}
+            fill={`url(#${id}_edge_shine)`}
+            opacity="0.5"
+          />
 
           {/* Рифление на торце */}
-          {Array.from({ length: 28 }, (_, i) => {
-            const t = i / 28;
-            const angle = Math.PI + t * Math.PI; // нижние 180° видны
-            const ex = cx + rx * Math.cos(angle);
-            const ey = cy + ry * 0.55 * Math.sin(angle);
-            if (Math.sin(angle) > 0) return null;
+          {Array.from({ length: 22 }, (_, i) => {
+            if (i % 2 !== 0) return null;
+            const t = i / 21;
+            const y = faceCY - faceRY * 0.1 + t * (faceRY * 1.02);
             return (
-              <line
-                key={i}
-                x1={ex} y1={ey + edgeH * 0.1}
-                x2={ex} y2={ey + edgeH * 0.9}
-                stroke="rgba(255,180,30,0.18)"
-                strokeWidth={s * 0.008}
+              <line key={i}
+                x1={faceCX + faceRX + edgeW*0.05} y1={y}
+                x2={faceCX + faceRX + edgeW*0.92} y2={y + size*0.01}
+                stroke="rgba(255,200,50,0.22)" strokeWidth={H*0.008}
               />
             );
           })}
 
-          {/* === ЛИЦЕВАЯ СТОРОНА === */}
-          <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={`url(#${id}_face)`}/>
+          {/* Лицевая сторона */}
+          <ellipse cx={faceCX} cy={faceCY} rx={faceRX} ry={faceRY} fill={`url(#${id}_face)`}/>
 
-          {/* Ободок внешний — рифлёный */}
-          {Array.from({ length: 52 }, (_, i) => {
-            const a1 = (i / 52) * Math.PI * 2;
-            const a2 = ((i + 0.35) / 52) * Math.PI * 2;
-            const r1x = rx * 0.90, r1y = ry * 0.90;
-            const r2x = rx * 0.98, r2y = ry * 0.98;
+          {/* Рифлёный ободок */}
+          {Array.from({ length: 60 }, (_, i) => {
+            const a1 = (i / 60) * Math.PI * 2;
+            const a2 = ((i + 0.38) / 60) * Math.PI * 2;
+            const bright = Math.cos(a1 - Math.PI * 0.3) > 0.3;
             return (
-              <line
-                key={i}
-                x1={cx + r1x * Math.cos(a1)} y1={cy + r1y * Math.sin(a1)}
-                x2={cx + r2x * Math.cos(a2)} y2={cy + r2y * Math.sin(a2)}
-                stroke={i % 2 === 0 ? '#c9a030' : '#7a5008'}
-                strokeWidth={s * 0.009}
-                opacity="0.7"
+              <line key={i}
+                x1={faceCX + faceRX*0.89 * Math.cos(a1)} y1={faceCY + faceRY*0.89 * Math.sin(a1)}
+                x2={faceCX + faceRX*0.975 * Math.cos(a2)} y2={faceCY + faceRY*0.975 * Math.sin(a2)}
+                stroke={bright ? '#e8c840' : '#7a5008'}
+                strokeWidth={W*0.008}
+                opacity={bright ? '0.8' : '0.5'}
               />
             );
           })}
 
           {/* Кольца обода */}
-          <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke="#c9a030" strokeWidth={s*0.016} opacity="0.55"/>
-          <ellipse cx={cx} cy={cy} rx={rx*0.87} ry={ry*0.87} fill="none" stroke="#e8d060" strokeWidth={s*0.006} opacity="0.3"/>
+          <ellipse cx={faceCX} cy={faceCY} rx={faceRX} ry={faceRY}
+            fill="none" stroke="#c9a030" strokeWidth={W*0.018} opacity="0.6"/>
+          <ellipse cx={faceCX} cy={faceCY} rx={faceRX*0.86} ry={faceRY*0.86}
+            fill="none" stroke="#e8d060" strokeWidth={W*0.006} opacity="0.3"/>
 
-          {/* Тень рельефа */}
-          <ellipse cx={cx} cy={cy} rx={rx*0.87} ry={ry*0.87} fill={`url(#${id}_shadow)`}/>
-
-          {/* Знак ₽ — рельефный */}
-          <g filter={`url(#${id}_emboss)`}>
-            {/* Тень символа */}
+          {/* Знак ₽ — тиснение */}
+          <g clipPath={`url(#${id}_clip)`}>
+            {/* Тёмная подложка — углубление */}
             <text
-              x={cx + s*0.012} y={cy + ry*0.14 + s*0.018}
+              x={faceCX + W*0.016} y={faceCY + H*0.022}
               textAnchor="middle" dominantBaseline="middle"
-              fontFamily="Georgia, 'Times New Roman', serif"
-              fontWeight="bold"
-              fontSize={ry * 0.88}
-              fill="rgba(40,20,0,0.6)"
+              fontFamily="'Arial Black', 'Arial Bold', Arial, sans-serif"
+              fontWeight="900"
+              fontSize={faceRY * 1.05}
+              fill="rgba(70,35,0,0.8)"
+              style={{ userSelect: 'none' }}
             >₽</text>
-            {/* Сам символ */}
+            {/* Основной символ — тёмно-золотой как на фото */}
             <text
-              x={cx} y={cy + ry*0.12}
+              x={faceCX} y={faceCY + H*0.005}
               textAnchor="middle" dominantBaseline="middle"
-              fontFamily="Georgia, 'Times New Roman', serif"
-              fontWeight="bold"
-              fontSize={ry * 0.88}
-              fill="#fff8b0"
-              opacity="0.95"
+              fontFamily="'Arial Black', 'Arial Bold', Arial, sans-serif"
+              fontWeight="900"
+              fontSize={faceRY * 1.05}
+              fill="#b87c08"
+              opacity="0.88"
+              style={{ userSelect: 'none' }}
+            >₽</text>
+            {/* Блик на выступающих гранях символа */}
+            <text
+              x={faceCX - W*0.007} y={faceCY - H*0.012}
+              textAnchor="middle" dominantBaseline="middle"
+              fontFamily="'Arial Black', 'Arial Bold', Arial, sans-serif"
+              fontWeight="900"
+              fontSize={faceRY * 1.05}
+              fill="rgba(255,225,60,0.22)"
+              style={{ userSelect: 'none' }}
             >₽</text>
           </g>
 
-          {/* Блик — основной */}
+          {/* Большой мягкий блик сверху-слева */}
           <ellipse
-            cx={cx - rx*0.18} cy={cy - ry*0.3}
-            rx={rx*0.42} ry={ry*0.28}
-            fill={`url(#${id}_shine)`}
-            style={{ transform: 'rotate(-18deg)', transformOrigin: `${cx - rx*0.18}px ${cy - ry*0.3}px` }}
+            cx={faceCX - faceRX*0.15} cy={faceCY - faceRY*0.32}
+            rx={faceRX*0.55} ry={faceRY*0.38}
+            fill={`url(#${id}_shine1)`}
+            clipPath={`url(#${id}_clip)`}
+            style={{ transform: 'rotate(-12deg)', transformOrigin: `${faceCX - faceRX*0.15}px ${faceCY - faceRY*0.32}px` }}
           />
 
-          {/* Блик по ободу */}
-          <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={`url(#${id}_rim)`}/>
-
-          {/* Маленький яркий блик — бликовая точка */}
+          {/* Зеркальный блик — яркая точка */}
           <ellipse
-            cx={cx - rx*0.3} cy={cy - ry*0.45}
-            rx={rx*0.1} ry={ry*0.07}
-            fill="rgba(255,255,230,0.9)"
-            style={{ transform: 'rotate(-20deg)', transformOrigin: `${cx - rx*0.3}px ${cy - ry*0.45}px` }}
+            cx={faceCX - faceRX*0.32} cy={faceCY - faceRY*0.52}
+            rx={faceRX*0.1} ry={faceRY*0.07}
+            fill="rgba(255,255,230,0.95)"
+            clipPath={`url(#${id}_clip)`}
+            style={{ transform: 'rotate(-15deg)', transformOrigin: `${faceCX - faceRX*0.32}px ${faceCY - faceRY*0.52}px` }}
           />
         </svg>
       </div>
