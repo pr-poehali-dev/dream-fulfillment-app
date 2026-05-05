@@ -4,7 +4,7 @@ import WishModal from "@/components/WishModal";
 import VideoPreview from "@/components/VideoPreview";
 import StarsCanvas from "@/components/StarsCanvas";
 
-const BG_IMAGE = "https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/files/dabd9d12-4a4f-4f8c-91fb-8eea4eb58edd.jpg";
+const BG_IMAGE = "https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/files/90f0e037-ce00-4527-93a3-900c0cba6b4b.jpg";
 
 const PARTNERS = [
   { name: "Ангел №1", subtitle: "Первый партнёр", url: "#" },
