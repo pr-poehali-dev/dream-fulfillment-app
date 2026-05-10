@@ -152,62 +152,56 @@ export default function HeroSection({
 
 
 
-        {/* Well / Coin */}
-        <div className="animate-fade-in relative my-4" style={{ animationDelay: '0.8s', opacity: 0 }}>
-          <button
-            onClick={onWellClick}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-            aria-label="Нажми на монету, чтобы загадать желание"
-            className="focus:outline-none group"
-          >
-            <div style={{
-              width: 56, height: 56,
-              overflow: 'hidden',
-              borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              filter: 'drop-shadow(0 0 14px rgba(220,170,30,0.7)) drop-shadow(0 5px 14px rgba(80,50,0,0.8))',
-              animation: 'coin-wobble-v 4s ease-in-out infinite',
-            }}>
-              <img
-                src={COIN_IMG}
-                alt="монета"
-                style={{
-                  width: 74, height: 74,
-                  objectFit: 'cover',
-                  objectPosition: 'center 10%',
-                  marginTop: -6,
-                }}
-              />
-            </div>
-            <p className="font-cormorant text-xs tracking-[0.3em] uppercase mt-3 text-center"
-              style={{ color: 'rgba(201,168,76,0.5)' }}>
-              бросить монетку
-            </p>
-          </button>
-
-          {coinAnim && (
-            <div className="animate-coin-fall absolute left-1/2 -top-10 -translate-x-1/2 pointer-events-none z-20 select-none">
-              <div style={{ width: 42, height: 42, overflow: 'hidden', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src={COIN_IMG} alt="" style={{ width: 56, height: 56, objectFit: 'cover', objectPosition: 'center 10%', marginTop: -4 }} />
+        {/* Well / Coin — fixed over the well hole */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.8s', opacity: 0 }}>
+          <div className="fixed z-20" style={{ bottom: '36%', left: '50%', transform: 'translateX(-50%)' }}>
+            <button
+              onClick={onWellClick}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              aria-label="Загадать желание"
+              className="focus:outline-none"
+            >
+              <div style={{
+                width: 56, height: 56,
+                overflow: 'hidden',
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                filter: 'drop-shadow(0 0 14px rgba(220,170,30,0.7)) drop-shadow(0 5px 14px rgba(80,50,0,0.8))',
+                animation: 'coin-wobble-v 4s ease-in-out infinite',
+              }}>
+                <img
+                  src={COIN_IMG}
+                  alt="монета"
+                  style={{
+                    width: 74, height: 74,
+                    objectFit: 'cover',
+                    objectPosition: 'center 10%',
+                    marginTop: -6,
+                  }}
+                />
               </div>
-            </div>
-          )}
-          {rippleAnim && (
-            <div className="animate-ripple absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none z-20"
-              style={{ width: '60px', height: '14px', border: '2px solid rgba(100,180,255,0.45)', borderRadius: '50%' }} />
-          )}
-          {smokeAnim && (
-            <>
-              <div className="animate-smoke-rise absolute bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-20"
-                style={{ width: '50px', height: '50px', background: 'radial-gradient(circle, rgba(150,100,220,0.5) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(10px)' }} />
-              <div className="animate-smoke-rise absolute bottom-10 left-[55%] pointer-events-none z-20"
-                style={{ width: '35px', height: '35px', background: 'radial-gradient(circle, rgba(80,140,255,0.35) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(7px)', animationDelay: '0.25s', opacity: 0 }} />
-            </>
-          )}
+            </button>
 
-          <p className="font-golos text-xs mt-3" style={{ color: 'rgba(200,210,240,0.35)' }}>
-            Нажми на колодец и брось монетку
-          </p>
+            {coinAnim && (
+              <div className="animate-coin-fall absolute left-1/2 -top-10 -translate-x-1/2 pointer-events-none z-20 select-none">
+                <div style={{ width: 42, height: 42, overflow: 'hidden', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src={COIN_IMG} alt="" style={{ width: 56, height: 56, objectFit: 'cover', objectPosition: 'center 10%', marginTop: -4 }} />
+                </div>
+              </div>
+            )}
+            {rippleAnim && (
+              <div className="animate-ripple absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none z-20"
+                style={{ width: '60px', height: '14px', border: '2px solid rgba(100,180,255,0.45)', borderRadius: '50%' }} />
+            )}
+            {smokeAnim && (
+              <>
+                <div className="animate-smoke-rise absolute bottom-10 left-1/2 -translate-x-1/2 pointer-events-none z-20"
+                  style={{ width: '50px', height: '50px', background: 'radial-gradient(circle, rgba(150,100,220,0.5) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(10px)' }} />
+                <div className="animate-smoke-rise absolute bottom-10 left-[55%] pointer-events-none z-20"
+                  style={{ width: '35px', height: '35px', background: 'radial-gradient(circle, rgba(80,140,255,0.35) 0%, transparent 70%)', borderRadius: '50%', filter: 'blur(7px)', animationDelay: '0.25s', opacity: 0 }} />
+              </>
+            )}
+          </div>
         </div>
 
         {/* CTA buttons */}
