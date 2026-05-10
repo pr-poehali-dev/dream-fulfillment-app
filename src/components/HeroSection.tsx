@@ -26,9 +26,18 @@ export default function HeroSection({
     <>
       {/* Header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12">
-        <div className="flex items-center gap-2">
-          <span className="text-xl" style={{ color: '#c9a84c' }}>✦</span>
-          <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>ЗАГАДАЙ.ОНЛАЙН</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xl" style={{ color: '#c9a84c' }}>✦</span>
+            <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>ЗАГАДАЙ.ОНЛАЙН</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.18)' }}>
+            <span style={{ fontSize: 13 }}>⭐</span>
+            <span className="font-golos text-xs">
+              <span style={{ color: '#c9a84c', fontWeight: 600 }}>{starsCount.toLocaleString('ru-RU')}</span>
+              <span style={{ color: 'rgba(200,210,240,0.35)' }}> / 146 745 098</span>
+            </span>
+          </div>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm font-golos">
           {[
@@ -141,16 +150,7 @@ export default function HeroSection({
           }
         `}</style>
 
-        {/* Stars counter */}
-        <div className="animate-fade-in mt-6 mb-6" style={{ animationDelay: '0.5s', opacity: 0 }}>
-          <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full glass-panel">
-            <span className="text-lg">⭐</span>
-            <span className="font-golos text-sm">
-              <span style={{ color: '#c9a84c', fontWeight: 600 }}>{starsCount.toLocaleString('ru-RU')}</span>
-              <span style={{ color: 'rgba(200,210,240,0.35)' }}> / 146 745 098</span>
-            </span>
-          </div>
-        </div>
+
 
         {/* Well / Coin */}
         <div className="animate-fade-in relative my-4" style={{ animationDelay: '0.8s', opacity: 0 }}>

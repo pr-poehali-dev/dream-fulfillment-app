@@ -17,7 +17,7 @@ export default function Index() {
   const [rippleAnim, setRippleAnim] = useState(false);
   const [stars, setStars] = useState<Star[]>([]);
   const [introPhase, setIntroPhase] = useState<'line1' | 'line2' | 'out' | 'done'>('line1');
-  const [starsCount, setStarsCount] = useState(1247);
+  const [starsCount, setStarsCount] = useState(0);
   const [copilkaAmount] = useState(34580);
   const [angelsCount] = useState(89);
   const [altruistsCount] = useState(23);
