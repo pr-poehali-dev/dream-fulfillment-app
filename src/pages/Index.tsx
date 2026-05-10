@@ -105,7 +105,7 @@ const PARTNERS = [
   { name: "Ангел №3", subtitle: "Стать партнёром", url: "#" },
 ];
 
-type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean };
+type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; amount?: number };
 
 export default function Index() {
   const { playCoin, playSplash, playMagic } = useSound();
@@ -115,7 +115,7 @@ export default function Index() {
   const [smokeAnim, setSmokeAnim] = useState(false);
   const [rippleAnim, setRippleAnim] = useState(false);
   const [stars, setStars] = useState<Star[]>([]);
-  const [showIntroText, setShowIntroText] = useState(true);
+  const [introPhase, setIntroPhase] = useState<'line1' | 'line2' | 'out' | 'done'>('line1');
   const [starsCount, setStarsCount] = useState(1247);
   const [copilkaAmount] = useState(34580);
   const [angelsCount] = useState(89);
@@ -127,8 +127,14 @@ export default function Index() {
       setTimeout(() => setShowVideo(true), 500);
     }
     setStars([]);
-    const timer = setTimeout(() => setShowIntroText(false), 4000);
-    return () => clearTimeout(timer);
+    // Фаза 1: первая строка — 0–2.5s
+    // Фаза 2: вторая строка — 2.5–5s
+    // Фаза out: исчезает — 5–6.2s
+    // done: убрано
+    const t1 = setTimeout(() => setIntroPhase('line2'), 2500);
+    const t2 = setTimeout(() => setIntroPhase('out'), 5000);
+    const t3 = setTimeout(() => setIntroPhase('done'), 6200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
   const handleWellClick = () => {
@@ -173,24 +179,25 @@ export default function Index() {
     } catch (_) { /* silent */ }
   };
 
-  const handleWishSent = () => {
+  const handleWishSent = (amount: number) => {
     setShowModal(false);
     setStarsCount(prev => prev + 1);
     setTimeout(() => playStarAppear(), 300);
+    // Размер звезды зависит от суммы
+    const baseSize = amount >= 1000 ? 3.5 : amount >= 500 ? 2.8 : amount >= 100 ? 2.2 : amount >= 50 ? 1.8 : 1.3;
     const newStar: Star = {
       id: Date.now(),
       x: 5 + Math.random() * 85,
       y: 2 + Math.random() * 45,
-      size: 1.5 + Math.random() * 1.5,
+      size: baseSize + Math.random() * 0.5,
       delay: Math.random() * 3,
       lit: true,
-      isNew: true,
+      amount,
     };
     setStars(prev => {
       const updated = prev.map(s => ({ ...s, isNew: false }));
-      return [...updated, newStar];
+      return [...updated, { ...newStar, isNew: true }];
     });
-    // Снимаем флаг isNew через 3 секунды
     setTimeout(() => {
       setStars(prev => prev.map(s => s.id === newStar.id ? { ...s, isNew: false } : s));
     }, 3000);
@@ -272,26 +279,91 @@ export default function Index() {
       <main className="relative z-10 flex flex-col items-center justify-center px-4 text-center"
         style={{ minHeight: 'calc(100vh - 80px)', paddingTop: '40px', paddingBottom: '40px' }}>
 
-        <div
-          className="mb-2"
-          style={{
-            transition: 'opacity 1.2s ease, transform 1.2s ease',
-            opacity: showIntroText ? 1 : 0,
-            transform: showIntroText ? 'translateY(0)' : 'translateY(-18px)',
-            pointerEvents: showIntroText ? 'auto' : 'none',
-            animation: 'fadeInUp 0.8s ease both',
-          }}
-        >
-          <p className="text-xs tracking-[0.3em] uppercase mb-5 font-golos" style={{ color: 'rgba(201,168,76,0.55)' }}>
-            ✦ &nbsp; Цифровой Ритуал &nbsp; ✦
-          </p>
-          <h1 className="font-cormorant text-4xl md:text-6xl lg:text-7xl font-light leading-tight mb-4" style={{ color: '#f0e8d0' }}>
-            Мечтай громко.
-          </h1>
-          <p className="font-cormorant text-xl md:text-2xl font-light italic max-w-lg mx-auto" style={{ color: 'rgba(201,168,76,0.75)' }}>
-            Только так кто-то услышит и исполнит твою мечту.
-          </p>
-        </div>
+        {/* Интро-вспышки: появляются строки с эффектом звезды, потом исчезают */}
+        {introPhase !== 'done' && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 30,
+              pointerEvents: 'none',
+              transition: 'opacity 1.2s ease',
+              opacity: introPhase === 'out' ? 0 : 1,
+            }}
+          >
+            {/* Строка 1 */}
+            <div style={{
+              transition: 'opacity 0.8s ease, transform 0.8s ease',
+              opacity: introPhase === 'line1' || introPhase === 'line2' || introPhase === 'out' ? 1 : 0,
+              transform: introPhase === 'line1' || introPhase === 'line2' || introPhase === 'out' ? 'translateY(0)' : 'translateY(20px)',
+              marginBottom: '1.2rem',
+              textAlign: 'center',
+            }}>
+              {/* Вспышка-звезда над строкой */}
+              <div style={{
+                display: 'flex', justifyContent: 'center', marginBottom: '0.5rem',
+                animation: 'starFlashBig 1.2s ease-out both',
+              }}>
+                <span style={{ fontSize: 32, lineHeight: 1, filter: 'drop-shadow(0 0 14px #fffde0) drop-shadow(0 0 30px #ffd700)' }}>✦</span>
+              </div>
+              <p
+                className="font-cormorant"
+                style={{
+                  fontSize: 'clamp(1.6rem, 5vw, 3.5rem)',
+                  fontWeight: 300,
+                  color: '#f0e8d0',
+                  letterSpacing: '0.05em',
+                  animation: 'starFlashBig 1.0s ease-out both',
+                  textShadow: '0 0 40px rgba(255,220,80,0.5), 0 0 80px rgba(255,180,30,0.2)',
+                }}
+              >
+                Мечтай вслух — тебя услышат
+              </p>
+            </div>
+
+            {/* Строка 2 — появляется с задержкой */}
+            <div style={{
+              transition: 'opacity 1s ease, transform 1s ease',
+              opacity: introPhase === 'line2' || introPhase === 'out' ? 1 : 0,
+              transform: introPhase === 'line2' || introPhase === 'out' ? 'translateY(0)' : 'translateY(20px)',
+              textAlign: 'center',
+            }}>
+              <div style={{
+                display: 'flex', justifyContent: 'center', marginBottom: '0.5rem',
+                animation: introPhase === 'line2' ? 'starFlashBig 1.2s ease-out both' : 'none',
+              }}>
+                <span style={{ fontSize: 28, lineHeight: 1, filter: 'drop-shadow(0 0 12px #fffde0) drop-shadow(0 0 24px #ffd700)', opacity: introPhase === 'line2' || introPhase === 'out' ? 1 : 0, transition: 'opacity 0.8s ease' }}>✦</span>
+              </div>
+              <p
+                className="font-cormorant"
+                style={{
+                  fontSize: 'clamp(1.2rem, 3.5vw, 2.2rem)',
+                  fontWeight: 300,
+                  fontStyle: 'italic',
+                  color: 'rgba(201,168,76,0.9)',
+                  letterSpacing: '0.04em',
+                  animation: introPhase === 'line2' ? 'starFlashBig 1.0s ease-out both' : 'none',
+                  textShadow: '0 0 30px rgba(255,200,50,0.4)',
+                }}
+              >
+                И кто-то твою мечту исполнит
+              </p>
+            </div>
+          </div>
+        )}
+
+        <style>{`
+          @keyframes starFlashBig {
+            0%   { opacity: 0; transform: scale(0.6); filter: brightness(3); }
+            15%  { opacity: 1; transform: scale(1.12); filter: brightness(2.5); }
+            40%  { transform: scale(1.03); filter: brightness(1.4); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+          }
+        `}</style>
 
         {/* Stars counter */}
         <div className="animate-fade-in mt-6 mb-6" style={{ animationDelay: '0.5s', opacity: 0 }}>
@@ -313,21 +385,21 @@ export default function Index() {
             className="focus:outline-none group"
           >
             <div style={{
-              width: 110, height: 110,
+              width: 56, height: 56,
               overflow: 'hidden',
               borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              filter: 'drop-shadow(0 0 22px rgba(220,170,30,0.7)) drop-shadow(0 8px 24px rgba(80,50,0,0.8))',
+              filter: 'drop-shadow(0 0 14px rgba(220,170,30,0.7)) drop-shadow(0 5px 14px rgba(80,50,0,0.8))',
               animation: 'coin-wobble-v 4s ease-in-out infinite',
             }}>
               <img
                 src="https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/bucket/994424dc-faf0-452e-8765-ab51c3bce72d.png"
                 alt="монета"
                 style={{
-                  width: 145, height: 145,
+                  width: 74, height: 74,
                   objectFit: 'cover',
                   objectPosition: 'center 10%',
-                  marginTop: -12,
+                  marginTop: -6,
                 }}
               />
             </div>
@@ -405,40 +477,6 @@ export default function Index() {
               <div className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.45)' }}>{stat.label}</div>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section className="relative z-10 py-10 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="font-cormorant text-3xl md:text-4xl text-center mb-2" style={{ color: '#f0e8d0' }}>
-            Сколько стоит мечта?
-          </h2>
-          <p className="text-center text-sm mb-8 font-golos" style={{ color: 'rgba(200,210,240,0.45)' }}>
-            50% от каждого платежа идёт в Копилку Ангела
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {[
-              { coin: "10 ₽", wish: "до 1 000 ₽", tier: "Искорка" },
-              { coin: "50 ₽", wish: "до 5 000 ₽", tier: "Огонёк" },
-              { coin: "100 ₽", wish: "до 10 000 ₽", tier: "Звезда", popular: true },
-              { coin: "500 ₽", wish: "до 50 000 ₽", tier: "Луна" },
-              { coin: "1 000 ₽", wish: "до 100 000 ₽", tier: "Созвездие" },
-            ].map((tier, i) => (
-              <div key={i}
-                className="glass-panel rounded-2xl p-4 text-center cursor-pointer transition-all hover:scale-105"
-                style={{ borderColor: tier.popular ? 'rgba(201,168,76,0.5)' : 'rgba(201,168,76,0.13)' }}
-                onClick={handleWellClick}>
-                {tier.popular && (
-                  <div className="text-xs font-golos mb-2" style={{ color: '#c9a84c' }}>★ Популярный</div>
-                )}
-                <div className="font-cormorant text-2xl font-semibold mb-1 gold-text">{tier.coin}</div>
-                <div className="text-xs font-golos mb-2" style={{ color: 'rgba(200,210,240,0.35)' }}>монета</div>
-                <div className="text-sm font-golos font-medium" style={{ color: '#f0e8d0' }}>{tier.wish}</div>
-                <div className="text-xs font-golos mt-1" style={{ color: 'rgba(200,210,240,0.35)' }}>{tier.tier}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
