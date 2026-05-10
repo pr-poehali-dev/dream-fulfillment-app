@@ -115,6 +115,7 @@ export default function Index() {
   const [smokeAnim, setSmokeAnim] = useState(false);
   const [rippleAnim, setRippleAnim] = useState(false);
   const [stars, setStars] = useState<Star[]>([]);
+  const [showIntroText, setShowIntroText] = useState(true);
   const [starsCount, setStarsCount] = useState(1247);
   const [copilkaAmount] = useState(34580);
   const [angelsCount] = useState(89);
@@ -126,6 +127,8 @@ export default function Index() {
       setTimeout(() => setShowVideo(true), 500);
     }
     setStars([]);
+    const timer = setTimeout(() => setShowIntroText(false), 4000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleWellClick = () => {
@@ -204,15 +207,29 @@ export default function Index() {
       )}
 
       {/* Background */}
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0" style={{ background: '#060810' }}>
+        {/* Тёмное небо занимает весь верх, берег — только нижние 38% */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #03040d 0%, #060a18 55%, #080c1a 70%, #0a0e1c 100%)' }} />
         <img
           src={BG_IMAGE}
           alt="Ночной берег с колодцем"
-          className="w-full h-full object-cover"
-          style={{ objectPosition: 'center bottom', filter: 'brightness(0.85) contrast(1.05)' }}
+          className="absolute left-0 right-0 bottom-0 w-full"
+          style={{
+            height: '42%',
+            objectFit: 'cover',
+            objectPosition: 'center bottom',
+            filter: 'brightness(0.75) contrast(1.1)',
+          }}
         />
+        {/* Плавный переход небо→берег */}
+        <div className="absolute left-0 right-0" style={{
+          bottom: '38%',
+          height: '18%',
+          background: 'linear-gradient(to bottom, #060a18 0%, transparent 100%)',
+          pointerEvents: 'none',
+        }} />
         <div className="absolute inset-0" style={{
-          background: 'linear-gradient(to bottom, rgba(6,8,16,0.1) 0%, rgba(6,8,16,0.0) 30%, rgba(6,8,16,0.4) 70%, rgba(6,8,16,0.97) 100%)'
+          background: 'linear-gradient(to bottom, rgba(6,8,16,0) 60%, rgba(6,8,16,0.92) 100%)'
         }} />
         <StarsCanvas stars={stars} />
       </div>
@@ -221,7 +238,7 @@ export default function Index() {
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12">
         <div className="flex items-center gap-2">
           <span className="text-xl" style={{ color: '#c9a84c' }}>✦</span>
-          <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>Загадай</span>
+          <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>ЗАГАДАЙ.ОНЛАЙН</span>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm font-golos">
           {[
@@ -255,7 +272,16 @@ export default function Index() {
       <main className="relative z-10 flex flex-col items-center justify-center px-4 text-center"
         style={{ minHeight: 'calc(100vh - 80px)', paddingTop: '40px', paddingBottom: '40px' }}>
 
-        <div className="animate-fade-in mb-2" style={{ animationDelay: '0.2s', opacity: 0 }}>
+        <div
+          className="mb-2"
+          style={{
+            transition: 'opacity 1.2s ease, transform 1.2s ease',
+            opacity: showIntroText ? 1 : 0,
+            transform: showIntroText ? 'translateY(0)' : 'translateY(-18px)',
+            pointerEvents: showIntroText ? 'auto' : 'none',
+            animation: 'fadeInUp 0.8s ease both',
+          }}
+        >
           <p className="text-xs tracking-[0.3em] uppercase mb-5 font-golos" style={{ color: 'rgba(201,168,76,0.55)' }}>
             ✦ &nbsp; Цифровой Ритуал &nbsp; ✦
           </p>
@@ -286,7 +312,25 @@ export default function Index() {
             aria-label="Нажми на монету, чтобы загадать желание"
             className="focus:outline-none group"
           >
-            <GoldCoin size={72} />
+            <div style={{
+              width: 110, height: 110,
+              overflow: 'hidden',
+              borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              filter: 'drop-shadow(0 0 22px rgba(220,170,30,0.7)) drop-shadow(0 8px 24px rgba(80,50,0,0.8))',
+              animation: 'coin-wobble-v 4s ease-in-out infinite',
+            }}>
+              <img
+                src="https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/bucket/994424dc-faf0-452e-8765-ab51c3bce72d.png"
+                alt="монета"
+                style={{
+                  width: 145, height: 145,
+                  objectFit: 'cover',
+                  objectPosition: 'center 10%',
+                  marginTop: -12,
+                }}
+              />
+            </div>
             <p className="font-cormorant text-xs tracking-[0.3em] uppercase mt-3 text-center"
               style={{ color: 'rgba(201,168,76,0.5)' }}>
               бросить монетку
@@ -295,7 +339,15 @@ export default function Index() {
 
           {coinAnim && (
             <div className="animate-coin-fall absolute left-1/2 -top-10 -translate-x-1/2 pointer-events-none z-20 select-none">
-              <GoldCoin size={28} glow={false} />
+              <div style={{
+                width: 42, height: 42, overflow: 'hidden', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <img
+                  src="https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/bucket/994424dc-faf0-452e-8765-ab51c3bce72d.png"
+                  alt="" style={{ width: 56, height: 56, objectFit: 'cover', objectPosition: 'center 10%', marginTop: -4 }}
+                />
+              </div>
             </div>
           )}
           {rippleAnim && (
