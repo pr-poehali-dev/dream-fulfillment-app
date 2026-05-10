@@ -12,21 +12,10 @@ export default function PageBackground({ stars }: Props) {
   return (
     <div className="fixed inset-0 z-0" style={{ background: '#060810' }}>
       <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #03040d 0%, #060a18 55%, #080c1a 70%, #0a0e1c 100%)' }} />
-      <img
-        src={BG_IMAGE}
-        alt="Ночной берег с колодцем"
-        className="absolute left-0 right-0 bottom-0 w-full"
-        style={{
-          height: '42%',
-          objectFit: 'cover',
-          objectPosition: 'center bottom',
-          filter: 'brightness(0.75) contrast(1.1)',
-        }}
-      />
       <div className="absolute left-0 right-0" style={{
-        bottom: '38%',
-        height: '18%',
-        background: 'linear-gradient(to bottom, #060a18 0%, transparent 100%)',
+        bottom: '0',
+        height: '42%',
+        background: 'linear-gradient(to bottom, #060a18 0%, transparent 30%)',
         pointerEvents: 'none',
       }} />
       <div className="absolute inset-0" style={{
