@@ -154,7 +154,7 @@ export default function HeroSection({
 
         {/* Well / Coin — fixed over the well hole */}
         <div className="animate-fade-in" style={{ animationDelay: '0.8s', opacity: 0 }}>
-          <div className="fixed z-20" style={{ bottom: '36%', left: '50%', transform: 'translateX(-50%)' }}>
+          <div className="fixed z-20" style={{ top: '46%', left: '50%', transform: 'translateX(-50%)' }}>
             <button
               onClick={onWellClick}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
