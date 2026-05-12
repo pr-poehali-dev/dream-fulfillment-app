@@ -106,18 +106,18 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
           ].map(link => (
             <a key={link.href} href={link.href}
               className="font-golos text-xs transition-colors"
-              style={{ color: 'rgba(200,210,240,0.35)', textDecoration: 'none' }}
+              style={{ color: '#ffffff', textDecoration: 'none' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.35)')}>
+              onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}>
               {link.label}
             </a>
           ))}
           <button
             onClick={onShowVideo}
             className="font-golos text-xs transition-colors"
-            style={{ color: 'rgba(200,210,240,0.35)', background: 'none', border: 'none', cursor: 'pointer' }}
+            style={{ color: '#ffffff', background: 'none', border: 'none', cursor: 'pointer' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.35)')}>
+            onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}>
             О проекте
           </button>
         </div>
@@ -126,15 +126,15 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
             'ИНН 027411103939',
             'ОГРН 317028000155545',
           ].map(r => (
-            <span key={r} className="font-golos text-xs text-slate-400" style={{ color: 'rgba(200,210,240,0.22)' }}>{r}</span>
+            <span key={r} className="font-golos text-xs" style={{ color: '#ffffff' }}>{r}</span>
           ))}
-          <a href="mailto:help@zagadai.online" className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.22)', textDecoration: 'none' }}
+          <a href="mailto:help@zagadai.online" className="font-golos text-xs" style={{ color: '#ffffff', textDecoration: 'none' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.22)')}>
+            onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}>
             help@zagadai.online
           </a>
         </div>
-        <p className="font-golos text-sm text-slate-50" style={{ color: 'rgba(200,210,240,0.18)' }}>© 2026 Загадай Онлайн · zagadai.online</p>
+        <p className="font-golos text-sm" style={{ color: '#ffffff' }}>© 2026 Загадай Онлайн · zagadai.online</p>
       </footer>
     </>
   );

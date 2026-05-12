@@ -18,15 +18,12 @@ export default function Index() {
   const [stars, setStars] = useState<Star[]>([]);
   const [introPhase, setIntroPhase] = useState<'line1' | 'line2' | 'out' | 'done'>('line1');
   const [starsCount, setStarsCount] = useState(0);
-  const [copilkaAmount] = useState(34580);
-  const [angelsCount] = useState(89);
-  const [altruistsCount] = useState(23);
+  const [copilkaAmount] = useState(0);
+  const [angelsCount] = useState(0);
+  const [altruistsCount] = useState(0);
 
   useEffect(() => {
-    const hasSeenVideo = localStorage.getItem("zagadai_seen_video");
-    if (!hasSeenVideo) {
-      setTimeout(() => setShowVideo(true), 500);
-    }
+    // video temporarily disabled
     setStars([]);
     const t1 = setTimeout(() => setIntroPhase('line2'), 2500);
     const t2 = setTimeout(() => setIntroPhase('out'), 5000);
