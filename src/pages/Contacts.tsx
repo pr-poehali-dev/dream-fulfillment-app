@@ -1,14 +1,31 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import func2url from "@/func2url.json";
 
 export default function Contacts() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) return;
-    setSent(true);
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(func2url["send-contact"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("Ошибка отправки");
+      setSent(true);
+    } catch {
+      setError("Не удалось отправить. Напишите напрямую: zagadai.online@yandex.ru");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle = {
@@ -44,7 +61,7 @@ export default function Contacts() {
         {/* Contacts */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
           {[
-            { icon: "Mail", label: "Email", value: "support@zagadai.online", href: "mailto:support@zagadai.online" },
+            { icon: "Mail", label: "Email", value: "zagadai.online@yandex.ru", href: "mailto:zagadai.online@yandex.ru" },
             { icon: "MessageCircle", label: "ВКонтакте", value: "vk.com/zagadai", href: "https://vk.com" },
             { icon: "Send", label: "Telegram", value: "@zagadai_bot", href: "https://t.me" },
           ].map((contact, i) => (
@@ -113,16 +130,21 @@ export default function Contacts() {
                   onBlur={e => (e.target.style.borderColor = 'rgba(201,168,76,0.2)')}
                 />
               </div>
+              {error && (
+                <p className="font-golos text-xs text-center" style={{ color: '#ff6b6b' }}>{error}</p>
+              )}
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full py-3 rounded-full font-golos font-semibold text-sm transition-all"
                 style={{
                   background: 'linear-gradient(135deg, #c9a84c, #8a6a20)',
                   color: '#060810',
-                  cursor: 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
                   border: 'none',
+                  opacity: loading ? 0.7 : 1,
                 }}>
-                Отправить сообщение
+                {loading ? "Отправляем..." : "Отправить сообщение"}
               </button>
             </form>
           </div>

@@ -1,7 +1,7 @@
 const PARTNERS = [
-  { name: "Ангел №1", subtitle: "Первый партнёр", url: "#" },
-  { name: "Ангел №2", subtitle: "Стать партнёром", url: "#" },
-  { name: "Ангел №3", subtitle: "Стать партнёром", url: "#" },
+  { name: "Место для ангела-партнёра", subtitle: "Стать партнёром" },
+  { name: "Место для ангела-партнёра", subtitle: "Стать партнёром" },
+  { name: "Место для ангела-партнёра", subtitle: "Стать партнёром" },
 ];
 
 interface Props {
@@ -82,12 +82,12 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
           </h2>
           <div className="flex flex-wrap justify-center gap-4">
             {PARTNERS.map((p, i) => (
-              <a key={i} href={p.url}
+              <a key={i} href="/contacts"
                 className="glass-panel rounded-2xl px-8 py-5 text-center transition-all hover:scale-105"
-                style={{ minWidth: '130px', textDecoration: 'none' }}>
-                <div className="text-2xl mb-2" style={{ color: 'rgba(201,168,76,0.5)' }}>✦</div>
-                <div className="font-golos text-sm font-medium" style={{ color: '#f0e8d0' }}>{p.name}</div>
-                <div className="font-golos text-xs mt-1" style={{ color: 'rgba(200,210,240,0.35)' }}>{p.subtitle}</div>
+                style={{ minWidth: '160px', textDecoration: 'none', border: '1px solid rgba(201,168,76,0.15)', cursor: 'pointer' }}>
+                <div className="text-2xl mb-2" style={{ color: 'rgba(201,168,76,0.4)' }}>✦</div>
+                <div className="font-golos text-sm font-medium" style={{ color: 'rgba(200,210,240,0.5)' }}>{p.name}</div>
+                <div className="font-golos text-xs mt-1" style={{ color: '#c9a84c' }}>{p.subtitle} →</div>
               </a>
             ))}
           </div>
@@ -120,10 +120,10 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
           ].map(r => (
             <span key={r} className="font-golos text-xs" style={{ color: '#ffffff' }}>{r}</span>
           ))}
-          <a href="mailto:help@zagadai.online" className="font-golos text-xs" style={{ color: '#ffffff', textDecoration: 'none' }}
+          <a href="mailto:zagadai.online@yandex.ru" className="font-golos text-xs" style={{ color: '#ffffff', textDecoration: 'none' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
             onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}>
-            help@zagadai.online
+            zagadai.online@yandex.ru
           </a>
         </div>
         <p className="font-golos text-sm" style={{ color: '#ffffff' }}>© 2026 Загадай Онлайн · zagadai.online</p>
