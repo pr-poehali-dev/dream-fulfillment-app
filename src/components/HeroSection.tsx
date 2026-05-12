@@ -1,5 +1,7 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
+import FulfilledModal from "@/components/FulfilledModal";
 
 const VK_APP_ID = import.meta.env.VITE_VK_APP_ID ?? '';
 
@@ -25,6 +27,7 @@ export default function HeroSection({
   onWellClick,
 }: Props) {
   const { user, logout } = useUser();
+  const [showFulfilled, setShowFulfilled] = useState(false);
   return (
     <>
       {/* Header */}
@@ -43,19 +46,21 @@ export default function HeroSection({
           </div>
         </div>
         <nav className="hidden md:flex items-center gap-6 text-sm font-golos">
-          {[
-            { label: "Правила", href: "/rules" },
-            { label: "Конфиденциальность", href: "/privacy" },
-            { label: "Поддержка", href: "/contacts" },
-          ].map(link => (
-            <a key={link.href} href={link.href}
-              className="transition-colors"
-              style={{ color: 'rgba(200,210,240,0.6)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
-              {link.label}
-            </a>
-          ))}
+          <a href="/rules"
+            className="transition-colors"
+            style={{ color: 'rgba(200,210,240,0.6)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
+            Правила
+          </a>
+          <button
+            onClick={() => setShowFulfilled(true)}
+            className="flex items-center gap-1.5 transition-colors font-golos text-sm"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.6)', padding: 0 }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
+            🔴 Исполненные мечты
+          </button>
           {user ? (
             <div className="flex items-center gap-2">
               <a href="/cabinet" className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all font-golos"
@@ -198,6 +203,8 @@ export default function HeroSection({
 
 
       </main>
+
+      {showFulfilled && <FulfilledModal onClose={() => setShowFulfilled(false)} />}
     </>
   );
 }
