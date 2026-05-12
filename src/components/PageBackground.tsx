@@ -16,11 +16,11 @@ export default function PageBackground({ stars }: Props) {
         alt=""
         style={{
           position: 'absolute',
-          inset: 0,
+          bottom: 0,
+          left: 0,
           width: '100%',
-          height: '100%',
-          objectFit: 'contain',
-          objectPosition: 'center bottom',
+          height: 'auto',
+          display: 'block',
           filter: 'brightness(0.8) contrast(1.05)',
         }}
       />
