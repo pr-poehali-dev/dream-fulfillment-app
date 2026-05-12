@@ -145,7 +145,7 @@ export default function HeroSection({
 
         {/* CTA buttons */}
         <div className="animate-fade-in flex flex-wrap items-center justify-center gap-3"
-          style={{ animationDelay: '1s', opacity: 0, position: 'absolute', bottom: '22%', left: 0, right: 0 }}>
+          style={{ animationDelay: '1s', opacity: 0, position: 'absolute', bottom: '8%', left: 0, right: 0 }}>
           <button
             className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-golos font-semibold transition-all"
             style={{ background: 'linear-gradient(135deg, #c9a84c, #8a6a20)', color: '#060810' }}
