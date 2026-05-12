@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; isNew?: boolean; amount?: number };
+type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; isNew?: boolean; amount?: number; wish?: string };
 
 interface Props {
   stars: Star[];
@@ -37,6 +37,7 @@ function getStarGlow(amount: number | undefined, size: number) {
 
 export default function StarsCanvas({ stars }: Props) {
   const [flashing, setFlashing] = useState<Set<number>>(new Set());
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
   useEffect(() => {
     const newStars = stars.filter(s => s.isNew);
@@ -49,13 +50,14 @@ export default function StarsCanvas({ stars }: Props) {
   }, [stars]);
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden" style={{ pointerEvents: 'none' }}>
       {stars.map(star => {
         const isFlashing = flashing.has(star.id);
+        const isHovered = hoveredId === star.id;
         const { color, glow, opacity } = getStarGlow(star.amount, star.size);
-        // Размер гало вспышки тоже зависит от суммы
         const haloSize = star.amount && star.amount >= 1000 ? 200 : star.amount && star.amount >= 100 ? 150 : 120;
         const rayLen = star.amount && star.amount >= 1000 ? 90 : star.amount && star.amount >= 100 ? 70 : 55;
+        const scale = isHovered ? 2.4 : isFlashing ? 3.2 : 1;
 
         return (
           <div key={star.id} style={{ position: 'absolute', left: `${star.x}%`, top: `${star.y}%` }}>
@@ -71,7 +73,6 @@ export default function StarsCanvas({ stars }: Props) {
                   animation: 'star-burst-halo 2.5s ease-out forwards',
                   pointerEvents: 'none',
                 }} />
-                {/* Лучи */}
                 {[0, 90, 45, -45].map((rot, ri) => (
                   <div key={ri} style={{
                     position: 'absolute',
@@ -88,28 +89,79 @@ export default function StarsCanvas({ stars }: Props) {
               </>
             )}
 
+            {/* Ореол при ховере */}
+            {isHovered && (
+              <div style={{
+                position: 'absolute',
+                width: `${star.size * 14}px`,
+                height: `${star.size * 14}px`,
+                left: `${-star.size * 7}px`,
+                top: `${-star.size * 7}px`,
+                borderRadius: '50%',
+                background: `radial-gradient(circle, ${color}33 0%, transparent 70%)`,
+                pointerEvents: 'none',
+                animation: 'star-halo-pulse 1s ease-in-out infinite',
+              }} />
+            )}
+
             {/* Сама звезда */}
             <div
-              className="star-dot"
               style={{
                 position: 'absolute',
                 left: 0, top: 0,
-                width: `${star.size * (isFlashing ? 3.2 : 1)}px`,
-                height: `${star.size * (isFlashing ? 3.2 : 1)}px`,
-                marginLeft: `-${star.size * (isFlashing ? 1.6 : 0.5)}px`,
-                marginTop: `-${star.size * (isFlashing ? 1.6 : 0.5)}px`,
+                width: `${star.size}px`,
+                height: `${star.size}px`,
+                marginLeft: `-${star.size * 0.5}px`,
+                marginTop: `-${star.size * 0.5}px`,
                 borderRadius: '50%',
                 background: color,
-                boxShadow: isFlashing
-                  ? `0 0 ${star.size * 10}px ${star.size * 4}px rgba(255,253,200,0.95), 0 0 ${star.size * 28}px ${star.size * 10}px rgba(255,220,80,0.55)`
-                  : glow,
-                animation: isFlashing
-                  ? 'star-appear 2.5s ease-out forwards'
+                boxShadow: isHovered
+                  ? `0 0 ${star.size * 12}px ${star.size * 6}px rgba(255,253,200,0.95), 0 0 ${star.size * 30}px ${star.size * 12}px rgba(255,220,80,0.6)`
+                  : isFlashing
+                    ? `0 0 ${star.size * 10}px ${star.size * 4}px rgba(255,253,200,0.95), 0 0 ${star.size * 28}px ${star.size * 10}px rgba(255,220,80,0.55)`
+                    : glow,
+                transform: `scale(${scale})`,
+                animation: isFlashing || isHovered
+                  ? undefined
                   : `twinkle ${2.5 + star.delay * 0.4}s ease-in-out ${star.delay}s infinite`,
                 opacity: isFlashing ? 1 : opacity,
-                transition: 'width 0.5s, height 0.5s, box-shadow 0.5s',
+                transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                cursor: star.wish ? 'pointer' : 'default',
+                pointerEvents: 'auto',
               }}
+              onMouseEnter={() => setHoveredId(star.id)}
+              onMouseLeave={() => setHoveredId(null)}
             />
+
+            {/* Попап при ховере */}
+            {isHovered && star.wish && (
+              <div style={{
+                position: 'absolute',
+                bottom: `${star.size * scale + 10}px`,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(6,8,22,0.93)',
+                border: '1px solid rgba(201,168,76,0.35)',
+                borderRadius: 12,
+                padding: '10px 14px',
+                minWidth: 180,
+                maxWidth: 240,
+                pointerEvents: 'none',
+                backdropFilter: 'blur(12px)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
+                zIndex: 60,
+                whiteSpace: 'normal',
+              }}>
+                <p style={{ color: 'rgba(240,232,208,0.9)', fontSize: 12, lineHeight: 1.5, margin: 0, fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
+                  «{star.wish}»
+                </p>
+                {star.amount && (
+                  <div style={{ marginTop: 6, fontSize: 11, color: 'rgba(201,168,76,0.7)', fontFamily: 'Golos Text, sans-serif' }}>
+                    ✦ {star.amount.toLocaleString('ru-RU')} ₽
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
       })}
@@ -130,6 +182,10 @@ export default function StarsCanvas({ stars }: Props) {
           0%   { opacity: 0; transform: scaleY(0); }
           20%  { opacity: 1; transform: scaleY(1); }
           100% { opacity: 0; transform: scaleY(1.5); }
+        }
+        @keyframes star-halo-pulse {
+          0%, 100% { opacity: 0.6; transform: scale(1); }
+          50%      { opacity: 1;   transform: scale(1.15); }
         }
       `}</style>
     </div>

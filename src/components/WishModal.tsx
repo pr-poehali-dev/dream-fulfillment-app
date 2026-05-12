@@ -3,7 +3,7 @@ import Icon from "@/components/ui/icon";
 
 interface Props {
   onClose: () => void;
-  onSent: (amount: number) => void;
+  onSent: (amount: number, wish: string) => void;
 }
 
 function getStarTier(amount: number) {
@@ -45,7 +45,7 @@ export default function WishModal({ onClose, onSent }: Props) {
 
   const handleVkPost = () => {
     setStep("done");
-    setTimeout(() => onSent(numAmount), 1500);
+    setTimeout(() => onSent(numAmount, wish), 1500);
   };
 
   return (

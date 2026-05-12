@@ -6,7 +6,7 @@ import HeroSection from "@/components/HeroSection";
 import PageSections from "@/components/PageSections";
 import { useSound } from "@/hooks/useSound";
 
-type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; amount?: number };
+type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; amount?: number; wish?: string };
 
 export default function Index() {
   const { playCoin, playSplash, playMagic, playStarAppear } = useSound();
@@ -54,7 +54,7 @@ export default function Index() {
     }, 2200);
   };
 
-  const handleWishSent = (amount: number) => {
+  const handleWishSent = (amount: number, wish: string) => {
     setShowModal(false);
     setStarsCount(prev => prev + 1);
     setTimeout(() => playStarAppear(), 300);
@@ -67,6 +67,7 @@ export default function Index() {
       delay: Math.random() * 3,
       lit: true,
       amount,
+      wish,
     };
     setStars(prev => {
       const updated = prev.map(s => ({ ...s, isNew: false }));
