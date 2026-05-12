@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import WishModal from "@/components/WishModal";
-import VideoPreview from "@/components/VideoPreview";
 import PageBackground from "@/components/PageBackground";
 import HeroSection from "@/components/HeroSection";
 import PageSections from "@/components/PageSections";
@@ -11,7 +10,6 @@ type Star = { id: number; x: number; y: number; size: number; delay: number; lit
 export default function Index() {
   const { playCoin, playSplash, playMagic, playStarAppear } = useSound();
   const [showModal, setShowModal] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
   const [coinAnim, setCoinAnim] = useState(false);
   const [smokeAnim, setSmokeAnim] = useState(false);
   const [rippleAnim, setRippleAnim] = useState(false);
@@ -23,7 +21,6 @@ export default function Index() {
   const [altruistsCount] = useState(0);
 
   useEffect(() => {
-    // video temporarily disabled
     setStars([]);
     const t1 = setTimeout(() => setIntroPhase('line2'), 2500);
     const t2 = setTimeout(() => setIntroPhase('out'), 5000);
@@ -78,20 +75,12 @@ export default function Index() {
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#060810' }}>
 
-      {showVideo && (
-        <VideoPreview onClose={() => {
-          localStorage.setItem("zagadai_seen_video", "1");
-          setShowVideo(false);
-        }} />
-      )}
-
       <PageBackground stars={stars} />
 
       <HeroSection
         introPhase={introPhase}
         starsCount={starsCount}
         onWellClick={handleWellClick}
-        onShowVideo={() => setShowVideo(true)}
       />
 
       <PageSections
@@ -99,7 +88,6 @@ export default function Index() {
         copilkaAmount={copilkaAmount}
         angelsCount={angelsCount}
         altruistsCount={altruistsCount}
-        onShowVideo={() => setShowVideo(true)}
       />
 
       {showModal && (

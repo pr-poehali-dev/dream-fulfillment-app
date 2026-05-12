@@ -9,10 +9,9 @@ interface Props {
   copilkaAmount: number;
   angelsCount: number;
   altruistsCount: number;
-  onShowVideo: () => void;
 }
 
-export default function PageSections({ starsCount, copilkaAmount, angelsCount, altruistsCount, onShowVideo }: Props) {
+export default function PageSections({ starsCount, copilkaAmount, angelsCount, altruistsCount }: Props) {
   return (
     <>
       {/* Stats */}
@@ -103,6 +102,7 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
             { label: "Правила", href: "/rules" },
             { label: "Конфиденциальность", href: "/privacy" },
             { label: "Техподдержка", href: "/contacts" },
+            { label: "О проекте", href: "/about" },
           ].map(link => (
             <a key={link.href} href={link.href}
               className="font-golos text-xs transition-colors"
@@ -112,14 +112,6 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
               {link.label}
             </a>
           ))}
-          <button
-            onClick={onShowVideo}
-            className="font-golos text-xs transition-colors"
-            style={{ color: '#ffffff', background: 'none', border: 'none', cursor: 'pointer' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#ffffff')}>
-            О проекте
-          </button>
         </div>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
           {[

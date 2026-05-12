@@ -17,7 +17,6 @@ interface Props {
   introPhase: IntroPhase;
   starsCount: number;
   onWellClick: () => void;
-  onShowVideo: () => void;
 }
 
 export default function HeroSection({
@@ -51,6 +50,13 @@ export default function HeroSection({
             onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
             onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
             Правила
+          </a>
+          <a href="/about"
+            className="transition-colors"
+            style={{ color: 'rgba(200,210,240,0.6)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
+            О проекте
           </a>
           <button
             onClick={() => setShowFulfilled(true)}
