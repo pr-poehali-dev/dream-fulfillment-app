@@ -1,4 +1,5 @@
 import StarsCanvas from "@/components/StarsCanvas";
+import WishesGallery from "@/components/WishesGallery";
 
 const BG_IMAGE = "https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/bucket/44ca2f43-19c6-45a5-824f-8662569e1ee3.jpeg";
 
@@ -24,6 +25,7 @@ export default function PageBackground({ stars }: Props) {
           filter: 'brightness(0.8) contrast(1.05)',
         }}
       />
+      <WishesGallery />
       <StarsCanvas stars={stars} />
     </div>
   );
