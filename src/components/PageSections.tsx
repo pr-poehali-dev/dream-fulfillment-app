@@ -134,9 +134,7 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
             help@zagadai.online
           </a>
         </div>
-        <p className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.18)' }}>
-          © 2024 Загадай Онлайн · zagadai.online
-        </p>
+        <p className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.18)' }}>© 2026 Загадай Онлайн · zagadai.online</p>
       </footer>
     </>
   );
