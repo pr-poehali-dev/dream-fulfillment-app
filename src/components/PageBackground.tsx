@@ -14,10 +14,8 @@ export default function PageBackground({ stars }: Props) {
     <div className="bg-root fixed inset-0 z-0" style={{ background: '#060810' }}>
       {/* Картинка — прибита к низу */}
       <img
-        ref={imgRef}
         src={BG_IMAGE}
         alt=""
-        onLoad={updateRect}
         style={{
           position: 'absolute',
           inset: 0,
