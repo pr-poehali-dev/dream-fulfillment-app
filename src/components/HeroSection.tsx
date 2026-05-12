@@ -72,7 +72,8 @@ export default function HeroSection({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'flex-start',
+              paddingTop: '6vh',
               zIndex: 30,
               pointerEvents: 'none',
               transition: 'opacity 1.2s ease',
@@ -141,33 +142,6 @@ export default function HeroSection({
             100% { opacity: 1; transform: scale(1); filter: brightness(1); }
           }
         `}</style>
-
-        {/* Заголовок — постоянный */}
-        <div className="animate-fade-in" style={{ animationDelay: '0.3s', opacity: 0, marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: 28, lineHeight: 1, filter: 'drop-shadow(0 0 14px #fffde0) drop-shadow(0 0 30px #ffd700)' }}>✦</span>
-          </div>
-          <p className="font-cormorant" style={{
-            fontSize: 'clamp(1.6rem, 5vw, 3.5rem)',
-            fontWeight: 300,
-            color: '#f0e8d0',
-            letterSpacing: '0.05em',
-            textShadow: '0 0 40px rgba(255,220,80,0.5), 0 0 80px rgba(255,180,30,0.2)',
-            marginBottom: '0.5rem',
-          }}>
-            Мечтай вслух — тебя услышат
-          </p>
-          <p className="font-cormorant" style={{
-            fontSize: 'clamp(1.1rem, 3vw, 2rem)',
-            fontWeight: 300,
-            fontStyle: 'italic',
-            color: 'rgba(201,168,76,0.85)',
-            letterSpacing: '0.04em',
-            textShadow: '0 0 30px rgba(255,200,50,0.4)',
-          }}>
-            И кто-то твою мечту исполнит
-          </p>
-        </div>
 
         {/* CTA buttons */}
         <div className="animate-fade-in flex flex-wrap items-center justify-center gap-3"
