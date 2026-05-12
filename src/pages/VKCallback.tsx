@@ -21,7 +21,7 @@ export default function VKCallback() {
       return;
     }
 
-    const redirect_uri = `${window.location.origin}/vk-callback`;
+    const redirect_uri = 'https://zagadai.online/vk-callback';
 
     fetch(func2url['vk-auth'], {
       method: 'POST',

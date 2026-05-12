@@ -6,10 +6,9 @@ import FulfilledModal from "@/components/FulfilledModal";
 const VK_APP_ID = import.meta.env.VITE_VK_APP_ID ?? '';
 
 function openVKAuth() {
-  const redirectUri = encodeURIComponent(`${window.location.origin}/vk-callback`);
-  const scope = encodeURIComponent('');
+  const redirectUri = encodeURIComponent('https://zagadai.online/vk-callback');
   window.location.href =
-    `https://oauth.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&v=5.131`;
+    `https://oauth.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=&response_type=code&v=5.131`;
 }
 
 type IntroPhase = 'line1' | 'line2' | 'out' | 'done';
