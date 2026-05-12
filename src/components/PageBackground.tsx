@@ -1,4 +1,3 @@
-import { useRef, useState, useEffect } from "react";
 import StarsCanvas from "@/components/StarsCanvas";
 import WishesGallery from "@/components/WishesGallery";
 
@@ -11,29 +10,6 @@ interface Props {
 }
 
 export default function PageBackground({ stars }: Props) {
-  const imgRef = useRef<HTMLImageElement>(null);
-  const [imgRect, setImgRect] = useState<{ top: number; height: number } | null>(null);
-
-  const updateRect = () => {
-    const img = imgRef.current;
-    if (!img) return;
-    const rect = img.getBoundingClientRect();
-    // fixed-контейнер всегда top=0, поэтому top картинки = rect.top
-    setImgRect({ top: rect.top, height: rect.height });
-  };
-
-  useEffect(() => {
-    const img = imgRef.current;
-    if (!img) return;
-    if (img.complete) updateRect();
-    img.addEventListener('load', updateRect);
-    window.addEventListener('resize', updateRect);
-    return () => {
-      img.removeEventListener('load', updateRect);
-      window.removeEventListener('resize', updateRect);
-    };
-  }, []);
-
   return (
     <div className="bg-root fixed inset-0 z-0" style={{ background: '#060810' }}>
       {/* Картинка — прибита к низу */}
@@ -44,29 +20,21 @@ export default function PageBackground({ stars }: Props) {
         onLoad={updateRect}
         style={{
           position: 'absolute',
-          bottom: 0,
-          left: 0,
+          inset: 0,
           width: '100%',
-          height: 'auto',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'bottom center',
           display: 'block',
           filter: 'brightness(0.8) contrast(1.05)',
         }}
       />
 
-      {/* Звёзды — позиционируются внутри картинки */}
-      {imgRect && (
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          top: imgRect.top,
-          height: imgRect.height,
-          pointerEvents: 'none',
-        }}>
-          <WishesGallery />
-          <StarsCanvas stars={stars} />
-        </div>
-      )}
+      {/* Звёзды поверх фона */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <WishesGallery />
+        <StarsCanvas stars={stars} />
+      </div>
     </div>
   );
 }
