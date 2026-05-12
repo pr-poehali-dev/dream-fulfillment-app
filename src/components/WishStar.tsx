@@ -101,6 +101,7 @@ export default function WishStar({ wish }: Props) {
         transform: 'translate(-50%, -50%)',
         zIndex: hovered ? 50 : 10,
         cursor: 'pointer',
+        pointerEvents: 'auto',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
