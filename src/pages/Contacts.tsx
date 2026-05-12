@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
-import func2url from "@/func2url.json";
+import func2url from "../../backend/func2url.json";
 
 export default function Contacts() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
