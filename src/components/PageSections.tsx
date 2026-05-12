@@ -121,6 +121,19 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
             О проекте
           </button>
         </div>
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
+          {[
+            'ИНН 027411103939',
+            'ОГРН 317028000155545',
+          ].map(r => (
+            <span key={r} className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.22)' }}>{r}</span>
+          ))}
+          <a href="mailto:help@zagadai.online" className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.22)', textDecoration: 'none' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.22)')}>
+            help@zagadai.online
+          </a>
+        </div>
         <p className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.18)' }}>
           © 2024 Загадай Онлайн · zagadai.online
         </p>
