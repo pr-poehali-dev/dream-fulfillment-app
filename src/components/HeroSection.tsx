@@ -1,4 +1,14 @@
 import Icon from "@/components/ui/icon";
+import { useUser } from "@/context/UserContext";
+
+const VK_APP_ID = import.meta.env.VITE_VK_APP_ID ?? '';
+
+function openVKAuth() {
+  const redirectUri = encodeURIComponent(`${window.location.origin}/vk-callback`);
+  const scope = encodeURIComponent('');
+  window.location.href =
+    `https://oauth.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=${scope}&response_type=code&v=5.131`;
+}
 
 type IntroPhase = 'line1' | 'line2' | 'out' | 'done';
 
@@ -14,6 +24,7 @@ export default function HeroSection({
   starsCount,
   onWellClick,
 }: Props) {
+  const { user, logout } = useUser();
   return (
     <>
       {/* Header */}
@@ -45,14 +56,35 @@ export default function HeroSection({
               {link.label}
             </a>
           ))}
-          <a href="/cabinet"
-            className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
-            style={{ border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.1)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-            <Icon name="User" size={14} />
-            Войти
-          </a>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <a href="/cabinet" className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all font-golos"
+                style={{ border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(201,168,76,0.06)' }}>
+                <img
+                  src={user.avatar_url}
+                  alt={user.name}
+                  style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(201,168,76,0.4)' }}
+                />
+                <span style={{ color: '#c9a84c', fontSize: 13 }}>{user.name.split(' ')[0]}</span>
+              </a>
+              <button
+                onClick={logout}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.4)', padding: '4px' }}
+                title="Выйти">
+                <Icon name="LogOut" size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={openVKAuth}
+              className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
+              style={{ border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c', background: 'none', cursor: 'pointer' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.1)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+              <Icon name="LogIn" size={14} />
+              Войти через ВК
+            </button>
+          )}
         </nav>
         <button className="md:hidden" style={{ color: 'rgba(200,210,240,0.7)', background: 'none', border: 'none' }}>
           <Icon name="Menu" size={22} />

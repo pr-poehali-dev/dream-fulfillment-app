@@ -10,25 +10,30 @@ import Privacy from "./pages/Privacy";
 import Contacts from "./pages/Contacts";
 import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
+import VKCallback from "./pages/VKCallback";
+import { UserProvider } from "./context/UserContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/cabinet" element={<Cabinet />} />
-          <Route path="/rules" element={<Rules />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/contacts" element={<Contacts />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <UserProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/cabinet" element={<Cabinet />} />
+            <Route path="/rules" element={<Rules />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contacts" element={<Contacts />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/vk-callback" element={<VKCallback />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </UserProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
