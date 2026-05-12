@@ -69,7 +69,7 @@ export default function WishModal({ onClose, onSent }: Props) {
         {step === "form" && (
           <>
             <div className="text-center mb-6">
-              <div className="text-3xl mb-2">🌠</div>
+              <div className="text-3xl mb-2"></div>
               <h2 className="font-cormorant text-2xl md:text-3xl mb-1" style={{ color: '#f0e8d0' }}>
                 Загадай желание
               </h2>
