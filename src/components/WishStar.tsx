@@ -1,4 +1,5 @@
 import { useState } from "react";
+import WishCardModal from "@/components/WishCardModal";
 
 export type WishCategory = 'dust' | 'flicker' | 'star' | 'beacon' | 'sun';
 
@@ -89,6 +90,7 @@ export function getCategory(brightness: number): WishCategory {
 
 export default function WishStar({ wish }: Props) {
   const [hovered, setHovered] = useState(false);
+  const [open, setOpen] = useState(false);
   const cfg = CATEGORY_CONFIG[wish.category];
   const s = hovered ? cfg.size * 1.7 : cfg.size;
 
@@ -107,6 +109,7 @@ export default function WishStar({ wish }: Props) {
       onMouseLeave={() => setHovered(false)}
       onTouchStart={() => setHovered(true)}
       onTouchEnd={() => setHovered(false)}
+      onClick={() => setOpen(true)}
     >
       {/* Лучи для Sun */}
       {cfg.rays && (
@@ -204,6 +207,8 @@ export default function WishStar({ wish }: Props) {
           </div>
         </div>
       )}
+
+      {open && <WishCardModal wish={wish} onClose={() => setOpen(false)} />}
 
       <style>{`
         @keyframes wish-twinkle {
