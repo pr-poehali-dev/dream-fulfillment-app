@@ -11,16 +11,19 @@ interface Props {
 export default function PageBackground({ stars }: Props) {
   return (
     <div className="fixed inset-0 z-0" style={{ background: '#060810' }}>
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #03040d 0%, #060a18 55%, #080c1a 70%, #0a0e1c 100%)' }} />
-      <div className="absolute left-0 right-0" style={{
-        bottom: '0',
-        height: '42%',
-        background: 'linear-gradient(to bottom, #060a18 0%, transparent 30%)',
-        pointerEvents: 'none',
-      }} />
-      <div className="absolute inset-0" style={{
-        background: 'linear-gradient(to bottom, rgba(6,8,16,0) 60%, rgba(6,8,16,0.92) 100%)'
-      }} />
+      <img
+        src={BG_IMAGE}
+        alt=""
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          objectPosition: 'center bottom',
+          filter: 'brightness(0.8) contrast(1.05)',
+        }}
+      />
       <StarsCanvas stars={stars} />
     </div>
   );

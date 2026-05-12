@@ -92,9 +92,6 @@ export default function Index() {
       <HeroSection
         introPhase={introPhase}
         starsCount={starsCount}
-        coinAnim={coinAnim}
-        rippleAnim={rippleAnim}
-        smokeAnim={smokeAnim}
         onWellClick={handleWellClick}
         onShowVideo={() => setShowVideo(true)}
       />

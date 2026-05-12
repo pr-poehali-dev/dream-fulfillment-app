@@ -1,25 +1,17 @@
 import Icon from "@/components/ui/icon";
-import WellWithCoin from "@/components/WellWithCoin";
 
 type IntroPhase = 'line1' | 'line2' | 'out' | 'done';
 
 interface Props {
   introPhase: IntroPhase;
   starsCount: number;
-  coinAnim: boolean;
-  rippleAnim: boolean;
-  smokeAnim: boolean;
   onWellClick: () => void;
   onShowVideo: () => void;
 }
 
-
 export default function HeroSection({
   introPhase,
   starsCount,
-  coinAnim,
-  rippleAnim,
-  smokeAnim,
   onWellClick,
 }: Props) {
   return (
@@ -173,15 +165,7 @@ export default function HeroSection({
           </button>
         </div>
 
-        {/* Well + Coin — колодец как img, монетка absolute внутри */}
-        <div className="animate-fade-in w-full" style={{ animationDelay: '0.8s', opacity: 0, marginTop: 'auto' }}>
-          <WellWithCoin
-            coinAnim={coinAnim}
-            rippleAnim={rippleAnim}
-            smokeAnim={smokeAnim}
-            onWellClick={onWellClick}
-          />
-        </div>
+
       </main>
     </>
   );
