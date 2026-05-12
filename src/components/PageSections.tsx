@@ -126,7 +126,7 @@ export default function PageSections({ starsCount, copilkaAmount, angelsCount, a
             'ИНН 027411103939',
             'ОГРН 317028000155545',
           ].map(r => (
-            <span key={r} className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.22)' }}>{r}</span>
+            <span key={r} className="font-golos text-xs text-slate-400" style={{ color: 'rgba(200,210,240,0.22)' }}>{r}</span>
           ))}
           <a href="mailto:help@zagadai.online" className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.22)', textDecoration: 'none' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
