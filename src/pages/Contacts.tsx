@@ -92,7 +92,7 @@ export default function Contacts() {
               icon: "MessageCircle",
               label: "ВКонтакте",
               value: "vk.com/zagadai.online",
-              href: "https://vk.com",
+              href: "https://vk.com/club238641413",
             },
             {
               icon: "Send",
