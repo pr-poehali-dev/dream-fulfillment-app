@@ -3,7 +3,7 @@ import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
 
-const VK_APP_ID = import.meta.env.VITE_VK_APP_ID ?? "";
+const VK_APP_ID = "54589468";
 
 function openVKAuth() {
   const redirectUri = encodeURIComponent("https://zagadai.online/vk-callback");
