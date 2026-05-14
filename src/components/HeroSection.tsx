@@ -250,9 +250,7 @@ export default function HeroSection({
           </button>
           <button
             className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
-            style={{ color: 'rgba(200,210,240,0.75)' }}>
-            🔍 Найти свою звезду
-          </button>
+            style={{ color: 'rgba(200,210,240,0.75)' }}>🔍 Найти звезду</button>
         </div>
 
 
