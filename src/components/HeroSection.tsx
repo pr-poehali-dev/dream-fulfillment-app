@@ -43,24 +43,23 @@ export default function HeroSection({
             VKID.Config.init({
               app: 54589468,
               redirectUrl: "https://zagadai.online/vk-callback",
-              responseMode: "form_post",
+              responseMode: VKID.ConfigResponseMode.Callback,
               source: VKID.ConfigSource.LOWCODE,
               scope: "",
             });
 
-            const oneTap = new VKID.OneTap();
-            oneTap.render({
+            const oAuth = new VKID.OAuthList();
+            oAuth.render({
               container: vkButtonContainer.current,
               scheme: "dark",
-              showAlternativeLogin: true,
-              oauthList: ["mail_ru", "ok_ru"],
+              oauthList: ["vkid"],
             });
 
-            oneTap
+            oAuth
               .on(VKID.WidgetEvents.ERROR, vkidOnError)
-              .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
+              .on(VKID.OAuthListInternalEvents.LOGIN_SUCCESS, (payload) => {
                 const code = payload.code;
-                const deviceId = payload.deviceId;
+                const deviceId = payload.device_id;
                 VKID.Auth.exchangeCode(code, deviceId)
                   .then(vkidOnSuccess)
                   .catch(vkidOnError);
