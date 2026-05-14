@@ -28,12 +28,11 @@ export default function HeroSection({
   const [findError, setFindError] = useState("");
   const [findLoading, setFindLoading] = useState(false);
 
+  const vkAuthUrl =
+    "https://id.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&response_type=code&v=5.131";
+
   return (
     <>
-      {/* VK ID Low-code скрипт */}
-      <script src="https://id.vk.com/sdk/lowcode.js" async />
-      <div id="vk_id_login" style={{ display: "none" }} />
-
       {/* Header */}
       <header className="relative z-10 px-6 py-5 md:px-12">
         <div className="flex items-center justify-between">
@@ -148,7 +147,25 @@ export default function HeroSection({
                 </button>
               </div>
             ) : (
-              <div id="vk_id_login" />
+              <button
+                onClick={() => (window.location.href = vkAuthUrl)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
+                style={{
+                  border: "1px solid rgba(201,168,76,0.4)",
+                  color: "#c9a84c",
+                  background: "none",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "rgba(201,168,76,0.1)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <Icon name="LogIn" size={14} />
+                Войти через ВК
+              </button>
             )}
           </nav>
           <button
@@ -262,7 +279,22 @@ export default function HeroSection({
               </button>
             </div>
           ) : (
-            <div id="vk_id_login_mobile" />
+            <button
+              onClick={() => {
+                window.location.href = vkAuthUrl;
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
+              style={{
+                border: "1px solid rgba(201,168,76,0.4)",
+                color: "#c9a84c",
+                background: "none",
+                cursor: "pointer",
+              }}
+            >
+              <Icon name="LogIn" size={14} />
+              Войти через ВК
+            </button>
           )}
         </div>
       )}
