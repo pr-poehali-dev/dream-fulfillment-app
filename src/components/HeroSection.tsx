@@ -3,6 +3,13 @@ import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
 
+const VK_APP_ID = "54589468";
+
+function openVKAuth() {
+  const redirectUri = encodeURIComponent("https://zagadai.online/vk-callback");
+  window.location.href = `https://id.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=&response_type=code&v=5.131`;
+}
+
 type IntroPhase = "line1" | "line2" | "out" | "done";
 
 interface Props {
@@ -27,10 +34,6 @@ export default function HeroSection({
   const [findValue, setFindValue] = useState("");
   const [findError, setFindError] = useState("");
   const [findLoading, setFindLoading] = useState(false);
-
-  const vkAuthUrl =
-    "https://id.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&response_type=code&v=5.131";
-
   return (
     <>
       {/* Header */}
@@ -148,7 +151,7 @@ export default function HeroSection({
               </div>
             ) : (
               <button
-                onClick={() => (window.location.href = vkAuthUrl)}
+                onClick={openVKAuth}
                 className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
                 style={{
                   border: "1px solid rgba(201,168,76,0.4)",
@@ -281,7 +284,7 @@ export default function HeroSection({
           ) : (
             <button
               onClick={() => {
-                window.location.href = vkAuthUrl;
+                openVKAuth();
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
