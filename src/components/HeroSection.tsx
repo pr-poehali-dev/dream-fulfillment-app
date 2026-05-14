@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
@@ -20,86 +20,13 @@ export default function HeroSection({
   onRandomStar,
   onFindStar,
 }: Props) {
-  const { user, logout, setUser } = useUser();
-
+  const { user, logout } = useUser();
   const [showFulfilled, setShowFulfilled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [findValue, setFindValue] = useState("");
   const [findError, setFindError] = useState("");
   const [findLoading, setFindLoading] = useState(false);
-
-  const vkButtonContainer = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (vkButtonContainer.current && !user) {
-      const script = document.createElement("script");
-      script.src = "https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js";
-      script.async = true;
-      script.onload = () => {
-        if ("VKIDSDK" in window) {
-          const VKID = window.VKIDSDK;
-          try {
-            VKID.Config.init({
-              app: 54589468,
-              redirectUrl: "https://zagadai.online/vk-callback",
-              responseMode: VKID.ConfigResponseMode.Callback,
-              source: VKID.ConfigSource.LOWCODE,
-              scope: "",
-            });
-
-            const oAuth = new VKID.OAuthList();
-            oAuth.render({
-              container: vkButtonContainer.current,
-              scheme: "dark",
-              oauthList: ["vkid"],
-              showAlternativeLogin: false,
-            });
-
-            oAuth
-              .on(VKID.WidgetEvents.ERROR, vkidOnError)
-              .on(VKID.OAuthListInternalEvents.LOGIN_SUCCESS, (payload) => {
-                const code = payload.code;
-                const deviceId = payload.device_id;
-                VKID.Auth.exchangeCode(code, deviceId)
-                  .then(vkidOnSuccess)
-                  .catch(vkidOnError);
-              });
-          } catch (error) {
-            console.error("Ошибка инициализации VK ID:", error);
-          }
-        }
-      };
-      document.body.appendChild(script);
-    }
-
-    return () => {
-      const existingScript = document.querySelector(
-        'script[src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"]',
-      );
-      if (existingScript) {
-        document.body.removeChild(existingScript);
-      }
-    };
-  }, [user]);
-
-  function vkidOnSuccess(data) {
-    console.log("Успешный вход:", data);
-    if (setUser && data.account) {
-      const vkUser = {
-        id: data.account.id,
-        name: `${data.account.first_name} ${data.account.last_name}`,
-        avatar_url: data.account.photo,
-      };
-      setUser(vkUser);
-    }
-  }
-
-  function vkidOnError(error) {
-    console.error("Ошибка авторизации:", error);
-    alert("Произошла ошибка при попытке входа через ВК. Попробуйте позже.");
-  }
-
   return (
     <>
       {/* Header */}
@@ -176,7 +103,6 @@ export default function HeroSection({
             >
               🔴 Исполненные мечты
             </button>
-
             {user ? (
               <div className="flex items-center gap-2">
                 <a
@@ -217,7 +143,28 @@ export default function HeroSection({
                 </button>
               </div>
             ) : (
-              <div ref={vkButtonContainer} style={{ height: "38px" }} />
+              <button
+                onClick={() =>
+                  (window.location.href =
+                    "https://oauth.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131")
+                }
+                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
+                style={{
+                  border: "1px solid rgba(201,168,76,0.4)",
+                  color: "#c9a84c",
+                  background: "none",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "rgba(201,168,76,0.1)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <Icon name="LogIn" size={14} />
+                Войти через ВК
+              </button>
             )}
           </nav>
           <button
@@ -331,10 +278,23 @@ export default function HeroSection({
               </button>
             </div>
           ) : (
-            <div
-              ref={vkButtonContainer}
-              style={{ height: "auto", minHeight: "38px" }}
-            />
+            <button
+              onClick={() => {
+                window.location.href =
+                  "https://oauth.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131";
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
+              style={{
+                border: "1px solid rgba(201,168,76,0.4)",
+                color: "#c9a84c",
+                background: "none",
+                cursor: "pointer",
+              }}
+            >
+              <Icon name="LogIn" size={14} />
+              Войти через ВК
+            </button>
           )}
         </div>
       )}
