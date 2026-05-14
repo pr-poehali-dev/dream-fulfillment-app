@@ -53,6 +53,7 @@ export default function HeroSection({
               container: vkButtonContainer.current,
               scheme: "dark",
               oauthList: ["vkid"],
+              showAlternativeLogin: false,
             });
 
             oAuth
