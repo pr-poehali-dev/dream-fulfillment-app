@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import WishModal from "@/components/WishModal";
+import WishCardModal from "@/components/WishCardModal";
 import PageBackground from "@/components/PageBackground";
 import HeroSection from "@/components/HeroSection";
 import PageSections from "@/components/PageSections";
 import { useSound } from "@/hooks/useSound";
+import { getCategory, calcBrightness } from "@/components/WishStar";
+import type { WishItem } from "@/components/WishStar";
+import func2url from "../../backend/func2url.json";
 
 type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; amount?: number; wish?: string };
 
@@ -19,6 +23,8 @@ export default function Index() {
   const [copilkaAmount] = useState(0);
   const [angelsCount] = useState(0);
   const [altruistsCount] = useState(0);
+  const [randomWish, setRandomWish] = useState<WishItem | null>(null);
+  const [randomLoading, setRandomLoading] = useState(false);
 
   useEffect(() => {
     setStars([]);
@@ -46,6 +52,34 @@ export default function Index() {
       setSmokeAnim(false);
       setShowModal(true);
     }, 2200);
+  };
+
+  const handleRandomStar = async () => {
+    if (randomLoading) return;
+    setRandomLoading(true);
+    try {
+      const excludeParam = randomWish ? `?exclude=${randomWish.id}` : '';
+      const res = await fetch(`${func2url['get-random-wish']}${excludeParam}`);
+      const raw = await res.json();
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      const brightness = calcBrightness(parsed.amount, 10, 1000);
+      const category = getCategory(Math.max(0.1, brightness));
+      setRandomWish({
+        id: parsed.id,
+        x: parsed.x ?? 50,
+        y: parsed.y ?? 50,
+        amount: parsed.amount,
+        wish: parsed.wish,
+        name: parsed.name,
+        avatar: parsed.avatar,
+        brightness,
+        category,
+      });
+    } catch {
+      setRandomWish(null);
+    } finally {
+      setRandomLoading(false);
+    }
   };
 
   const handleWishSent = (amount: number, wish: string) => {
@@ -81,6 +115,7 @@ export default function Index() {
         introPhase={introPhase}
         starsCount={starsCount}
         onWellClick={handleWellClick}
+        onRandomStar={handleRandomStar}
       />
 
       <PageSections
@@ -92,6 +127,30 @@ export default function Index() {
 
       {showModal && (
         <WishModal onClose={() => setShowModal(false)} onSent={handleWishSent} />
+      )}
+
+      {randomWish && (
+        <WishCardModal wish={randomWish} onClose={() => setRandomWish(null)} />
+      )}
+
+      {randomLoading && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            padding: '14px 24px',
+            background: 'rgba(6,8,22,0.9)',
+            border: '1px solid rgba(201,168,76,0.3)',
+            borderRadius: 99,
+            color: '#c9a84c',
+            fontFamily: '"Golos Text", sans-serif',
+            fontSize: 14,
+          }}>
+            ✦ Ищем звезду...
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "Get random wish",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get random wish with exclude",
+      "method": "GET",
+      "path": "/?exclude=1",
+      "expectedStatus": 200
+    }
+  ]
+}

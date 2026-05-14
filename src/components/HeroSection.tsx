@@ -17,12 +17,14 @@ interface Props {
   introPhase: IntroPhase;
   starsCount: number;
   onWellClick: () => void;
+  onRandomStar: () => void;
 }
 
 export default function HeroSection({
   introPhase,
   starsCount,
   onWellClick,
+  onRandomStar,
 }: Props) {
   const { user, logout } = useUser();
   const [showFulfilled, setShowFulfilled] = useState(false);
@@ -244,6 +246,7 @@ export default function HeroSection({
             ✦ Загадать желание
           </button>
           <button
+            onClick={onRandomStar}
             className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
             style={{ color: 'rgba(200,210,240,0.75)' }}>
             🎲 Случайная звезда
