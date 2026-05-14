@@ -3,13 +3,6 @@ import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
 
-const VK_APP_ID = "54589468";
-
-function openVKAuth() {
-  const redirectUri = encodeURIComponent("https://zagadai.online/vk-callback");
-  window.location.href = `https://id.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=&response_type=code&v=5.131`;
-}
-
 type IntroPhase = "line1" | "line2" | "out" | "done";
 
 interface Props {
@@ -34,8 +27,13 @@ export default function HeroSection({
   const [findValue, setFindValue] = useState("");
   const [findError, setFindError] = useState("");
   const [findLoading, setFindLoading] = useState(false);
+
   return (
     <>
+      {/* VK ID Low-code скрипт */}
+      <script src="https://id.vk.com/sdk/lowcode.js" async />
+      <div id="vk_id_login" style={{ display: "none" }} />
+
       {/* Header */}
       <header className="relative z-10 px-6 py-5 md:px-12">
         <div className="flex items-center justify-between">
@@ -150,25 +148,7 @@ export default function HeroSection({
                 </button>
               </div>
             ) : (
-              <button
-                onClick={openVKAuth}
-                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
-                style={{
-                  border: "1px solid rgba(201,168,76,0.4)",
-                  color: "#c9a84c",
-                  background: "none",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(201,168,76,0.1)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                <Icon name="LogIn" size={14} />
-                Войти через ВК
-              </button>
+              <div id="vk_id_login" />
             )}
           </nav>
           <button
@@ -282,22 +262,7 @@ export default function HeroSection({
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => {
-                openVKAuth();
-                setMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
-              style={{
-                border: "1px solid rgba(201,168,76,0.4)",
-                color: "#c9a84c",
-                background: "none",
-                cursor: "pointer",
-              }}
-            >
-              <Icon name="LogIn" size={14} />
-              Войти через ВК
-            </button>
+            <div id="vk_id_login_mobile" />
           )}
         </div>
       )}
