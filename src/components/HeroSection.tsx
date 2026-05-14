@@ -43,7 +43,7 @@ export default function HeroSection({
             VKID.Config.init({
               app: 54589468,
               redirectUrl: "https://zagadai.online/vk-callback",
-              responseMode: 'form_post',,
+              responseMode: "form_post",
               source: VKID.ConfigSource.LOWCODE,
               scope: "",
             });
