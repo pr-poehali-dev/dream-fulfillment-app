@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "name": "Get total count",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get wish by number 1",
+      "method": "GET",
+      "path": "/?number=1",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Out of range returns 404",
+      "method": "GET",
+      "path": "/?number=999",
+      "expectedStatus": 404
+    }
+  ]
+}

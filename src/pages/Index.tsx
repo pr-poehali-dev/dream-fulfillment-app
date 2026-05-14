@@ -82,6 +82,32 @@ export default function Index() {
     }
   };
 
+  const handleFindStar = async (number: number): Promise<'ok' | 'out_of_range' | 'error'> => {
+    try {
+      const res = await fetch(`${func2url['get-wish-by-number']}?number=${number}`);
+      const raw = await res.json();
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (res.status === 404 || parsed.error === 'out_of_range') return 'out_of_range';
+      if (!res.ok) return 'error';
+      const brightness = calcBrightness(parsed.amount, 10, 1000);
+      const category = getCategory(Math.max(0.1, brightness));
+      setRandomWish({
+        id: parsed.id,
+        x: parsed.x ?? 50,
+        y: parsed.y ?? 50,
+        amount: parsed.amount,
+        wish: parsed.wish,
+        name: parsed.name,
+        avatar: parsed.avatar,
+        brightness,
+        category,
+      });
+      return 'ok';
+    } catch {
+      return 'error';
+    }
+  };
+
   const handleWishSent = (amount: number, wish: string) => {
     setShowModal(false);
     setStarsCount(prev => prev + 1);
@@ -116,6 +142,7 @@ export default function Index() {
         starsCount={starsCount}
         onWellClick={handleWellClick}
         onRandomStar={handleRandomStar}
+        onFindStar={handleFindStar}
       />
 
       <PageSections
