@@ -137,7 +137,7 @@ export default function PageSections({
               color: "#060810",
             }}
           >
-            Стать Ангелом-партнёром
+            Помочь-Ангелам
           </button>
         </div>
       </section>
