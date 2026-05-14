@@ -131,10 +131,14 @@ export default function PageSections({
             Помоги нам зажечь все 146 745 098 звёзд
           </p>
           <button
+            onClick={() =>
+              (window.location.href = "mailto:zagadai.online@yandex.ru")
+            }
             className="w-full py-3 rounded-full font-golos font-semibold text-sm animate-glow-pulse transition-all"
             style={{
               background: "linear-gradient(135deg, #c9a84c, #8a6a20)",
               color: "#060810",
+              cursor: "pointer",
             }}
           >
             Помочь-Ангелам
