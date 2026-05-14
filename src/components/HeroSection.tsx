@@ -1,7 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
-import { useUser } from "@/context/UserContext"; // Убедитесь, что useUser возвращает и setUser
+import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
+
+const VK_APP_ID = import.meta.env.VITE_VK_APP_ID ?? "";
+
+function openVKAuth() {
+  const redirectUri = encodeURIComponent("https://zagadai.online/vk-callback");
+  window.location.href = `https://oauth.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=&response_type=code&v=5.131`;
+}
 
 type IntroPhase = "line1" | "line2" | "out" | "done";
 
@@ -20,99 +27,13 @@ export default function HeroSection({
   onRandomStar,
   onFindStar,
 }: Props) {
-  // ВАЖНО: Если в вашем useUser нет setUser, замените эту строку на:
-  // const { user, logout } = useUser();
-  // И напишите мне, как вы обновляете пользователя, чтобы я поправил функцию vkidOnSuccess.
-  const { user, logout, setUser } = useUser();
-
+  const { user, logout } = useUser();
   const [showFulfilled, setShowFulfilled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [findValue, setFindValue] = useState("");
   const [findError, setFindError] = useState("");
   const [findLoading, setFindLoading] = useState(false);
-
-  // --- НАЧАЛО БЛОКА АВТОРИЗАЦИИ ---
-
-  // Создаем ссылку на контейнер для кнопки VK
-  const vkButtonContainer = useRef<HTMLDivElement>(null);
-
-  // Этот эффект сработает при монтировании компонента и при изменении user
-  useEffect(() => {
-    // Проверяем, что контейнер существует и пользователь не залогинен
-    if (vkButtonContainer.current && !user) {
-      // Создаем скрипт для загрузки SDK
-      const script = document.createElement("script");
-      script.src = "https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js";
-      script.async = true;
-      script.onload = () => {
-        if ("VKIDSDK" in window) {
-          const VKID = window.VKIDSDK;
-          try {
-            VKID.Config.init({
-              app: 54589468,
-              redirectUrl: "https://zagadai.online/vk-callback",
-              responseMode: VKID.ConfigResponseMode.Callback,
-              source: VKID.ConfigSource.LOWCODE,
-              scope: "",
-            });
-
-            const oneTap = new VKID.OneTap();
-            oneTap.render({
-              container: vkButtonContainer.current,
-              scheme: "dark",
-              showAlternativeLogin: true,
-              oauthList: ["mail_ru", "ok_ru"],
-            });
-
-            oneTap
-              .on(VKID.WidgetEvents.ERROR, vkidOnError)
-              .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
-                const code = payload.code;
-                const deviceId = payload.deviceId;
-                VKID.Auth.exchangeCode(code, deviceId)
-                  .then(vkidOnSuccess)
-                  .catch(vkidOnError);
-              });
-          } catch (error) {
-            console.error("Ошибка инициализации VK ID:", error);
-          }
-        }
-      };
-      document.body.appendChild(script);
-    }
-
-    // Очистка: удаляем скрипт при размонтировании компонента
-    return () => {
-      const existingScript = document.querySelector(
-        'script[src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"]',
-      );
-      if (existingScript) {
-        document.body.removeChild(existingScript);
-      }
-    };
-  }, [user]); // Зависимость от user
-
-  function vkidOnSuccess(data) {
-    console.log("Успешный вход:", data);
-    // ВАЖНО: Обновляем состояние пользователя в контексте
-    if (setUser && data.account) {
-      const vkUser = {
-        id: data.account.id,
-        name: `${data.account.first_name} ${data.account.last_name}`,
-        avatar_url: data.account.photo,
-      };
-      setUser(vkUser); // Это заставит компонент перерендериться и скрыть кнопку входа
-    }
-  }
-
-  function vkidOnError(error) {
-    console.error("Ошибка авторизации:", error);
-    alert("Произошла ошибка при попытке входа через ВК. Попробуйте позже.");
-  }
-
-  // --- КОНЕЦ БЛОКА АВТОРИЗАЦИИ ---
-
   return (
     <>
       {/* Header */}
@@ -189,8 +110,6 @@ export default function HeroSection({
             >
               🔴 Исполненные мечты
             </button>
-
-            {/* БЛОК АВТОРИЗАЦИИ (ДЛЯ ДЕСКТОПА) */}
             {user ? (
               <div className="flex items-center gap-2">
                 <a
@@ -231,8 +150,25 @@ export default function HeroSection({
                 </button>
               </div>
             ) : (
-              // Если пользователя нет - показываем кнопку VK (или её контейнер)
-              <div ref={vkButtonContainer} style={{ height: "38px" }} />
+              <button
+                onClick={openVKAuth}
+                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
+                style={{
+                  border: "1px solid rgba(201,168,76,0.4)",
+                  color: "#c9a84c",
+                  background: "none",
+                  cursor: "pointer",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "rgba(201,168,76,0.1)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <Icon name="LogIn" size={14} />
+                Войти через ВК
+              </button>
             )}
           </nav>
           <button
@@ -258,6 +194,7 @@ export default function HeroSection({
               {starsCount.toLocaleString("ru-RU")}
             </span>
             <span style={{ color: "rgba(200,210,240,0.4)" }}>
+              {" "}
               / 146 745 098
             </span>
           </span>
@@ -293,18 +230,18 @@ export default function HeroSection({
               setMobileMenuOpen(false);
             }}
             style={{
-              backgroundColor: "transparent",
+              background: "none",
               border: "none",
               cursor: "pointer",
-              color: "rgba(255,255,255,.7)",
-              padding: "unset",
-              fontSize: "inherit",
+              color: "rgba(200,210,240,0.7)",
+              textAlign: "left",
+              padding: 0,
+              fontSize: 14,
               fontFamily: "inherit",
             }}
           >
             🔴 Исполненные мечты
           </button>
-          {/* БЛОК АВТОРИЗАЦИИ (ДЛЯ МОБИЛЬНОГО МЕНЮ) */}
           {user ? (
             <div className="flex items-center gap-3">
               <a
@@ -320,10 +257,10 @@ export default function HeroSection({
                     height: 28,
                     borderRadius: "50%",
                     objectFit: "cover",
-                    border: "1px solid rgba(255,179,99,.3)",
+                    border: "1px solid rgba(201,168,76,0.4)",
                   }}
                 />
-                <span style={{ color: "#ffb333", fontSize: "inherit" }}>
+                <span style={{ color: "#c9a84c", fontSize: 13 }}>
                   {user.name.split(" ")[0]}
                 </span>
               </a>
@@ -333,11 +270,11 @@ export default function HeroSection({
                   setMobileMenuOpen(false);
                 }}
                 style={{
-                  backgroundColor: "transparent",
+                  background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "rgba(255,255,255,.4)",
-                  padding: "unset",
+                  color: "rgba(200,210,240,0.4)",
+                  padding: 0,
                 }}
                 title="Выйти"
               >
@@ -345,11 +282,22 @@ export default function HeroSection({
               </button>
             </div>
           ) : (
-            // Если пользователя нет - показываем кнопку VK в мобильном меню
-            <div
-              ref={vkButtonContainer}
-              style={{ height: "auto", minHeight: "38px" }}
-            />
+            <button
+              onClick={() => {
+                openVKAuth();
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
+              style={{
+                border: "1px solid rgba(201,168,76,0.4)",
+                color: "#c9a84c",
+                background: "none",
+                cursor: "pointer",
+              }}
+            >
+              <Icon name="LogIn" size={14} />
+              Войти через ВК
+            </button>
           )}
         </div>
       )}
@@ -358,9 +306,9 @@ export default function HeroSection({
       <main
         className="relative z-10 flex flex-col items-center justify-center px-4 text-center"
         style={{
-          minHeight: "calc(100vh - 88px)",
-          paddingTop: "calc(4rem + env(safe-area-inset-top))",
-          paddingBottom: "calc(4rem + env(safe-area-inset-bottom))",
+          minHeight: "calc(100vh - 80px)",
+          paddingTop: "40px",
+          paddingBottom: "40px",
         }}
       >
         {/* Интро-вспышки */}
@@ -368,34 +316,35 @@ export default function HeroSection({
           <div
             style={{
               position: "absolute",
-              inset:
-                "env(safe-area-inset-top) auto auto env(safe-area-inset-bottom)",
+              inset: 0,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "flex-start",
-              paddingTop: "calc(6vh + env(safe-area-inset-top))",
-              zIndex: 3,
+              paddingTop: "6vh",
+              zIndex: 30,
               pointerEvents: "none",
+              transition: "opacity 1.2s ease",
+              opacity: introPhase === "out" ? 0 : 1,
             }}
           >
             {/* Строка 1 */}
             <div
               style={{
-                transition: "opacity .8s ease-out , transform .8s ease-out",
+                transition: "opacity 0.8s ease, transform 0.8s ease",
                 opacity:
                   introPhase === "line1" ||
                   introPhase === "line2" ||
                   introPhase === "out"
-                    ? "1"
-                    : "none",
+                    ? 1
+                    : 0,
                 transform:
                   introPhase === "line1" ||
                   introPhase === "line2" ||
                   introPhase === "out"
-                    ? "translateY(calc(-5vh - env(safe-area-inset-top)))"
-                    : "translateY(calc(-5vh - env(safe-area-inset-top)) - 3vh)",
-                marginBottom: "calc(1.7rem + env(safe-area-inset-top))",
+                    ? "translateY(0)"
+                    : "translateY(20px)",
+                marginBottom: "1.2rem",
                 textAlign: "center",
               }}
             >
@@ -403,16 +352,16 @@ export default function HeroSection({
                 style={{
                   display: "flex",
                   justifyContent: "center",
-                  marginBottom: "calc(.7rem + env(safe-area-inset-top))",
-                  animation: `starFlashBig .9s ease-out both`,
+                  marginBottom: "0.5rem",
+                  animation: "starFlashBig 1.2s ease-out both",
                 }}
               >
                 <span
                   style={{
-                    fontSize:
-                      "clamp(3rem , calc(3rem + (5 * (1vw - .7rem))) , calc(3rem + (5 * (7vw - .7rem))))",
-                    lineHeight: 0.9,
-                    filter: `drop-shadow(calc(4px + .3vw) calc(4px + .3vw) calc(9px + .7vw) #fffde) drop-shadow(calc(8px + .6vw) calc(8px + .6vw) calc(37px + .7vw) #ffd73d)`,
+                    fontSize: 32,
+                    lineHeight: 1,
+                    filter:
+                      "drop-shadow(0 0 14px #fffde0) drop-shadow(0 0 30px #ffd700)",
                   }}
                 >
                   ✦
@@ -421,13 +370,13 @@ export default function HeroSection({
               <p
                 className="font-cormorant"
                 style={{
-                  fontSize:
-                    "clamp(1.7rem , calc(1.7rem + (5 * (1vw - .7rem))) , calc(1.7rem + (5 * (7vw - .7rem))))",
-                  fontWeight: "var(--font-weight-light)",
-                  color: "#fdeacf",
-                  letterSpacing: "var(--letter-spacing-wider)",
-                  animation: `starFlashBig .9s ease-out both`,
-                  textShadow: `calc(4px + .3vw) calc(4px + .3vw) calc(9px + .7vw) rgba(255 , 255 , 255 , .9) , calc(8px + .6vw) calc(8px + .6vw) calc(37px + .7vw) rgba(255 , 196 , 67 , .7)`,
+                  fontSize: "clamp(1.6rem, 5vw, 3.5rem)",
+                  fontWeight: 300,
+                  color: "#f0e8d0",
+                  letterSpacing: "0.05em",
+                  animation: "starFlashBig 1.0s ease-out both",
+                  textShadow:
+                    "0 0 40px rgba(255,220,80,0.5), 0 0 80px rgba(255,180,30,0.2)",
                 }}
               >
                 Мечтай вслух — тебя услышат
@@ -437,13 +386,12 @@ export default function HeroSection({
             {/* Строка 2 */}
             <div
               style={{
-                transition: `opacity .9s ease-out , transform .9s ease-out`,
-                opacity:
-                  introPhase === "line2" || introPhase === "out" ? "1" : "none",
+                transition: "opacity 1s ease, transform 1s ease",
+                opacity: introPhase === "line2" || introPhase === "out" ? 1 : 0,
                 transform:
                   introPhase === "line2" || introPhase === "out"
-                    ? "translateY(calc(-5vh - env(safe-area-inset-top)))"
-                    : "translateY(calc(-5vh - env(safe-area-inset-top)) - 3vh)",
+                    ? "translateY(0)"
+                    : "translateY(20px)",
                 textAlign: "center",
               }}
             >
@@ -451,35 +399,40 @@ export default function HeroSection({
                 style={{
                   display: "flex",
                   justifyContent: "center",
-                  marginBottom: "calc(.7rem + env(safe-area-inset-top))",
+                  marginBottom: "0.5rem",
+                  animation:
+                    introPhase === "line2"
+                      ? "starFlashBig 1.2s ease-out both"
+                      : "none",
                 }}
               >
                 <span
                   style={{
-                    fontSize:
-                      "clamp(3rem , calc(3rem + (5 * (1vw - .7rem))) , calc(3rem + (5 * (7vw - .7rem))))",
-                    lineHeight: 0.9,
+                    fontSize: 28,
+                    lineHeight: 1,
+                    filter:
+                      "drop-shadow(0 0 12px #fffde0) drop-shadow(0 0 24px #ffd700)",
                     opacity:
-                      introPhase === "line2" || introPhase === "out"
-                        ? "1"
-                        : "none",
-                    transition: `opacity .9s ease-out`,
-                    filter: `drop-shadow(calc(4px + .3vw) calc(4px + .3vw) calc(9px + .7vw) #fffde) drop-shadow(calc(8px + .6vw) calc(8px + .6vw) calc(37px + .7vw) #ffd73d)`,
+                      introPhase === "line2" || introPhase === "out" ? 1 : 0,
+                    transition: "opacity 0.8s ease",
                   }}
                 >
                   ✦
                 </span>
               </div>
-
               <p
                 className="font-cormorant"
                 style={{
-                  fontSize:
-                    "clamp(.9rem , calc(.9rem + (5 * (1vw - .7rem))) , calc(.9rem + (5 * (7vw - .7rem))))",
-                  fontWeight: "var(--font-weight-light)",
+                  fontSize: "clamp(1.2rem, 3.5vw, 2.2rem)",
+                  fontWeight: 300,
                   fontStyle: "italic",
-                  color: "#ffb333",
-                  letterSpacing: "var(--letter-spacing-wider)",
+                  color: "rgba(201,168,76,0.9)",
+                  letterSpacing: "0.04em",
+                  animation:
+                    introPhase === "line2"
+                      ? "starFlashBig 1.0s ease-out both"
+                      : "none",
+                  textShadow: "0 0 30px rgba(255,200,50,0.4)",
                 }}
               >
                 И кто-то твою мечту исполнит
@@ -489,45 +442,43 @@ export default function HeroSection({
         )}
 
         <style>{`
-         @keyframes starFlashBig {
-           from { opacity:.6; transform : scale(.9); filter:brightness(.9); }
-           to   { opacity:.9; transform : scale(1); filter:brightness(.9); }
-         }
-       `}</style>
+          @keyframes starFlashBig {
+            0%   { opacity: 0; transform: scale(0.6); filter: brightness(3); }
+            15%  { opacity: 1; transform: scale(1.12); filter: brightness(2.5); }
+            40%  { transform: scale(1.03); filter: brightness(1.4); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+          }
+        `}</style>
 
         {/* CTA buttons */}
         <div
           className="animate-fade-in flex flex-wrap items-center justify-center gap-3"
           style={{
-            animationDelay: "calc(.8s)",
-            opacity: "none",
+            animationDelay: "1s",
+            opacity: 0,
             position: "absolute",
-            bottom:
-              "calc((env(safe-area-inset-bottom) + env(safe-area-inset-top)) / -4)",
-            left: "env(safe-area-inset-left)",
-            right: "env(safe-area-inset-right)",
+            bottom: "8%",
+            left: 0,
+            right: 0,
           }}
         >
           <button
-            onClick={onWellClick}
             className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-golos font-semibold transition-all"
             style={{
-              background:
-                "linear-gradient(to bottom right , #ffb333 , #ffb333)",
-              color: "#fff",
+              background: "linear-gradient(135deg, #c9a84c, #8a6a20)",
+              color: "#060810",
             }}
+            onClick={onWellClick}
           >
             ✦ Загадать желание
           </button>
-
           <button
             onClick={onRandomStar}
             className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
-            style={{ color: "#fff" }}
+            style={{ color: "rgba(200,210,240,0.75)" }}
           >
             🎲 Случайная звезда
           </button>
-
           <button
             onClick={() => {
               setFindOpen((o) => !o);
@@ -535,7 +486,7 @@ export default function HeroSection({
               setFindError("");
             }}
             className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
-            style={{ color: "#fff" }}
+            style={{ color: "rgba(200,210,240,0.75)" }}
           >
             🔍 Найти звезду
           </button>
@@ -547,12 +498,110 @@ export default function HeroSection({
             className="animate-fade-in"
             style={{
               position: "absolute",
-              bottom:
-                "calc((env(safe-area-inset-bottom) + env(safe-area-inset-top)) / -4 + calc((env(safe-area-inset-bottom) + env(safe-area-inset-top)) / -8))",
-              left: "calc(env(safe-area-inset-left) + env(safe-area-inset-right)) / -4",
-              transform: "translateX(-5%)",
+              bottom: "calc(8% + 56px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 20,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
             }}
-          ></div>
+          >
+            <div
+              className="font-golos"
+              style={{
+                fontSize: 12,
+                color: "rgba(200,210,240,0.45)",
+                letterSpacing: "0.04em",
+              }}
+            >
+              Введите номер от 1 до{" "}
+              <span style={{ color: "#c9a84c" }}>
+                {starsCount > 0 ? starsCount : "..."}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                autoFocus
+                type="number"
+                min={1}
+                max={starsCount || undefined}
+                value={findValue}
+                onChange={(e) => {
+                  setFindValue(e.target.value);
+                  setFindError("");
+                }}
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter" && findValue) {
+                    setFindLoading(true);
+                    const result = await onFindStar(Number(findValue));
+                    setFindLoading(false);
+                    if (result === "ok") {
+                      setFindOpen(false);
+                      setFindValue("");
+                    } else if (result === "out_of_range")
+                      setFindError(`Введите номер от 1 до ${starsCount}`);
+                    else setFindError("Что-то пошло не так");
+                  }
+                }}
+                placeholder="№"
+                style={{
+                  width: 90,
+                  padding: "8px 14px",
+                  borderRadius: 99,
+                  background: "rgba(20,25,40,0.9)",
+                  border: `1px solid ${findError ? "rgba(255,80,80,0.5)" : "rgba(201,168,76,0.3)"}`,
+                  color: "#f0e8d0",
+                  fontFamily: '"Golos Text", sans-serif',
+                  fontSize: 14,
+                  outline: "none",
+                  textAlign: "center",
+                }}
+              />
+              <button
+                disabled={!findValue || findLoading}
+                onClick={async () => {
+                  if (!findValue) return;
+                  setFindLoading(true);
+                  const result = await onFindStar(Number(findValue));
+                  setFindLoading(false);
+                  if (result === "ok") {
+                    setFindOpen(false);
+                    setFindValue("");
+                  } else if (result === "out_of_range")
+                    setFindError(`Введите номер от 1 до ${starsCount}`);
+                  else setFindError("Что-то пошло не так");
+                }}
+                className="font-golos"
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: 99,
+                  fontSize: 13,
+                  background:
+                    findValue && !findLoading
+                      ? "rgba(201,168,76,0.15)"
+                      : "rgba(201,168,76,0.05)",
+                  border: "1px solid rgba(201,168,76,0.3)",
+                  color:
+                    findValue && !findLoading
+                      ? "#c9a84c"
+                      : "rgba(201,168,76,0.35)",
+                  cursor: findValue && !findLoading ? "pointer" : "default",
+                }}
+              >
+                {findLoading ? "..." : "→"}
+              </button>
+            </div>
+            {findError && (
+              <div
+                className="font-golos"
+                style={{ fontSize: 12, color: "rgba(255,100,100,0.85)" }}
+              >
+                {findError}
+              </div>
+            )}
+          </div>
         )}
       </main>
 
