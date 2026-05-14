@@ -3,13 +3,6 @@ import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
 
-const VK_APP_ID = "54589468";
-
-function openVKAuth() {
-  const redirectUri = encodeURIComponent("https://zagadai.online/vk-callback");
-  window.location.href = `https://id.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=&response_type=code&v=5.131`;
-}
-
 type IntroPhase = "line1" | "line2" | "out" | "done";
 
 interface Props {
@@ -150,25 +143,44 @@ export default function HeroSection({
                 </button>
               </div>
             ) : (
-              <button
-                onClick={openVKAuth}
-                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
-                style={{
-                  border: "1px solid rgba(201,168,76,0.4)",
-                  color: "#c9a84c",
-                  background: "none",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(201,168,76,0.1)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                <Icon name="LogIn" size={14} />
-                Войти через ВК
-              </button>
+              <div>
+                <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+                <script type="text/javascript">
+                  {`
+                    if ('VKIDSDK' in window) {
+                      const VKID = window.VKIDSDK;
+                      VKID.Config.init({
+                        app: 54589468,
+                        redirectUrl: 'https://zagadai.online/vk-callback',
+                        responseMode: VKID.ConfigResponseMode.Callback,
+                        source: VKID.ConfigSource.LOWCODE,
+                        scope: '',
+                      });
+                      const oneTap = new VKID.OneTap();
+                      oneTap.render({
+                        container: document.currentScript.parentElement,
+                        scheme: 'dark',
+                        showAlternativeLogin: true,
+                        oauthList: ['mail_ru', 'ok_ru']
+                      })
+                      .on(VKID.WidgetEvents.ERROR, vkidOnError)
+                      .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function (payload) {
+                        const code = payload.code;
+                        const deviceId = payload.device_id;
+                        VKID.Auth.exchangeCode(code, deviceId)
+                          .then(vkidOnSuccess)
+                          .catch(vkidOnError);
+                      });
+                      function vkidOnSuccess(data) {
+                        console.log('Успешный вход:', data);
+                      }
+                      function vkidOnError(error) {
+                        console.error('Ошибка:', error);
+                      }
+                    }
+                  `}
+                </script>
+              </div>
             )}
           </nav>
           <button
@@ -282,22 +294,44 @@ export default function HeroSection({
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => {
-                openVKAuth();
-                setMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
-              style={{
-                border: "1px solid rgba(201,168,76,0.4)",
-                color: "#c9a84c",
-                background: "none",
-                cursor: "pointer",
-              }}
-            >
-              <Icon name="LogIn" size={14} />
-              Войти через ВК
-            </button>
+            <div>
+              <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+              <script type="text/javascript">
+                {`
+                  if ('VKIDSDK' in window) {
+                    const VKID = window.VKIDSDK;
+                    VKID.Config.init({
+                      app: 54589468,
+                      redirectUrl: 'https://zagadai.online/vk-callback',
+                      responseMode: VKID.ConfigResponseMode.Callback,
+                      source: VKID.ConfigSource.LOWCODE,
+                      scope: '',
+                    });
+                    const oneTap = new VKID.OneTap();
+                    oneTap.render({
+                      container: document.currentScript.parentElement,
+                      scheme: 'dark',
+                      showAlternativeLogin: true,
+                      oauthList: ['mail_ru', 'ok_ru']
+                    })
+                    .on(VKID.WidgetEvents.ERROR, vkidOnError)
+                    .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function (payload) {
+                      const code = payload.code;
+                      const deviceId = payload.device_id;
+                      VKID.Auth.exchangeCode(code, deviceId)
+                        .then(vkidOnSuccess)
+                        .catch(vkidOnError);
+                    });
+                    function vkidOnSuccess(data) {
+                      console.log('Успешный вход:', data);
+                    }
+                    function vkidOnError(error) {
+                      console.error('Ошибка:', error);
+                    }
+                  }
+                `}
+              </script>
+            </div>
           )}
         </div>
       )}
