@@ -26,6 +26,7 @@ export default function HeroSection({
 }: Props) {
   const { user, logout } = useUser();
   const [showFulfilled, setShowFulfilled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
     <>
       {/* Header */}
@@ -96,10 +97,47 @@ export default function HeroSection({
             </button>
           )}
         </nav>
-        <button className="md:hidden" style={{ color: 'rgba(200,210,240,0.7)', background: 'none', border: 'none' }}>
-          <Icon name="Menu" size={22} />
+        <button
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(o => !o)}
+          style={{ color: 'rgba(200,210,240,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+          <Icon name={mobileMenuOpen ? "X" : "Menu"} size={22} />
         </button>
       </header>
+
+      {/* Мобильное меню */}
+      {mobileMenuOpen && (
+        <div
+          className="md:hidden relative z-20 flex flex-col gap-4 px-6 py-5 font-golos text-sm"
+          style={{ background: 'rgba(6,8,16,0.97)', borderBottom: '1px solid rgba(201,168,76,0.15)' }}>
+          <a href="/rules" onClick={() => setMobileMenuOpen(false)} style={{ color: 'rgba(200,210,240,0.7)' }}>Правила</a>
+          <a href="/about" onClick={() => setMobileMenuOpen(false)} style={{ color: 'rgba(200,210,240,0.7)' }}>О проекте</a>
+          <button
+            onClick={() => { setShowFulfilled(true); setMobileMenuOpen(false); }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.7)', textAlign: 'left', padding: 0, fontSize: 14, fontFamily: 'inherit' }}>
+            🔴 Исполненные мечты
+          </button>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <a href="/cabinet" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+                <img src={user.avatar_url} alt={user.name} style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(201,168,76,0.4)' }} />
+                <span style={{ color: '#c9a84c', fontSize: 13 }}>{user.name.split(' ')[0]}</span>
+              </a>
+              <button onClick={() => { logout(); setMobileMenuOpen(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.4)', padding: 0 }} title="Выйти">
+                <Icon name="LogOut" size={14} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { openVKAuth(); setMobileMenuOpen(false); }}
+              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
+              style={{ border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c', background: 'none', cursor: 'pointer' }}>
+              <Icon name="LogIn" size={14} />
+              Войти через ВК
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Hero */}
       <main className="relative z-10 flex flex-col items-center justify-center px-4 text-center"
