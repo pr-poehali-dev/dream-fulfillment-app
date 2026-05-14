@@ -1,6 +1,28 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 
+const MobileNav = () => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        className="md:hidden"
+        onClick={() => setOpen(o => !o)}
+        style={{ color: 'rgba(200,210,240,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+        <Icon name={open ? "X" : "Menu"} size={22} />
+      </button>
+      {open && (
+        <div className="md:hidden absolute top-full left-0 right-0 z-20 flex flex-col gap-4 px-6 py-5 font-golos text-sm"
+          style={{ background: 'rgba(6,8,16,0.97)', borderBottom: '1px solid rgba(201,168,76,0.15)' }}>
+          <a href="/rules" onClick={() => setOpen(false)} style={{ color: 'rgba(200,210,240,0.7)' }}>Правила</a>
+          <a href="/about" onClick={() => setOpen(false)} style={{ color: 'rgba(200,210,240,0.7)' }}>О проекте</a>
+          <a href="/contacts" onClick={() => setOpen(false)} style={{ color: 'rgba(200,210,240,0.7)' }}>Контакты</a>
+        </div>
+      )}
+    </>
+  );
+};
+
 const MOCK_WISHES = [
   { id: 1, text: "Купить квартиру в Москве для своей семьи", amount: 500, status: "pending", date: "12 мар 2024", star: "⭐" },
   { id: 2, text: "Поехать в путешествие на Байкал", amount: 100, status: "fulfilled", date: "5 фев 2024", star: "🔴" },
@@ -18,13 +40,24 @@ export default function Cabinet() {
   return (
     <div className="min-h-screen" style={{ background: '#060810' }}>
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-5 md:px-12"
+      <header className="relative flex items-center justify-between px-6 py-5 md:px-12"
         style={{ borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
         <a href="/" className="flex items-center gap-2" style={{ textDecoration: 'none' }}>
           <span style={{ color: '#c9a84c' }}>✦</span>
-          <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>Загадай</span>
+          <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>Загадай.Онлайн</span>
         </a>
-        <span className="font-cormorant text-lg" style={{ color: 'rgba(240,232,208,0.7)' }}>Личный кабинет</span>
+        <nav className="hidden md:flex items-center gap-6 text-sm font-golos">
+          <a href="/rules" className="transition-colors" style={{ color: 'rgba(200,210,240,0.6)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>Правила</a>
+          <a href="/about" className="transition-colors" style={{ color: 'rgba(200,210,240,0.6)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>О проекте</a>
+          <a href="/contacts" className="transition-colors" style={{ color: 'rgba(200,210,240,0.6)' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>Контакты</a>
+        </nav>
+        <MobileNav />
       </header>
 
       <div className="max-w-3xl mx-auto px-4 py-10">

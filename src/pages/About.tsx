@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import PageBackground from "@/components/PageBackground";
+import Icon from "@/components/ui/icon";
 
 export default function About() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#060810' }}>
       <PageBackground stars={[]} />
@@ -21,7 +24,22 @@ export default function About() {
             onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
             onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>Контакты</a>
         </nav>
+        <button
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(o => !o)}
+          style={{ color: 'rgba(200,210,240,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+          <Icon name={mobileMenuOpen ? "X" : "Menu"} size={22} />
+        </button>
       </header>
+
+      {mobileMenuOpen && (
+        <div className="md:hidden relative z-20 flex flex-col gap-4 px-6 py-5 font-golos text-sm"
+          style={{ background: 'rgba(6,8,16,0.97)', borderBottom: '1px solid rgba(201,168,76,0.15)' }}>
+          <a href="/rules" onClick={() => setMobileMenuOpen(false)} style={{ color: 'rgba(200,210,240,0.7)' }}>Правила</a>
+          <a href="/about" onClick={() => setMobileMenuOpen(false)} style={{ color: '#c9a84c' }}>О проекте</a>
+          <a href="/contacts" onClick={() => setMobileMenuOpen(false)} style={{ color: 'rgba(200,210,240,0.7)' }}>Контакты</a>
+        </div>
+      )}
 
       {/* Content */}
       <main className="relative z-10 px-4 py-10 pb-20">
