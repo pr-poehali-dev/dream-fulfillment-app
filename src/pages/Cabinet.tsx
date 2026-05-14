@@ -1,8 +1,5 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
-import * as VKID from "@vkid/sdk";
-
-VKID.Config.init({ app: 54589468 });
 
 const MobileNav = () => {
   const [open, setOpen] = useState(false);
@@ -173,13 +170,8 @@ export default function Cabinet() {
               статистику
             </p>
             <button
-              onClick={() => VKID.Auth.login({ scheme: "dark" })}
               className="inline-flex items-center gap-3 px-8 py-3 rounded-full font-golos font-semibold text-sm transition-all"
-              style={{
-                background: "#0077ff",
-                color: "#fff",
-                cursor: "pointer",
-              }}
+              style={{ background: "#0077ff", color: "#fff" }}
             >
               <Icon name="LogIn" size={16} />
               Войти через ВКонтакте
