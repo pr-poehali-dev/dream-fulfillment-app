@@ -30,79 +30,90 @@ export default function HeroSection({
   return (
     <>
       {/* Header */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-12">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xl" style={{ color: '#c9a84c' }}>✦</span>
-            <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>ЗАГАДАЙ.ОНЛАЙН</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.18)' }}>
-            <span style={{ fontSize: 13 }}>⭐</span>
-            <span className="font-golos text-xs">
-              <span style={{ color: '#c9a84c', fontWeight: 600 }}>{starsCount.toLocaleString('ru-RU')}</span>
-              <span style={{ color: 'rgba(200,210,240,0.35)' }}> / 146 745 098</span>
-            </span>
-          </div>
-        </div>
-        <nav className="hidden md:flex items-center gap-6 text-sm font-golos">
-          <a href="/rules"
-            className="transition-colors"
-            style={{ color: 'rgba(200,210,240,0.6)' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
-            Правила
-          </a>
-          <a href="/about"
-            className="transition-colors"
-            style={{ color: 'rgba(200,210,240,0.6)' }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
-            О проекте
-          </a>
-          <button
-            onClick={() => setShowFulfilled(true)}
-            className="flex items-center gap-1.5 transition-colors font-golos text-sm"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.6)', padding: 0 }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
-            🔴 Исполненные мечты
-          </button>
-          {user ? (
+      <header className="relative z-10 px-6 py-5 md:px-12">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <a href="/cabinet" className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all font-golos"
-                style={{ border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(201,168,76,0.06)' }}>
-                <img
-                  src={user.avatar_url}
-                  alt={user.name}
-                  style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(201,168,76,0.4)' }}
-                />
-                <span style={{ color: '#c9a84c', fontSize: 13 }}>{user.name.split(' ')[0]}</span>
-              </a>
-              <button
-                onClick={logout}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.4)', padding: '4px' }}
-                title="Выйти">
-                <Icon name="LogOut" size={14} />
-              </button>
+              <span className="text-xl" style={{ color: '#c9a84c' }}>✦</span>
+              <span className="font-cormorant text-xl font-medium tracking-widest uppercase" style={{ color: '#c9a84c' }}>ЗАГАДАЙ.ОНЛАЙН</span>
             </div>
-          ) : (
+            <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.18)' }}>
+              <span style={{ fontSize: 13 }}>⭐</span>
+              <span className="font-golos text-xs">
+                <span style={{ color: '#c9a84c', fontWeight: 600 }}>{starsCount.toLocaleString('ru-RU')}</span>
+                <span style={{ color: 'rgba(200,210,240,0.35)' }}> / 146 745 098</span>
+              </span>
+            </div>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm font-golos">
+            <a href="/rules"
+              className="transition-colors"
+              style={{ color: 'rgba(200,210,240,0.6)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
+              Правила
+            </a>
+            <a href="/about"
+              className="transition-colors"
+              style={{ color: 'rgba(200,210,240,0.6)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
+              О проекте
+            </a>
             <button
-              onClick={openVKAuth}
-              className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
-              style={{ border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c', background: 'none', cursor: 'pointer' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.1)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-              <Icon name="LogIn" size={14} />
-              Войти через ВК
+              onClick={() => setShowFulfilled(true)}
+              className="flex items-center gap-1.5 transition-colors font-golos text-sm"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.6)', padding: 0 }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.6)')}>
+              🔴 Исполненные мечты
             </button>
-          )}
-        </nav>
-        <button
-          className="md:hidden"
-          onClick={() => setMobileMenuOpen(o => !o)}
-          style={{ color: 'rgba(200,210,240,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-          <Icon name={mobileMenuOpen ? "X" : "Menu"} size={22} />
-        </button>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <a href="/cabinet" className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all font-golos"
+                  style={{ border: '1px solid rgba(201,168,76,0.25)', background: 'rgba(201,168,76,0.06)' }}>
+                  <img
+                    src={user.avatar_url}
+                    alt={user.name}
+                    style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(201,168,76,0.4)' }}
+                  />
+                  <span style={{ color: '#c9a84c', fontSize: 13 }}>{user.name.split(' ')[0]}</span>
+                </a>
+                <button
+                  onClick={logout}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(200,210,240,0.4)', padding: '4px' }}
+                  title="Выйти">
+                  <Icon name="LogOut" size={14} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openVKAuth}
+                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
+                style={{ border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c', background: 'none', cursor: 'pointer' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(201,168,76,0.1)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                <Icon name="LogIn" size={14} />
+                Войти через ВК
+              </button>
+            )}
+          </nav>
+          <button
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(o => !o)}
+            style={{ color: 'rgba(200,210,240,0.7)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+            <Icon name={mobileMenuOpen ? "X" : "Menu"} size={22} />
+          </button>
+        </div>
+
+        {/* Счётчик звёзд — только мобильные */}
+        <div className="md:hidden mt-2 flex items-center gap-1.5">
+          <span style={{ fontSize: 13 }}>⭐</span>
+          <span className="font-golos text-xs">
+            <span style={{ color: '#c9a84c', fontWeight: 700 }}>{starsCount.toLocaleString('ru-RU')}</span>
+            <span style={{ color: 'rgba(200,210,240,0.4)' }}> / 146 745 098</span>
+          </span>
+        </div>
       </header>
 
       {/* Мобильное меню */}
