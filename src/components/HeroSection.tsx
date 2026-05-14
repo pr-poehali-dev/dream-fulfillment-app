@@ -1,14 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
-
-const VK_APP_ID = import.meta.env.VITE_VK_APP_ID ?? "";
-
-function openVKAuth() {
-  const redirectUri = encodeURIComponent("https://zagadai.online/vk-callback");
-  window.location.href = `https://oauth.vk.com/authorize?client_id=${VK_APP_ID}&display=page&redirect_uri=${redirectUri}&scope=&response_type=code&v=5.131`;
-}
 
 type IntroPhase = "line1" | "line2" | "out" | "done";
 
@@ -27,13 +20,86 @@ export default function HeroSection({
   onRandomStar,
   onFindStar,
 }: Props) {
-  const { user, logout } = useUser();
+  const { user, logout, setUser } = useUser();
+
   const [showFulfilled, setShowFulfilled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const [findValue, setFindValue] = useState("");
   const [findError, setFindError] = useState("");
   const [findLoading, setFindLoading] = useState(false);
+
+  const vkButtonContainer = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (vkButtonContainer.current && !user) {
+      const script = document.createElement("script");
+      script.src = "https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js";
+      script.async = true;
+      script.onload = () => {
+        if ("VKIDSDK" in window) {
+          const VKID = window.VKIDSDK;
+          try {
+            VKID.Config.init({
+              app: 54589468,
+              redirectUrl: "https://zagadai.online/vk-callback",
+              responseMode: VKID.ConfigResponseMode.Callback,
+              source: VKID.ConfigSource.LOWCODE,
+              scope: "",
+            });
+
+            const oneTap = new VKID.OneTap();
+            oneTap.render({
+              container: vkButtonContainer.current,
+              scheme: "dark",
+              showAlternativeLogin: true,
+              oauthList: ["mail_ru", "ok_ru"],
+            });
+
+            oneTap
+              .on(VKID.WidgetEvents.ERROR, vkidOnError)
+              .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
+                const code = payload.code;
+                const deviceId = payload.deviceId;
+                VKID.Auth.exchangeCode(code, deviceId)
+                  .then(vkidOnSuccess)
+                  .catch(vkidOnError);
+              });
+          } catch (error) {
+            console.error("Ошибка инициализации VK ID:", error);
+          }
+        }
+      };
+      document.body.appendChild(script);
+    }
+
+    return () => {
+      const existingScript = document.querySelector(
+        'script[src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"]',
+      );
+      if (existingScript) {
+        document.body.removeChild(existingScript);
+      }
+    };
+  }, [user]);
+
+  function vkidOnSuccess(data) {
+    console.log("Успешный вход:", data);
+    if (setUser && data.account) {
+      const vkUser = {
+        id: data.account.id,
+        name: `${data.account.first_name} ${data.account.last_name}`,
+        avatar_url: data.account.photo,
+      };
+      setUser(vkUser);
+    }
+  }
+
+  function vkidOnError(error) {
+    console.error("Ошибка авторизации:", error);
+    alert("Произошла ошибка при попытке входа через ВК. Попробуйте позже.");
+  }
+
   return (
     <>
       {/* Header */}
@@ -110,6 +176,7 @@ export default function HeroSection({
             >
               🔴 Исполненные мечты
             </button>
+
             {user ? (
               <div className="flex items-center gap-2">
                 <a
@@ -150,25 +217,7 @@ export default function HeroSection({
                 </button>
               </div>
             ) : (
-              <button
-                onClick={openVKAuth}
-                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
-                style={{
-                  border: "1px solid rgba(201,168,76,0.4)",
-                  color: "#c9a84c",
-                  background: "none",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(201,168,76,0.1)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                <Icon name="LogIn" size={14} />
-                Войти через ВК
-              </button>
+              <div ref={vkButtonContainer} style={{ height: "38px" }} />
             )}
           </nav>
           <button
@@ -282,22 +331,10 @@ export default function HeroSection({
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => {
-                openVKAuth();
-                setMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
-              style={{
-                border: "1px solid rgba(201,168,76,0.4)",
-                color: "#c9a84c",
-                background: "none",
-                cursor: "pointer",
-              }}
-            >
-              <Icon name="LogIn" size={14} />
-              Войти через ВК
-            </button>
+            <div
+              ref={vkButtonContainer}
+              style={{ height: "auto", minHeight: "38px" }}
+            />
           )}
         </div>
       )}
