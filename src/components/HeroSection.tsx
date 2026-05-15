@@ -144,26 +144,7 @@ export default function HeroSection({
               </div>
             ) : (
               <button
-                onClick={() =>
-                  (window.location.href =
-                    "https://id.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131")
-                }
-                className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
-                style={{
-                  border: "1px solid rgba(201,168,76,0.4)",
-                  color: "#c9a84c",
-                  background: "none",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(201,168,76,0.1)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                <Icon name="LogIn" size={14} />
-                Войти через ВК
+                <div id="vkAuthContainer"></div>
               </button>
             )}
           </nav>
@@ -279,21 +260,7 @@ export default function HeroSection({
             </div>
           ) : (
             <button
-              onClick={() => {
-                window.location.href =
-                  "https://id.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131";
-                setMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-2 self-start px-4 py-2 rounded-full"
-              style={{
-                border: "1px solid rgba(201,168,76,0.4)",
-                color: "#c9a84c",
-                background: "none",
-                cursor: "pointer",
-              }}
-            >
-              <Icon name="LogIn" size={14} />
-              Войти через ВК
+              <div id="vkAuthContainer"></div>
             </button>
           )}
         </div>
