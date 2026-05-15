@@ -38,7 +38,7 @@ export default function HeroSection({
         .render({
           container: document.getElementById("vkAuthContainer"),
           scheme: "dark",
-          showAlternativeLogin: true,
+          showAlternativeLogin: false,
         })
         .on(VKID.WidgetEvents.ERROR, (error) =>
           console.error("VK ID Error:", error),
