@@ -52,6 +52,25 @@ export default function HeroSection({
         });
     }
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+    if (code && window.VKIDSDK) {
+      const VKID = window.VKIDSDK;
+      VKID.Auth.exchangeCode(code, "device_id")
+        .then((data) => {
+          console.log("Данные пользователя:", data);
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+          );
+        })
+        .catch((error) => console.error("Ошибка обработки кода:", error));
+    }
+  }, []);
   const [showFulfilled, setShowFulfilled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
