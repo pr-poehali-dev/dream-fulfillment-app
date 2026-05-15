@@ -146,7 +146,7 @@ export default function HeroSection({
               <button
                 onClick={() =>
                   (window.location.href =
-                    "https://oauth.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131")
+                    "https://id.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131")
                 }
                 className="flex items-center gap-2 px-4 py-2 rounded-full transition-all font-golos"
                 style={{
@@ -281,7 +281,7 @@ export default function HeroSection({
             <button
               onClick={() => {
                 window.location.href =
-                  "https://oauth.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131";
+                  "https://id.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131";
                 setMobileMenuOpen(false);
               }}
               className="flex items-center gap-2 self-start px-4 py-2 rounded-full"

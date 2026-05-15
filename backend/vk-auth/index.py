@@ -43,7 +43,7 @@ def handler(event: dict, context) -> dict:
         'redirect_uri': redirect_uri,
         'code': code,
     })
-    token_url = f'https://oauth.vk.com/access_token?{params}'
+    token_url = f'https://id.vk.com/access_token?{params}'
     with urllib.request.urlopen(token_url) as resp:
         token_data = json.loads(resp.read())
 
