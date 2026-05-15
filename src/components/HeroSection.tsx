@@ -23,37 +23,19 @@ export default function HeroSection({
   const { user, logout } = useUser();
 
   useEffect(() => {
-  const container = document.getElementById("vkAuthContainer");
-  if (container) {
-    container.innerHTML = '';
-    const btn = document.createElement('button');
-    btn.textContent = 'Войти через ВК';
-    btn.style.cssText = 'border: 1px solid rgba(201,168,76,0.4); color: #c9a84c; background: none; cursor: pointer; padding: 8px 16px; border-radius: 20px; font-family: inherit; font-size: 14px;';
-    btn.onclick = () => {
-      window.location.href = 'https://oauth.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131';
-    };
-    container.appendChild(btn);
-  }
-}, []);
-
-      const oneTap = new VKID.OneTap();
-      oneTap
-        .render({
-          container: document.getElementById("vkAuthContainer"),
-          scheme: "dark",
-          showAlternativeLogin: false,
-        })
-        .on(VKID.WidgetEvents.ERROR, (error) =>
-          console.error("VK ID Error:", error),
-        )
-        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
-          VKID.Auth.exchangeCode(payload.code, payload.device_id)
-            .then((data) => {
-              console.log("Успешный вход:", data);
-            })
-            .catch((error) => console.error("Ошибка обмена кода:", error));
-        });
-    }
+    const containers = document.querySelectorAll("#vkAuthContainer");
+    containers.forEach((container) => {
+      container.innerHTML = "";
+      const btn = document.createElement("button");
+      btn.textContent = "Войти через ВК";
+      btn.style.cssText =
+        "border: 1px solid rgba(201,168,76,0.4); color: #c9a84c; background: none; cursor: pointer; padding: 8px 16px; border-radius: 20px; font-family: inherit; font-size: 14px;";
+      btn.onclick = () => {
+        window.location.href =
+          "https://oauth.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131";
+      };
+      container.appendChild(btn);
+    });
   }, []);
 
   useEffect(() => {
@@ -74,6 +56,7 @@ export default function HeroSection({
         .catch((error) => console.error("Ошибка обработки кода:", error));
     }
   }, []);
+
   const [showFulfilled, setShowFulfilled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
