@@ -68,7 +68,7 @@ export default function HeroCtaButtons({
           className="animate-fade-in"
           style={{
             position: "absolute",
-            bottom: "calc(8% + 80px)",
+            bottom: "calc(8% + 90px)",
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 20,
