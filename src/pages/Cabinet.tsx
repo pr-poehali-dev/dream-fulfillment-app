@@ -139,8 +139,8 @@ export default function Cabinet() {
     <div
       className="min-h-screen"
       style={{
-        background: "rgba(6, 8, 16, 0.5)",
-        backdropFilter: "blur(10px)",
+        background:
+          "linear-gradient(180deg, rgba(6,8,16,0.85) 0%, rgba(6,8,16,0.92) 100%)",
       }}
     >
       {/* Header */}
