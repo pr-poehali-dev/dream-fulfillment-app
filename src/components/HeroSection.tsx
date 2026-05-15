@@ -42,6 +42,15 @@ export default function HeroSection({
           container: document.getElementById("vkAuthContainer"),
           scheme: "dark",
           showAlternativeLogin: false,
+          styles: {
+            button: {
+              background: "rgba(201,168,76,0.1)",
+              border: "1px solid rgba(201,168,76,0.4)",
+            },
+            text: {
+              color: "#c9a84c",
+            },
+          },
         })
         .on(VKID.WidgetEvents.ERROR, (error) =>
           console.error("VK ID Error:", error),
