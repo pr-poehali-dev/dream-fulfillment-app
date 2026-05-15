@@ -49,8 +49,9 @@ export default function HeroSection({
               if (data && data.account) {
                 const vkUser = {
                   id: data.account.id,
+                  vk_id: data.account.id,
                   name: `${data.account.first_name} ${data.account.last_name}`,
-                  avatar_url: data.account.photo,
+                  avatar_url: data.account.photo || "",
                 };
                 login(vkUser);
               }
