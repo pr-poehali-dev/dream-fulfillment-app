@@ -19,59 +19,27 @@ export default function HeroCtaButtons({
   const [findLoading, setFindLoading] = useState(false);
 
   return (
-    <>
-      {/* CTA buttons */}
-      <div
-        className="animate-fade-in flex flex-wrap items-center justify-center gap-3"
-        style={{
-          animationDelay: "1s",
-          opacity: 0,
-          position: "absolute",
-          bottom: "8%",
-          left: 0,
-          right: 0,
-        }}
-      >
-        <button
-          className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-golos font-semibold transition-all"
-          style={{
-            background: "linear-gradient(135deg, #c9a84c, #8a6a20)",
-            color: "#060810",
-          }}
-          onClick={onWellClick}
-        >
-          ✦ Загадать желание
-        </button>
-        <button
-          onClick={onRandomStar}
-          className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
-          style={{ color: "rgba(200,210,240,0.75)" }}
-        >
-          🎲 Случайная звезда
-        </button>
-        <button
-          onClick={() => {
-            setFindOpen((o) => !o);
-            setFindValue("");
-            setFindError("");
-          }}
-          className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
-          style={{ color: "rgba(200,210,240,0.75)" }}
-        >
-          🔍 Найти звезду
-        </button>
-      </div>
-
-      {/* Панель поиска по номеру */}
+    <div
+      className="animate-fade-in"
+      style={{
+        animationDelay: "1s",
+        opacity: 0,
+        position: "absolute",
+        bottom: "8%",
+        left: 0,
+        right: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 12,
+        zIndex: 20,
+      }}
+    >
+      {/* Панель поиска по номеру — всегда над кнопками */}
       {findOpen && (
         <div
           className="animate-fade-in"
           style={{
-            position: "absolute",
-            bottom: "calc(8% + 90px)",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 20,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -173,6 +141,38 @@ export default function HeroCtaButtons({
           )}
         </div>
       )}
-    </>
+
+      {/* CTA кнопки */}
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <button
+          className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-golos font-semibold transition-all"
+          style={{
+            background: "linear-gradient(135deg, #c9a84c, #8a6a20)",
+            color: "#060810",
+          }}
+          onClick={onWellClick}
+        >
+          ✦ Загадать желание
+        </button>
+        <button
+          onClick={onRandomStar}
+          className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
+          style={{ color: "rgba(200,210,240,0.75)" }}
+        >
+          🎲 Случайная звезда
+        </button>
+        <button
+          onClick={() => {
+            setFindOpen((o) => !o);
+            setFindValue("");
+            setFindError("");
+          }}
+          className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
+          style={{ color: "rgba(200,210,240,0.75)" }}
+        >
+          🔍 Найти звезду
+        </button>
+      </div>
+    </div>
   );
 }
