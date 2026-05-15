@@ -21,6 +21,37 @@ export default function HeroSection({
   onFindStar,
 }: Props) {
   const { user, logout } = useUser();
+
+  useEffect(() => {
+    if (window.VKIDSDK) {
+      const VKID = window.VKIDSDK;
+      VKID.Config.init({
+        app: 54589468,
+        redirectUrl: "https://zagadai.online/vk-callback",
+        responseMode: VKID.ConfigResponseMode.Callback,
+        source: VKID.ConfigSource.LOWCODE,
+        scope: "email",
+      });
+
+      const oneTap = new VKID.OneTap();
+      oneTap
+        .render({
+          container: document.getElementById("vkAuthContainer"),
+          scheme: "dark",
+          showAlternativeLogin: true,
+        })
+        .on(VKID.WidgetEvents.ERROR, (error) =>
+          console.error("VK ID Error:", error),
+        )
+        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
+          VKID.Auth.exchangeCode(payload.code, payload.device_id)
+            .then((data) => {
+              console.log("Успешный вход:", data);
+            })
+            .catch((error) => console.error("Ошибка обмена кода:", error));
+        });
+    }
+  }, []);
   const [showFulfilled, setShowFulfilled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
