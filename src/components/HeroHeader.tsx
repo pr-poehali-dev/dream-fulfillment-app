@@ -24,66 +24,135 @@ export default function HeroHeader({
     if (!window.VKIDSDK) return;
     const VKID = window.VKIDSDK;
 
-    // Генерируем PKCE verifier, сохраняем в localStorage — он переживает редирект на vk-callback
     const array = new Uint8Array(48);
     crypto.getRandomValues(array);
     const codeVerifier = btoa(String.fromCharCode(...array))
-      .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
     localStorage.setItem("vk_code_verifier", codeVerifier);
 
-    crypto.subtle.digest("SHA-256", new TextEncoder().encode(codeVerifier)).then((hashBuffer) => {
-      const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)))
-        .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    crypto.subtle
+      .digest("SHA-256", new TextEncoder().encode(codeVerifier))
+      .then((hashBuffer) => {
+        const codeChallenge = btoa(
+          String.fromCharCode(...new Uint8Array(hashBuffer)),
+        )
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=/g, "");
 
-      VKID.Config.init({
-        app: 54589468,
-        redirectUrl: "https://zagadai.online/vk-callback",
-        source: VKID.ConfigSource.LOWCODE,
-        scope: "email",
-        codeChallenge,
-      });
-
-      const oneTap = new VKID.OneTap();
-      oneTap
-        .render({
-          container: document.getElementById("vkAuthContainer"),
-          scheme: "dark",
-          showAlternativeLogin: false,
-          styles: {
-            button: { background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)" },
-            text: { color: "#c9a84c" },
-          },
-        })
-        .on(VKID.WidgetEvents.ERROR, (error: unknown) => console.error("VK ID Error:", error))
-        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload: { code: string; device_id: string; state?: string }) => {
-          const storedVerifier = localStorage.getItem("vk_code_verifier") || "";
-          fetch(vkAuthUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              code: payload.code,
-              device_id: payload.device_id,
-              code_verifier: storedVerifier,
-              state: payload.state,
-              redirect_uri: "https://zagadai.online/vk-callback",
-            }),
-          })
-            .then((r) => r.json())
-            .then((data) => {
-              if (data && data.id) {
-                localStorage.removeItem("vk_code_verifier");
-                login({ id: data.id, vk_id: data.vk_id, name: data.name, avatar_url: data.avatar_url });
-              } else {
-                console.error("VK auth error:", data);
-              }
-            })
-            .catch((e) => console.error("Ошибка авторизации VK:", e));
+        VKID.Config.init({
+          app: 54589468,
+          redirectUrl: "https://zagadai.online/vk-callback",
+          source: VKID.ConfigSource.LOWCODE,
+          scope: "email",
+          codeChallenge,
         });
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        const oneTap = new VKID.OneTap();
+        oneTap
+          .render({
+            container: document.querySelectorAll("#vkAuthContainer")[0],
+            scheme: "dark",
+            showAlternativeLogin: false,
+            styles: {
+              button: {
+                background: "rgba(201,168,76,0.1)",
+                border: "1px solid rgba(201,168,76,0.4)",
+              },
+              text: { color: "#c9a84c" },
+            },
+          })
+          .on(VKID.WidgetEvents.ERROR, (error: unknown) =>
+            console.error("VK ID Error:", error),
+          )
+          .on(
+            VKID.OneTapInternalEvents.LOGIN_SUCCESS,
+            (payload: { code: string; device_id: string; state?: string }) => {
+              const storedVerifier =
+                localStorage.getItem("vk_code_verifier") || "";
+              fetch(vkAuthUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  code: payload.code,
+                  device_id: payload.device_id,
+                  code_verifier: storedVerifier,
+                  state: payload.state,
+                  redirect_uri: "https://zagadai.online/vk-callback",
+                }),
+              })
+                .then((r) => r.json())
+                .then((data) => {
+                  if (data && data.id) {
+                    localStorage.removeItem("vk_code_verifier");
+                    login({
+                      id: data.id,
+                      vk_id: data.vk_id,
+                      name: data.name,
+                      avatar_url: data.avatar_url,
+                    });
+                  } else {
+                    console.error("VK auth error:", data);
+                  }
+                })
+                .catch((e) => console.error("Ошибка авторизации VK:", e));
+            },
+          );
+
+        const oneTapMobile = new VKID.OneTap();
+        oneTapMobile
+          .render({
+            container: document.querySelectorAll("#vkAuthContainer")[1],
+            scheme: "dark",
+            showAlternativeLogin: false,
+            styles: {
+              button: {
+                background: "rgba(201,168,76,0.1)",
+                border: "1px solid rgba(201,168,76,0.4)",
+              },
+              text: { color: "#c9a84c" },
+            },
+          })
+          .on(VKID.WidgetEvents.ERROR, (error: unknown) =>
+            console.error("VK ID Error:", error),
+          )
+          .on(
+            VKID.OneTapInternalEvents.LOGIN_SUCCESS,
+            (payload: { code: string; device_id: string; state?: string }) => {
+              const storedVerifier =
+                localStorage.getItem("vk_code_verifier") || "";
+              fetch(vkAuthUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  code: payload.code,
+                  device_id: payload.device_id,
+                  code_verifier: storedVerifier,
+                  state: payload.state,
+                  redirect_uri: "https://zagadai.online/vk-callback",
+                }),
+              })
+                .then((r) => r.json())
+                .then((data) => {
+                  if (data && data.id) {
+                    localStorage.removeItem("vk_code_verifier");
+                    login({
+                      id: data.id,
+                      vk_id: data.vk_id,
+                      name: data.name,
+                      avatar_url: data.avatar_url,
+                    });
+                  } else {
+                    console.error("VK auth error:", data);
+                  }
+                })
+                .catch((e) => console.error("Ошибка авторизации VK:", e));
+            },
+          );
+      });
   }, []);
-
-
 
   return (
     <>
