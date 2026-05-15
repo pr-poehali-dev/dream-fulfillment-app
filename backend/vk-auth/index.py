@@ -18,59 +18,74 @@ def get_db():
 
 
 def handler(event: dict, context) -> dict:
-    """Авторизация через VK: обмен кода на токен, сохранение пользователя в БД."""
+    """Авторизация через VK ID 2.1: обмен кода на токен, сохранение пользователя в БД."""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 
     body = json.loads(event.get('body') or '{}')
     code = body.get('code')
-    redirect_uri = body.get('redirect_uri')
+    device_id = body.get('device_id', '')
+    redirect_uri = body.get('redirect_uri', 'https://zagadai.online/vk-callback')
 
-    if not code or not redirect_uri:
+    if not code:
         return {
             'statusCode': 400,
             'headers': CORS,
-            'body': json.dumps({'error': 'code and redirect_uri required'}),
+            'body': json.dumps({'error': 'code required'}),
         }
 
     app_id = os.environ['VK_APP_ID']
     app_secret = os.environ['VK_APP_SECRET']
 
-    # Обмен кода на access_token
-    params = urllib.parse.urlencode({
+    # Обмен кода на access_token через VK ID OAuth 2.1
+    token_params = urllib.parse.urlencode({
+        'grant_type': 'authorization_code',
+        'code': code,
+        'device_id': device_id,
         'client_id': app_id,
         'client_secret': app_secret,
         'redirect_uri': redirect_uri,
-        'code': code,
     })
-    token_url = f'https://id.vk.com/access_token?{params}'
-    with urllib.request.urlopen(token_url) as resp:
+    token_url = f'https://id.vk.com/oauth2/auth?{token_params}'
+    req = urllib.request.Request(token_url, method='POST')
+    req.add_header('Content-Length', '0')
+    with urllib.request.urlopen(req) as resp:
         token_data = json.loads(resp.read())
 
     if 'error' in token_data:
         return {
             'statusCode': 400,
             'headers': CORS,
-            'body': json.dumps({'error': token_data.get('error_description', 'vk error')}),
+            'body': json.dumps({'error': token_data.get('error_description', token_data.get('error', 'vk error'))}),
         }
 
-    access_token = token_data['access_token']
-    vk_id = token_data['user_id']
+    access_token = token_data.get('access_token')
+    id_token = token_data.get('id_token', '')
 
-    # Получаем данные пользователя из VK API
-    user_params = urllib.parse.urlencode({
-        'user_ids': vk_id,
-        'fields': 'photo_200',
+    # Получаем данные пользователя через VK ID API
+    user_info_params = urllib.parse.urlencode({
+        'client_id': app_id,
         'access_token': access_token,
-        'v': '5.131',
     })
-    user_url = f'https://api.vk.com/method/users.get?{user_params}'
-    with urllib.request.urlopen(user_url) as resp:
-        user_data = json.loads(resp.read())
+    user_info_url = f'https://id.vk.com/oauth2/user_info?{user_info_params}'
+    req2 = urllib.request.Request(user_info_url, method='POST')
+    req2.add_header('Content-Length', '0')
+    with urllib.request.urlopen(req2) as resp2:
+        user_info = json.loads(resp2.read())
 
-    vk_user = user_data['response'][0]
-    name = f"{vk_user.get('first_name', '')} {vk_user.get('last_name', '')}".strip()
-    avatar_url = vk_user.get('photo_200', '')
+    user = user_info.get('user', {})
+    vk_id = user.get('user_id') or token_data.get('user_id')
+    first_name = user.get('first_name', '')
+    last_name = user.get('last_name', '')
+    name = f"{first_name} {last_name}".strip()
+    avatar_url = user.get('avatar', '')
+
+    if not vk_id:
+        return {
+            'statusCode': 400,
+            'headers': CORS,
+            'body': json.dumps({'error': 'could not get vk user_id'}),
+        }
 
     # Сохраняем / обновляем пользователя в БД
     conn = get_db()
@@ -82,7 +97,7 @@ def handler(event: dict, context) -> dict:
         ON CONFLICT (vk_id) DO UPDATE SET name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url
         RETURNING id
         """,
-        (vk_id, name, avatar_url),
+        (str(vk_id), name, avatar_url),
     )
     user_id = cur.fetchone()[0]
     conn.commit()

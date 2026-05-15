@@ -8,11 +8,38 @@ import { useSound } from "@/hooks/useSound";
 import { getCategory, calcBrightness } from "@/components/WishStar";
 import type { WishItem } from "@/components/WishStar";
 import func2url from "../../backend/func2url.json";
+import { useUser } from "@/context/UserContext";
 
 type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; amount?: number; wish?: string };
 
 export default function Index() {
   const { playCoin, playSplash, playMagic, playStarAppear } = useSound();
+  const { login } = useUser();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const device_id = params.get("device_id");
+    if (!code) return;
+    // Убираем параметры из URL
+    window.history.replaceState({}, "", window.location.pathname);
+    fetch(func2url["vk-auth"], {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code,
+        device_id: device_id || "",
+        redirect_uri: "https://zagadai.online/vk-callback",
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && data.id) {
+          login({ id: data.id, vk_id: data.vk_id, name: data.name, avatar_url: data.avatar_url });
+        }
+      })
+      .catch((e) => console.error("VK auth error:", e));
+  }, []);
   const [showModal, setShowModal] = useState(false);
   const [coinAnim, setCoinAnim] = useState(false);
   const [smokeAnim, setSmokeAnim] = useState(false);

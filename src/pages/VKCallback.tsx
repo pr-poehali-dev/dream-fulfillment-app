@@ -11,6 +11,7 @@ export default function VKCallback() {
 
     const params = new URLSearchParams(window.location.search);
     const code = params.get("code");
+    const device_id = params.get("device_id");
     const error = params.get("error");
 
     if (error || !code) {
@@ -18,8 +19,9 @@ export default function VKCallback() {
       return;
     }
 
-    // Перенаправляем на главную с кодом
-    window.location.href = `/?code=${code}`;
+    // Перенаправляем на главную с кодом и device_id
+    const qs = device_id ? `code=${code}&device_id=${device_id}` : `code=${code}`;
+    window.location.href = `/?${qs}`;
   }, []);
 
   return (

@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import FulfilledModal from "@/components/FulfilledModal";
+import func2url from "../../backend/func2url.json";
+
+const vkAuthUrl = func2url["vk-auth"];
 
 type IntroPhase = "line1" | "line2" | "out" | "done";
 
@@ -44,19 +47,29 @@ export default function HeroSection({
           console.error("VK ID Error:", error),
         )
         .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
-          VKID.Auth.exchangeCode(payload.code, payload.device_id)
+          fetch(vkAuthUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              code: payload.code,
+              device_id: payload.device_id,
+              redirect_uri: "https://zagadai.online/vk-callback",
+            }),
+          })
+            .then((r) => r.json())
             .then((data) => {
-              if (data && data.account) {
-                const vkUser = {
-                  id: data.account.id,
-                  vk_id: data.account.id,
-                  name: `${data.account.first_name} ${data.account.last_name}`,
-                  avatar_url: data.account.photo || "",
-                };
-                login(vkUser);
+              if (data && data.id) {
+                login({
+                  id: data.id,
+                  vk_id: data.vk_id,
+                  name: data.name,
+                  avatar_url: data.avatar_url,
+                });
+              } else {
+                console.error("VK auth error:", data);
               }
             })
-            .catch((error) => console.error("Ошибка обмена кода:", error));
+            .catch((error) => console.error("Ошибка авторизации VK:", error));
         });
     }
   }, []);
