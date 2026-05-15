@@ -20,7 +20,7 @@ export default function HeroSection({
   onRandomStar,
   onFindStar,
 }: Props) {
-  const { user, logout } = useUser();
+  const { user, logout, login } = useUser();
 
   useEffect(() => {
     if (window.VKIDSDK) {
@@ -46,7 +46,14 @@ export default function HeroSection({
         .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
           VKID.Auth.exchangeCode(payload.code, payload.device_id)
             .then((data) => {
-              console.log("Успешный вход:", data);
+              if (data && data.account) {
+                const vkUser = {
+                  id: data.account.id,
+                  name: `${data.account.first_name} ${data.account.last_name}`,
+                  avatar_url: data.account.photo,
+                };
+                login(vkUser);
+              }
             })
             .catch((error) => console.error("Ошибка обмена кода:", error));
         });
