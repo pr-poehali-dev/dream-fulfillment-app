@@ -20,6 +20,41 @@ export default function HeroHeader({
 }: Props) {
   const { user, logout, login } = useUser();
 
+  const handleMobileVkLogin = () => {
+    if (!window.VKIDSDK) return;
+    const VKID = window.VKIDSDK;
+    const array = new Uint8Array(48);
+    crypto.getRandomValues(array);
+    const codeVerifier = btoa(String.fromCharCode(...array))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+    localStorage.setItem("vk_code_verifier", codeVerifier);
+
+    crypto.subtle
+      .digest("SHA-256", new TextEncoder().encode(codeVerifier))
+      .then((hashBuffer) => {
+        const codeChallenge = btoa(
+          String.fromCharCode(...new Uint8Array(hashBuffer)),
+        )
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=/g, "");
+
+        const state = Math.random().toString(36).slice(2);
+        const params = new URLSearchParams({
+          response_type: "code",
+          client_id: "54589468",
+          redirect_uri: "https://zagadai.online/vk-callback",
+          scope: "email",
+          code_challenge: codeChallenge,
+          code_challenge_method: "S256",
+          state,
+        });
+        window.location.href = `https://id.vk.com/authorize?${params.toString()}`;
+      });
+  };
+
   useEffect(() => {
     if (!window.VKIDSDK) return;
     const VKID = window.VKIDSDK;
@@ -335,7 +370,23 @@ export default function HeroHeader({
               </button>
             </div>
           ) : (
-            <div id="vkAuthContainer"></div>
+            <button
+              onClick={handleMobileVkLogin}
+              style={{
+                background: "rgba(201,168,76,0.1)",
+                border: "1px solid rgba(201,168,76,0.4)",
+                borderRadius: 8,
+                cursor: "pointer",
+                color: "#c9a84c",
+                padding: "10px 16px",
+                fontSize: 14,
+                fontFamily: "inherit",
+                width: "100%",
+                textAlign: "center",
+              }}
+            >
+              Войти через ВКонтакте
+            </button>
           )}
         </div>
       )}
