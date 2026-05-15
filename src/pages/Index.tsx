@@ -10,7 +10,16 @@ import type { WishItem } from "@/components/WishStar";
 import func2url from "../../backend/func2url.json";
 import { useUser } from "@/context/UserContext";
 
-type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; amount?: number; wish?: string };
+type Star = {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  delay: number;
+  lit: boolean;
+  amount?: number;
+  wish?: string;
+};
 
 export default function Index() {
   const { playCoin, playSplash, playMagic, playStarAppear } = useSound();
@@ -21,8 +30,22 @@ export default function Index() {
     const code = params.get("code");
     const device_id = params.get("device_id");
     if (!code) return;
-    // Убираем параметры из URL
+
+    // Дебаг-окно
+    const debugDiv = document.createElement("div");
+    debugDiv.style.cssText =
+      "position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;z-index:9999;padding:20px;font-size:14px;max-height:50vh;overflow:auto;";
+    debugDiv.innerHTML = "<b>Отладка авторизации VK</b><br>";
+    document.body.appendChild(debugDiv);
+    const log = (msg: string) => {
+      debugDiv.innerHTML += msg + "<br>";
+    };
+
+    log("code: " + (code ? "есть" : "нет"));
+    log("device_id: " + (device_id ? "есть" : "нет"));
+
     window.history.replaceState({}, "", window.location.pathname);
+
     fetch(func2url["vk-auth"], {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -34,18 +57,32 @@ export default function Index() {
     })
       .then((r) => r.json())
       .then((data) => {
+        log("Ответ бэкенда: " + JSON.stringify(data));
         if (data && data.id) {
-          login({ id: data.id, vk_id: data.vk_id, name: data.name, avatar_url: data.avatar_url });
+          log("Успех! Сохраняю пользователя...");
+          login({
+            id: data.id,
+            vk_id: data.vk_id,
+            name: data.name,
+            avatar_url: data.avatar_url,
+          });
+        } else {
+          log("ОШИБКА: нет id в ответе");
         }
       })
-      .catch((e) => console.error("VK auth error:", e));
+      .catch((e) => {
+        log("ОШИБКА: " + e.message);
+      });
   }, []);
+
   const [showModal, setShowModal] = useState(false);
   const [coinAnim, setCoinAnim] = useState(false);
   const [smokeAnim, setSmokeAnim] = useState(false);
   const [rippleAnim, setRippleAnim] = useState(false);
   const [stars, setStars] = useState<Star[]>([]);
-  const [introPhase, setIntroPhase] = useState<'line1' | 'line2' | 'out' | 'done'>('line1');
+  const [introPhase, setIntroPhase] = useState<
+    "line1" | "line2" | "out" | "done"
+  >("line1");
   const [starsCount, setStarsCount] = useState(0);
   const [copilkaAmount] = useState(0);
   const [angelsCount] = useState(0);
@@ -55,10 +92,14 @@ export default function Index() {
 
   useEffect(() => {
     setStars([]);
-    const t1 = setTimeout(() => setIntroPhase('line2'), 2500);
-    const t2 = setTimeout(() => setIntroPhase('out'), 5000);
-    const t3 = setTimeout(() => setIntroPhase('done'), 6200);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    const t1 = setTimeout(() => setIntroPhase("line2"), 2500);
+    const t2 = setTimeout(() => setIntroPhase("out"), 5000);
+    const t3 = setTimeout(() => setIntroPhase("done"), 6200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, []);
 
   const handleWellClick = () => {
@@ -85,10 +126,10 @@ export default function Index() {
     if (randomLoading) return;
     setRandomLoading(true);
     try {
-      const excludeParam = randomWish ? `?exclude=${randomWish.id}` : '';
-      const res = await fetch(`${func2url['get-random-wish']}${excludeParam}`);
+      const excludeParam = randomWish ? `?exclude=${randomWish.id}` : "";
+      const res = await fetch(`${func2url["get-random-wish"]}${excludeParam}`);
       const raw = await res.json();
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
       const brightness = calcBrightness(parsed.amount, 10, 1000);
       const category = getCategory(Math.max(0.1, brightness));
       setRandomWish({
@@ -109,13 +150,18 @@ export default function Index() {
     }
   };
 
-  const handleFindStar = async (number: number): Promise<'ok' | 'out_of_range' | 'error'> => {
+  const handleFindStar = async (
+    number: number,
+  ): Promise<"ok" | "out_of_range" | "error"> => {
     try {
-      const res = await fetch(`${func2url['get-wish-by-number']}?number=${number}`);
+      const res = await fetch(
+        `${func2url["get-wish-by-number"]}?number=${number}`,
+      );
       const raw = await res.json();
-      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-      if (res.status === 404 || parsed.error === 'out_of_range') return 'out_of_range';
-      if (!res.ok) return 'error';
+      const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (res.status === 404 || parsed.error === "out_of_range")
+        return "out_of_range";
+      if (!res.ok) return "error";
       const brightness = calcBrightness(parsed.amount, 10, 1000);
       const category = getCategory(Math.max(0.1, brightness));
       setRandomWish({
@@ -129,17 +175,26 @@ export default function Index() {
         brightness,
         category,
       });
-      return 'ok';
+      return "ok";
     } catch {
-      return 'error';
+      return "error";
     }
   };
 
   const handleWishSent = (amount: number, wish: string) => {
     setShowModal(false);
-    setStarsCount(prev => prev + 1);
+    setStarsCount((prev) => prev + 1);
     setTimeout(() => playStarAppear(), 300);
-    const baseSize = amount >= 1000 ? 3.5 : amount >= 500 ? 2.8 : amount >= 100 ? 2.2 : amount >= 50 ? 1.8 : 1.3;
+    const baseSize =
+      amount >= 1000
+        ? 3.5
+        : amount >= 500
+          ? 2.8
+          : amount >= 100
+            ? 2.2
+            : amount >= 50
+              ? 1.8
+              : 1.3;
     const newStar: Star = {
       id: Date.now(),
       x: 5 + Math.random() * 85,
@@ -150,18 +205,22 @@ export default function Index() {
       amount,
       wish,
     };
-    setStars(prev => {
-      const updated = prev.map(s => ({ ...s, isNew: false }));
+    setStars((prev) => {
+      const updated = prev.map((s) => ({ ...s, isNew: false }));
       return [...updated, { ...newStar, isNew: true }];
     });
     setTimeout(() => {
-      setStars(prev => prev.map(s => s.id === newStar.id ? { ...s, isNew: false } : s));
+      setStars((prev) =>
+        prev.map((s) => (s.id === newStar.id ? { ...s, isNew: false } : s)),
+      );
     }, 3000);
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: '#060810' }}>
-
+    <div
+      className="relative min-h-screen overflow-x-hidden"
+      style={{ background: "#060810" }}
+    >
       <PageBackground stars={stars} />
 
       <HeroSection
@@ -180,7 +239,10 @@ export default function Index() {
       />
 
       {showModal && (
-        <WishModal onClose={() => setShowModal(false)} onSent={handleWishSent} />
+        <WishModal
+          onClose={() => setShowModal(false)}
+          onSent={handleWishSent}
+        />
       )}
 
       {randomWish && (
@@ -188,20 +250,28 @@ export default function Index() {
       )}
 
       {randomLoading && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 200,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          pointerEvents: 'none',
-        }}>
-          <div style={{
-            padding: '14px 24px',
-            background: 'rgba(6,8,22,0.9)',
-            border: '1px solid rgba(201,168,76,0.3)',
-            borderRadius: 99,
-            color: '#c9a84c',
-            fontFamily: '"Golos Text", sans-serif',
-            fontSize: 14,
-          }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 200,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              padding: "14px 24px",
+              background: "rgba(6,8,22,0.9)",
+              border: "1px solid rgba(201,168,76,0.3)",
+              borderRadius: 99,
+              color: "#c9a84c",
+              fontFamily: '"Golos Text", sans-serif',
+              fontSize: 14,
+            }}
+          >
             ✦ Ищем звезду...
           </div>
         </div>
