@@ -83,11 +83,19 @@ def handler(event: dict, context) -> dict:
         user_info = json.loads(resp2.read())
 
     user = user_info.get('user', {})
+    print("VK user_info:", json.dumps(user_info))
     vk_id = user.get('user_id') or token_data.get('user_id')
     first_name = user.get('first_name', '')
     last_name = user.get('last_name', '')
     name = f"{first_name} {last_name}".strip()
-    avatar_url = user.get('avatar', '')
+    # VK ID API может вернуть avatar, photo_200, photo_100, photo_50
+    avatar_url = (
+        user.get('avatar') or
+        user.get('photo_200') or
+        user.get('photo_100') or
+        user.get('photo_50') or
+        ''
+    )
 
     if not vk_id:
         return {
