@@ -71,14 +71,13 @@ def handler(event: dict, context) -> dict:
     access_token = token_data.get('access_token')
     id_token = token_data.get('id_token', '')
 
-    # Получаем данные пользователя через VK ID API
-    user_info_params = urllib.parse.urlencode({
+    # Получаем данные пользователя через VK ID API (токен в теле POST)
+    user_info_body = urllib.parse.urlencode({
         'client_id': app_id,
         'access_token': access_token,
-    })
-    user_info_url = f'https://id.vk.com/oauth2/user_info?{user_info_params}'
-    req2 = urllib.request.Request(user_info_url, method='POST')
-    req2.add_header('Content-Length', '0')
+    }).encode()
+    req2 = urllib.request.Request('https://id.vk.com/oauth2/user_info', data=user_info_body, method='POST')
+    req2.add_header('Content-Type', 'application/x-www-form-urlencoded')
     with urllib.request.urlopen(req2) as resp2:
         user_info = json.loads(resp2.read())
 
