@@ -19,22 +19,81 @@ MOCK_WISHES = [
 ]
 
 
-def handler(event: dict, context) -> dict:
-    """Возвращает случайное активное желание из БД (или моки если БД пустая)"""
+def get_cabinet_data(user_id: str, schema: str, db_url: str) -> dict:
+    """Данные личного кабинета пользователя."""
+    import psycopg2
+    conn = psycopg2.connect(db_url)
+    cur = conn.cursor()
 
+    cur.execute(f"""
+        SELECT id, wish, amount, status, created_at, fulfilled_at
+        FROM {schema}.stars
+        WHERE user_id = %s
+        ORDER BY created_at DESC
+    """, (user_id,))
+    wishes = []
+    for row in cur.fetchall():
+        star_id, wish, amount, status, created_at, fulfilled_at = row
+        wishes.append({
+            'id': star_id,
+            'wish': wish,
+            'amount': float(amount),
+            'status': status,
+            'created_at': created_at.isoformat() if created_at else None,
+            'fulfilled_at': fulfilled_at.isoformat() if fulfilled_at else None,
+        })
+
+    cur.execute(f"SELECT COUNT(*) FROM {schema}.stars WHERE user_id = %s AND status = 'fulfilled'", (user_id,))
+    fulfilled_count = int(cur.fetchone()[0])
+
+    cur.execute(f"""
+        SELECT COUNT(DISTINCT t.star_id)
+        FROM {schema}.transactions t
+        JOIN {schema}.stars s ON s.id = t.star_id
+        WHERE t.user_id = %s AND s.user_id != %s AND t.status = 'completed'
+    """, (user_id, user_id))
+    altruist_count = int(cur.fetchone()[0])
+
+    cur.execute(f"SELECT COALESCE(SUM(amount), 0) FROM {schema}.stars WHERE user_id = %s", (user_id,))
+    total_donated = float(cur.fetchone()[0])
+
+    cur.close()
+    conn.close()
+
+    return {
+        'wishes': wishes,
+        'fulfilled_count': fulfilled_count,
+        'altruist_count': altruist_count,
+        'total_donated': total_donated,
+    }
+
+
+def handler(event: dict, context) -> dict:
+    """Возвращает случайное желание (GET /) или данные кабинета (GET /?action=cabinet&user_id=N)."""
     if event.get("httpMethod") == "OPTIONS":
         return {"statusCode": 200, "headers": CORS_HEADERS, "body": ""}
 
-    exclude_id = None
     params = event.get("queryStringParameters") or {}
+    db_url = os.environ.get("DATABASE_URL")
+    schema = os.environ.get("MAIN_DB_SCHEMA", "public")
+
+    # Режим кабинета
+    if params.get("action") == "cabinet":
+        user_id = params.get("user_id")
+        if not user_id:
+            return {"statusCode": 400, "headers": CORS_HEADERS, "body": json.dumps({"error": "user_id required"})}
+        if not db_url:
+            return {"statusCode": 503, "headers": CORS_HEADERS, "body": json.dumps({"error": "db unavailable"})}
+        data = get_cabinet_data(user_id, schema, db_url)
+        return {"statusCode": 200, "headers": CORS_HEADERS, "body": json.dumps(data)}
+
+    # Режим случайного желания
+    exclude_id = None
     if params.get("exclude"):
         try:
             exclude_id = int(params["exclude"])
         except Exception:
             pass
-
-    db_url = os.environ.get("DATABASE_URL")
-    schema = os.environ.get("MAIN_DB_SCHEMA", "public")
 
     if db_url:
         try:
