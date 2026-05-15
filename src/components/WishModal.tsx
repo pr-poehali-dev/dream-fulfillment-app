@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import { useUser } from "@/context/UserContext";
+import func2url from "../../backend/func2url.json";
 
 interface Props {
   onClose: () => void;
-  onSent: (amount: number, wish: string) => void;
+  onSent: (amount: number, wish: string, x?: number, y?: number) => void;
 }
 
 function getStarTier(amount: number) {
@@ -17,11 +19,13 @@ function getStarTier(amount: number) {
 const QUICK_AMOUNTS = [10, 50, 100, 500, 1000];
 
 export default function WishModal({ onClose, onSent }: Props) {
+  const { user } = useUser();
   const [wish, setWish] = useState("");
   const [story, setStory] = useState("");
   const [amount, setAmount] = useState<number | "">(100);
   const [amountInput, setAmountInput] = useState("100");
   const [step, setStep] = useState<"form" | "vk" | "done">("form");
+  const [saving, setSaving] = useState(false);
 
   const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);
@@ -43,9 +47,36 @@ export default function WishModal({ onClose, onSent }: Props) {
     setStep("vk");
   };
 
-  const handleVkPost = () => {
+  const handleVkPost = async () => {
+    setSaving(true);
+    let starX: number | undefined;
+    let starY: number | undefined;
+    let starId: number | undefined;
+    if (user) {
+      try {
+        const res = await fetch(func2url["save-wish"], {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: user.id,
+            wish,
+            story,
+            amount: numAmount,
+          }),
+        });
+        const data = await res.json();
+        if (data.id) {
+          starId = data.id;
+          starX = data.x;
+          starY = data.y;
+        }
+      } catch {
+        // продолжаем даже при ошибке
+      }
+    }
+    setSaving(false);
     setStep("done");
-    setTimeout(() => onSent(numAmount, wish), 1500);
+    setTimeout(() => onSent(numAmount, wish, starX, starY), 1500);
   };
 
   return (
@@ -231,9 +262,10 @@ export default function WishModal({ onClose, onSent }: Props) {
             </div>
             <button
               onClick={handleVkPost}
+              disabled={saving}
               className="w-full py-3 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
-              style={{ background: '#0077ff', color: '#fff' }}>
-              Опубликовать во ВКонтакте
+              style={{ background: saving ? 'rgba(0,119,255,0.5)' : '#0077ff', color: '#fff', cursor: saving ? 'default' : 'pointer' }}>
+              {saving ? 'Сохраняем...' : 'Опубликовать во ВКонтакте'}
             </button>
             <p className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.3)' }}>
               После публикации твоя звезда появится на небосводе

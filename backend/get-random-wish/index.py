@@ -43,7 +43,7 @@ def handler(event: dict, context) -> dict:
             cur = conn.cursor()
             exclude_clause = f"AND s.id != {exclude_id}" if exclude_id else ""
             cur.execute(f"""
-                SELECT s.id, s.wish, s.amount, s.x, s.y, u.first_name, u.last_name, u.avatar_url
+                SELECT s.id, s.wish, s.amount, s.x, s.y, u.name, u.avatar_url
                 FROM {schema}.stars s
                 JOIN {schema}.users u ON u.id = s.user_id
                 WHERE s.status = 'active' {exclude_clause}
@@ -53,8 +53,7 @@ def handler(event: dict, context) -> dict:
             cur.close()
             conn.close()
             if row:
-                star_id, wish, amount, x, y, first_name, last_name, avatar_url = row
-                name = f"{first_name} {last_name[0]}." if last_name else first_name
+                star_id, wish, amount, x, y, name, avatar_url = row
                 return {
                     "statusCode": 200,
                     "headers": CORS_HEADERS,

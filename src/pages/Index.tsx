@@ -95,6 +95,16 @@ export default function Index() {
     const t1 = setTimeout(() => setIntroPhase("line2"), 2500);
     const t2 = setTimeout(() => setIntroPhase("out"), 5000);
     const t3 = setTimeout(() => setIntroPhase("done"), 6200);
+
+    // Загружаем реальный счётчик из БД
+    fetch(func2url["get-wish-by-number"])
+      .then((r) => r.json())
+      .then((data) => {
+        const parsed = typeof data === "string" ? JSON.parse(data) : data;
+        if (parsed.total !== undefined) setStarsCount(parsed.total);
+      })
+      .catch(() => {});
+
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -181,7 +191,7 @@ export default function Index() {
     }
   };
 
-  const handleWishSent = (amount: number, wish: string) => {
+  const handleWishSent = (amount: number, wish: string, starX?: number, starY?: number) => {
     setShowModal(false);
     setStarsCount((prev) => prev + 1);
     setTimeout(() => playStarAppear(), 300);
@@ -197,8 +207,8 @@ export default function Index() {
               : 1.3;
     const newStar: Star = {
       id: Date.now(),
-      x: 5 + Math.random() * 85,
-      y: 2 + Math.random() * 45,
+      x: starX ?? (5 + Math.random() * 85),
+      y: starY ?? (2 + Math.random() * 45),
       size: baseSize + Math.random() * 0.5,
       delay: Math.random() * 3,
       lit: true,
