@@ -8,7 +8,6 @@ import { useSound } from "@/hooks/useSound";
 import { getCategory, calcBrightness } from "@/components/WishStar";
 import type { WishItem } from "@/components/WishStar";
 import func2url from "../../backend/func2url.json";
-import { useUser } from "@/context/UserContext";
 
 type Star = {
   id: number;
@@ -23,57 +22,6 @@ type Star = {
 
 export default function Index() {
   const { playCoin, playSplash, playMagic, playStarAppear } = useSound();
-  const { login } = useUser();
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const device_id = params.get("device_id");
-    if (!code) return;
-
-    // Дебаг-окно
-    const debugDiv = document.createElement("div");
-    debugDiv.style.cssText =
-      "position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;z-index:9999;padding:20px;font-size:14px;max-height:50vh;overflow:auto;";
-    debugDiv.innerHTML = "<b>Отладка авторизации VK</b><br>";
-    document.body.appendChild(debugDiv);
-    const log = (msg: string) => {
-      debugDiv.innerHTML += msg + "<br>";
-    };
-
-    log("code: " + (code ? "есть" : "нет"));
-    log("device_id: " + (device_id ? "есть" : "нет"));
-
-    window.history.replaceState({}, "", window.location.pathname);
-
-    fetch(func2url["vk-auth"], {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        code,
-        device_id: device_id || "",
-        redirect_uri: "https://zagadai.online/vk-callback",
-      }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        log("Ответ бэкенда: " + JSON.stringify(data));
-        if (data && data.id) {
-          log("Успех! Сохраняю пользователя...");
-          login({
-            id: data.id,
-            vk_id: data.vk_id,
-            name: data.name,
-            avatar_url: data.avatar_url,
-          });
-        } else {
-          log("ОШИБКА: нет id в ответе");
-        }
-      })
-      .catch((e) => {
-        log("ОШИБКА: " + e.message);
-      });
-  }, []);
 
   const [showModal, setShowModal] = useState(false);
   const [coinAnim, setCoinAnim] = useState(false);
