@@ -50,12 +50,15 @@ export default function HeroHeader({
           console.error("VK ID Error:", error),
         )
         .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, (payload) => {
+          console.log("VK LOGIN_SUCCESS payload:", JSON.stringify(payload));
           fetch(vkAuthUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               code: payload.code,
               device_id: payload.device_id,
+              code_verifier: payload.code_verifier,
+              state: payload.state,
               redirect_uri: "https://zagadai.online/vk-callback",
             }),
           })

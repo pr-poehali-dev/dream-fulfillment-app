@@ -25,6 +25,8 @@ def handler(event: dict, context) -> dict:
     body = json.loads(event.get('body') or '{}')
     code = body.get('code')
     device_id = body.get('device_id', '')
+    code_verifier = body.get('code_verifier', '')
+    state = body.get('state', '')
     redirect_uri = body.get('redirect_uri', 'https://zagadai.online/vk-callback')
 
     if not code:
@@ -38,18 +40,26 @@ def handler(event: dict, context) -> dict:
     app_secret = os.environ['VK_APP_SECRET']
 
     # Обмен кода на access_token через VK ID OAuth 2.1
-    token_body = urllib.parse.urlencode({
+    token_params = {
         'grant_type': 'authorization_code',
         'code': code,
         'device_id': device_id,
         'client_id': app_id,
         'client_secret': app_secret,
         'redirect_uri': redirect_uri,
-    }).encode()
+    }
+    if code_verifier:
+        token_params['code_verifier'] = code_verifier
+    if state:
+        token_params['state'] = state
+
+    token_body = urllib.parse.urlencode(token_params).encode()
     req = urllib.request.Request('https://id.vk.com/oauth2/auth', data=token_body, method='POST')
     req.add_header('Content-Type', 'application/x-www-form-urlencoded')
     with urllib.request.urlopen(req) as resp:
         token_data = json.loads(resp.read())
+
+    print("VK token_data:", json.dumps(token_data))
 
     if 'error' in token_data:
         return {
