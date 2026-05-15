@@ -50,7 +50,7 @@ export default function HeroCtaButtons({
             className="font-golos"
             style={{
               fontSize: 12,
-              color: "rgba(200,210,240,0.45)",
+              color: "rgba(200,210,240,0.85)",
               letterSpacing: "0.04em",
             }}
           >
