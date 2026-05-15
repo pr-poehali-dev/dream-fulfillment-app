@@ -143,9 +143,7 @@ export default function HeroSection({
                 </button>
               </div>
             ) : (
-              <button
-                <div id="vkAuthContainer"></div>
-              </button>
+              <div id="vkAuthContainer"></div>
             )}
           </nav>
           <button
@@ -259,9 +257,7 @@ export default function HeroSection({
               </button>
             </div>
           ) : (
-            <button
-              <div id="vkAuthContainer"></div>
-            </button>
+            <div id="vkAuthContainer"></div>
           )}
         </div>
       )}
