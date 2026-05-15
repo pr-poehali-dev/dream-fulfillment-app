@@ -53,7 +53,7 @@ export default function HeroHeader({
         const oneTap = new VKID.OneTap();
         oneTap
           .render({
-            container: document.querySelectorAll("#vkAuthContainer")[0],
+            container: document.getElementById("vkAuthDesktop"),
             scheme: "dark",
             showAlternativeLogin: false,
             styles: {
@@ -104,7 +104,7 @@ export default function HeroHeader({
         const oneTapMobile = new VKID.OneTap();
         oneTapMobile
           .render({
-            container: document.querySelectorAll("#vkAuthContainer")[1],
+            container: document.getElementById("vkAuthMobile"),
             scheme: "dark",
             showAlternativeLogin: false,
             styles: {
@@ -270,7 +270,7 @@ export default function HeroHeader({
                 </button>
               </div>
             ) : (
-              <div id="vkAuthContainer"></div>
+              <div id="vkAuthDesktop"></div>
             )}
           </nav>
           <button
@@ -384,7 +384,7 @@ export default function HeroHeader({
               </button>
             </div>
           ) : (
-            <div id="vkAuthContainer"></div>
+            <div id="vkAuthMobile"></div>
           )}
         </div>
       )}
