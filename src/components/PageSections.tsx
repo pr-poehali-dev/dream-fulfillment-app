@@ -217,15 +217,17 @@ export default function PageSections({
           ))}
         </div>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
-          {[ "ИП ХАБИБУЛЛИН РР" "ИНН 027411103939", "ОГРН 317028000155545"].map((r) => (
-            <span
-              key={r}
-              className="font-golos text-xs"
-              style={{ color: "#ffffff" }}
-            >
-              {r}
-            </span>
-          ))}
+          {["ИП ХАБИБУЛЛИН РР", "ИНН 027411103939", "ОГРН 317028000155545"].map(
+            (r) => (
+              <span
+                key={r}
+                className="font-golos text-xs"
+                style={{ color: "#ffffff" }}
+              >
+                {r}
+              </span>
+            ),
+          )}
           <a
             href="mailto:zagadai.online@yandex.ru"
             className="font-golos text-xs"
