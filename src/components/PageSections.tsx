@@ -192,6 +192,27 @@ export default function PageSections({
         </div>
       </section>
 
+      {/* SEO текст */}
+      <section className="relative z-10 py-10 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1
+            className="font-cormorant text-3xl mb-4"
+            style={{ color: "#c9a84c" }}
+          >
+            Загадай желание в Колодце Желаний
+          </h1>
+          <p
+            className="font-golos text-sm leading-relaxed"
+            style={{ color: "rgba(200,210,240,0.5)" }}
+          >
+            «Загадай Онлайн» — это платформа, где каждый может загадать желание
+            онлайн, бросить виртуальную монетку в Колодец Желаний и зажечь свою
+            звезду на небе. Присоединяйтесь к сообществу мечтателей, чтобы ваше
+            желание было услышано и исполнено.
+          </p>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer
         className="relative z-10 py-8 px-4 text-center mt-4"
