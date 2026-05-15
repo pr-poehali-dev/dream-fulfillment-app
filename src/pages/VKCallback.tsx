@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function VKCallback() {
   const navigate = useNavigate();
   const called = useRef(false);
-  const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
     if (called.current) return;
@@ -15,47 +14,31 @@ export default function VKCallback() {
     const device_id = params.get("device_id");
     const error = params.get("error");
 
-    setLogs((prev) => [...prev, `code: ${code ? "есть" : "нет"}`]);
-    setLogs((prev) => [...prev, `device_id: ${device_id ? "есть" : "нет"}`]);
-    setLogs((prev) => [...prev, `error: ${error || "нет"}`]);
-
     if (error || !code) {
-      setLogs((prev) => [...prev, `ОШИБКА: ${error || "Код не получен"}`]);
+      navigate("/", { replace: true });
       return;
     }
 
-    setLogs((prev) => [...prev, "Перенаправляю на главную..."]);
-    setTimeout(() => {
-      const qs = device_id
-        ? `code=${code}&device_id=${device_id}`
-        : `code=${code}`;
-      window.location.href = `/?${qs}`;
-    }, 3000);
+    const qs = device_id
+      ? `code=${code}&device_id=${device_id}`
+      : `code=${code}`;
+    window.location.href = `/?${qs}`;
   }, []);
 
   return (
     <div
       style={{
         minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         background: "#060810",
         color: "#c9a84c",
         fontFamily: "Golos Text, sans-serif",
-        padding: "40px",
-        fontSize: 16,
+        fontSize: 18,
       }}
     >
-      <h2>Отладка авторизации VK</h2>
-      {logs.map((log, i) => (
-        <div
-          key={i}
-          style={{
-            marginBottom: 8,
-            color: log.includes("ОШИБКА") ? "#ff5555" : "#c9a84c",
-          }}
-        >
-          {log}
-        </div>
-      ))}
+      Входим через ВКонтакте...
     </div>
   );
 }
