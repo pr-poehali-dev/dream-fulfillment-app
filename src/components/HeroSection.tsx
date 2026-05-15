@@ -23,15 +23,18 @@ export default function HeroSection({
   const { user, logout } = useUser();
 
   useEffect(() => {
-    if (window.VKIDSDK) {
-      const VKID = window.VKIDSDK;
-      VKID.Config.init({
-        app: 54589468,
-        redirectUrl: "https://zagadai.online/vk-callback",
-        responseMode: VKID.ConfigResponseMode.Callback,
-        source: VKID.ConfigSource.LOWCODE,
-        scope: "email",
-      });
+  const container = document.getElementById("vkAuthContainer");
+  if (container) {
+    container.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.textContent = 'Войти через ВК';
+    btn.style.cssText = 'border: 1px solid rgba(201,168,76,0.4); color: #c9a84c; background: none; cursor: pointer; padding: 8px 16px; border-radius: 20px; font-family: inherit; font-size: 14px;';
+    btn.onclick = () => {
+      window.location.href = 'https://oauth.vk.com/authorize?client_id=54589468&display=page&redirect_uri=https://zagadai.online/vk-callback&scope=email&response_type=code&v=5.131';
+    };
+    container.appendChild(btn);
+  }
+}, []);
 
       const oneTap = new VKID.OneTap();
       oneTap
