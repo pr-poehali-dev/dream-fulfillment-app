@@ -38,17 +38,16 @@ def handler(event: dict, context) -> dict:
     app_secret = os.environ['VK_APP_SECRET']
 
     # Обмен кода на access_token через VK ID OAuth 2.1
-    token_params = urllib.parse.urlencode({
+    token_body = urllib.parse.urlencode({
         'grant_type': 'authorization_code',
         'code': code,
         'device_id': device_id,
         'client_id': app_id,
         'client_secret': app_secret,
         'redirect_uri': redirect_uri,
-    })
-    token_url = f'https://id.vk.com/oauth2/auth?{token_params}'
-    req = urllib.request.Request(token_url, method='POST')
-    req.add_header('Content-Length', '0')
+    }).encode()
+    req = urllib.request.Request('https://id.vk.com/oauth2/auth', data=token_body, method='POST')
+    req.add_header('Content-Type', 'application/x-www-form-urlencoded')
     with urllib.request.urlopen(req) as resp:
         token_data = json.loads(resp.read())
 
