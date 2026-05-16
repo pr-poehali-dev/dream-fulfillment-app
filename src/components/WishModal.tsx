@@ -9,11 +9,13 @@ interface Props {
 }
 
 function getStarTier(amount: number) {
-  if (amount >= 1000) return { label: "Созвездие", icon: "🌟", desc: "Ультра-яркая звезда — видна всем" };
-  if (amount >= 500)  return { label: "Луна",       icon: "✨", desc: "Очень яркая звезда" };
-  if (amount >= 100)  return { label: "Звезда",     icon: "⭐", desc: "Яркая звезда" };
-  if (amount >= 50)   return { label: "Огонёк",     icon: "💫", desc: "Заметная звезда" };
-  return                     { label: "Искорка",    icon: "·",  desc: "Маленькая звезда" };
+  if (amount >= 1000)
+    return { label: "Созвездие", icon: "🌟", desc: "Звездопад" };
+  if (amount >= 500) return { label: "Луна", icon: "✨", desc: "Созвездие" };
+  if (amount >= 100)
+    return { label: "Звезда", icon: "⭐", desc: "Яркая звезда" };
+  if (amount >= 50) return { label: "Огонёк", icon: "💫", desc: "Звезда" };
+  return { label: "Искорка", icon: "·", desc: "Звёздочка" };
 }
 
 const QUICK_AMOUNTS = [10, 50, 100, 500, 1000];
@@ -82,18 +84,31 @@ export default function WishModal({ onClose, onSent }: Props) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(6,8,16,0.92)', backdropFilter: 'blur(8px)' }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-
-      <div className="animate-modal-in w-full max-w-lg glass-panel rounded-3xl p-6 md:p-8 relative"
-        style={{ border: '1px solid rgba(201,168,76,0.2)', maxHeight: '90vh', overflowY: 'auto' }}>
-
+      style={{ background: "rgba(6,8,16,0.92)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="animate-modal-in w-full max-w-lg glass-panel rounded-3xl p-6 md:p-8 relative"
+        style={{
+          border: "1px solid rgba(201,168,76,0.2)",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 transition-colors"
-          style={{ color: 'rgba(200,210,240,0.4)', background: 'none', border: 'none', cursor: 'pointer' }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#c9a84c')}
-          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,210,240,0.4)')}>
+          style={{
+            color: "rgba(200,210,240,0.4)",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#c9a84c")}
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.color = "rgba(200,210,240,0.4)")
+          }
+        >
           <Icon name="X" size={20} />
         </button>
 
@@ -101,81 +116,123 @@ export default function WishModal({ onClose, onSent }: Props) {
           <>
             <div className="text-center mb-6">
               <div className="text-3xl mb-2"></div>
-              <h2 className="font-cormorant text-2xl md:text-3xl mb-1" style={{ color: '#f0e8d0' }}>
+              <h2
+                className="font-cormorant text-2xl md:text-3xl mb-1"
+                style={{ color: "#f0e8d0" }}
+              >
                 Загадай желание
               </h2>
-              <p className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.45)' }}>
+              <p
+                className="font-golos text-xs"
+                style={{ color: "rgba(200,210,240,0.45)" }}
+              >
                 Колодец слушает тебя
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="font-golos text-xs mb-2 block" style={{ color: 'rgba(201,168,76,0.7)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <label
+                  className="font-golos text-xs mb-2 block"
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
                   Твоё желание
                 </label>
                 <textarea
                   value={wish}
-                  onChange={e => setWish(e.target.value)}
+                  onChange={(e) => setWish(e.target.value)}
                   placeholder="Опиши своё желание подробно и искренне..."
                   rows={3}
                   maxLength={300}
                   className="w-full rounded-xl px-4 py-3 font-golos text-sm resize-none focus:outline-none transition-all"
                   style={{
-                    background: 'rgba(20,25,40,0.8)',
-                    border: '1px solid rgba(201,168,76,0.2)',
-                    color: '#f0e8d0',
-                    caretColor: '#c9a84c',
+                    background: "rgba(20,25,40,0.8)",
+                    border: "1px solid rgba(201,168,76,0.2)",
+                    color: "#f0e8d0",
+                    caretColor: "#c9a84c",
                   }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(201,168,76,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(201,168,76,0.2)')}
+                  onFocus={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.5)")
+                  }
+                  onBlur={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.2)")
+                  }
                 />
-                <div className="text-right mt-1 font-golos text-xs" style={{ color: 'rgba(200,210,240,0.3)' }}>
+                <div
+                  className="text-right mt-1 font-golos text-xs"
+                  style={{ color: "rgba(200,210,240,0.3)" }}
+                >
                   {wish.length}/300
                 </div>
               </div>
 
               <div>
-                <label className="font-golos text-xs mb-2 block" style={{ color: 'rgba(201,168,76,0.7)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <label
+                  className="font-golos text-xs mb-2 block"
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
                   История (необязательно)
                 </label>
                 <textarea
                   value={story}
-                  onChange={e => setStory(e.target.value)}
+                  onChange={(e) => setStory(e.target.value)}
                   placeholder="Расскажи, почему это желание важно для тебя..."
                   rows={2}
                   maxLength={500}
                   className="w-full rounded-xl px-4 py-3 font-golos text-sm resize-none focus:outline-none transition-all"
                   style={{
-                    background: 'rgba(20,25,40,0.8)',
-                    border: '1px solid rgba(201,168,76,0.15)',
-                    color: '#f0e8d0',
-                    caretColor: '#c9a84c',
+                    background: "rgba(20,25,40,0.8)",
+                    border: "1px solid rgba(201,168,76,0.15)",
+                    color: "#f0e8d0",
+                    caretColor: "#c9a84c",
                   }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(201,168,76,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(201,168,76,0.15)')}
+                  onFocus={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.5)")
+                  }
+                  onBlur={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.15)")
+                  }
                 />
               </div>
 
               {/* Размер монетки — свободная сумма */}
               <div>
-                <label className="font-golos text-xs mb-3 block" style={{ color: 'rgba(201,168,76,0.7)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <label
+                  className="font-golos text-xs mb-3 block"
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
                   Размер монетки — любая сумма от 10 ₽
                 </label>
 
                 {/* Быстрый выбор */}
                 <div className="flex gap-2 mb-3 flex-wrap">
-                  {QUICK_AMOUNTS.map(q => (
+                  {QUICK_AMOUNTS.map((q) => (
                     <button
                       key={q}
                       onClick={() => handleQuick(q)}
                       className="px-3 py-1.5 rounded-full font-golos text-sm transition-all"
                       style={{
-                        background: numAmount === q
-                          ? 'linear-gradient(135deg, rgba(201,168,76,0.3), rgba(201,168,76,0.1))'
-                          : 'rgba(20,25,40,0.6)',
-                        border: `1px solid ${numAmount === q ? 'rgba(201,168,76,0.6)' : 'rgba(201,168,76,0.15)'}`,
-                        color: numAmount === q ? '#c9a84c' : 'rgba(200,210,240,0.55)',
+                        background:
+                          numAmount === q
+                            ? "linear-gradient(135deg, rgba(201,168,76,0.3), rgba(201,168,76,0.1))"
+                            : "rgba(20,25,40,0.6)",
+                        border: `1px solid ${numAmount === q ? "rgba(201,168,76,0.6)" : "rgba(201,168,76,0.15)"}`,
+                        color:
+                          numAmount === q
+                            ? "#c9a84c"
+                            : "rgba(200,210,240,0.55)",
                       }}
                     >
                       {q >= 1000 ? `${q / 1000} 000 ₽` : `${q} ₽`}
@@ -190,37 +247,70 @@ export default function WishModal({ onClose, onSent }: Props) {
                       type="number"
                       min={10}
                       value={amountInput}
-                      onChange={e => handleAmountInput(e.target.value)}
+                      onChange={(e) => handleAmountInput(e.target.value)}
                       placeholder="Своя сумма"
                       className="w-full rounded-xl px-4 py-3 font-golos text-sm focus:outline-none transition-all"
                       style={{
-                        background: 'rgba(20,25,40,0.8)',
-                        border: `1px solid ${numAmount >= 10 ? 'rgba(201,168,76,0.4)' : 'rgba(201,168,76,0.15)'}`,
-                        color: '#f0e8d0',
-                        caretColor: '#c9a84c',
+                        background: "rgba(20,25,40,0.8)",
+                        border: `1px solid ${numAmount >= 10 ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.15)"}`,
+                        color: "#f0e8d0",
+                        caretColor: "#c9a84c",
                       }}
-                      onFocus={e => (e.target.style.borderColor = 'rgba(201,168,76,0.6)')}
-                      onBlur={e => (e.target.style.borderColor = numAmount >= 10 ? 'rgba(201,168,76,0.4)' : 'rgba(201,168,76,0.15)')}
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = "rgba(201,168,76,0.6)")
+                      }
+                      onBlur={(e) =>
+                        (e.target.style.borderColor =
+                          numAmount >= 10
+                            ? "rgba(201,168,76,0.4)"
+                            : "rgba(201,168,76,0.15)")
+                      }
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 font-golos text-sm" style={{ color: 'rgba(201,168,76,0.5)' }}>₽</span>
+                    <span
+                      className="absolute right-4 top-1/2 -translate-y-1/2 font-golos text-sm"
+                      style={{ color: "rgba(201,168,76,0.5)" }}
+                    >
+                      ₽
+                    </span>
                   </div>
 
                   {/* Превью звезды */}
                   {numAmount >= 10 && (
                     <div className="flex flex-col items-center gap-1 min-w-[64px]">
-                      <span style={{ fontSize: numAmount >= 1000 ? 28 : numAmount >= 100 ? 22 : 16 }}>{tier.icon}</span>
-                      <span className="font-golos text-xs text-center" style={{ color: 'rgba(201,168,76,0.7)', lineHeight: 1.2 }}>{tier.label}</span>
+                      <span
+                        style={{
+                          fontSize:
+                            numAmount >= 1000 ? 28 : numAmount >= 100 ? 22 : 16,
+                        }}
+                      >
+                        {tier.icon}
+                      </span>
+                      <span
+                        className="font-golos text-xs text-center"
+                        style={{
+                          color: "rgba(201,168,76,0.7)",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {tier.label}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {numAmount >= 10 && (
-                  <p className="font-golos text-xs mt-2" style={{ color: 'rgba(200,210,240,0.4)' }}>
+                  <p
+                    className="font-golos text-xs mt-2"
+                    style={{ color: "rgba(200,210,240,0.4)" }}
+                  >
                     {tier.desc} · чем крупнее монета, тем ярче звезда
                   </p>
                 )}
                 {numAmount > 0 && numAmount < 10 && (
-                  <p className="font-golos text-xs mt-2" style={{ color: 'rgba(220,80,80,0.7)' }}>
+                  <p
+                    className="font-golos text-xs mt-2"
+                    style={{ color: "rgba(220,80,80,0.7)" }}
+                  >
                     Минимальная сумма — 10 ₽
                   </p>
                 )}
@@ -232,12 +322,15 @@ export default function WishModal({ onClose, onSent }: Props) {
                 className="w-full py-3 rounded-full font-golos font-semibold text-sm transition-all mt-2"
                 style={{
                   background: isValid
-                    ? 'linear-gradient(135deg, #c9a84c, #8a6a20)'
-                    : 'rgba(201,168,76,0.15)',
-                  color: isValid ? '#060810' : 'rgba(200,210,240,0.3)',
-                  cursor: isValid ? 'pointer' : 'not-allowed',
-                }}>
-                {isValid ? `Бросить монетку · ${numAmount} ₽` : 'Введи желание и сумму'}
+                    ? "linear-gradient(135deg, #c9a84c, #8a6a20)"
+                    : "rgba(201,168,76,0.15)",
+                  color: isValid ? "#060810" : "rgba(200,210,240,0.3)",
+                  cursor: isValid ? "pointer" : "not-allowed",
+                }}
+              >
+                {isValid
+                  ? `Бросить монетку · ${numAmount} ₽`
+                  : "Введи желание и сумму"}
               </button>
             </div>
           </>
@@ -246,17 +339,31 @@ export default function WishModal({ onClose, onSent }: Props) {
         {step === "vk" && (
           <div className="text-center py-4">
             <div className="text-4xl mb-4">📢</div>
-            <h2 className="font-cormorant text-2xl mb-3" style={{ color: '#f0e8d0' }}>
+            <h2
+              className="font-cormorant text-2xl mb-3"
+              style={{ color: "#f0e8d0" }}
+            >
               Расскажи миру о мечте
             </h2>
-            <p className="font-golos text-sm mb-6 leading-relaxed" style={{ color: 'rgba(200,210,240,0.55)' }}>
-              Опубликуй пост ВКонтакте — это обязательное условие. Только публичные мечты зажигают звёзды и исполняются.
+            <p
+              className="font-golos text-sm mb-6 leading-relaxed"
+              style={{ color: "rgba(200,210,240,0.55)" }}
+            >
+              Опубликуй пост ВКонтакте — это обязательное условие. Только
+              публичные мечты зажигают звёзды и исполняются.
             </p>
-            <div className="glass-panel rounded-xl p-4 mb-6 text-left"
-              style={{ border: '1px solid rgba(201,168,76,0.15)' }}>
-              <p className="font-golos text-sm" style={{ color: 'rgba(200,210,240,0.7)' }}>
-                ✨ Я загадал желание на Загадай Онлайн! Мечтаю: <em style={{ color: '#c9a84c' }}>«{wish}»</em>
-                <br /><br />
+            <div
+              className="glass-panel rounded-xl p-4 mb-6 text-left"
+              style={{ border: "1px solid rgba(201,168,76,0.15)" }}
+            >
+              <p
+                className="font-golos text-sm"
+                style={{ color: "rgba(200,210,240,0.7)" }}
+              >
+                ✨ Я загадал желание на Загадай Онлайн! Мечтаю:{" "}
+                <em style={{ color: "#c9a84c" }}>«{wish}»</em>
+                <br />
+                <br />
                 Помоги исполниться моей мечте 🌠 zagadai.online #загадайонлайн
               </p>
             </div>
@@ -264,10 +371,18 @@ export default function WishModal({ onClose, onSent }: Props) {
               onClick={handleVkPost}
               disabled={saving}
               className="w-full py-3 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
-              style={{ background: saving ? 'rgba(0,119,255,0.5)' : '#0077ff', color: '#fff', cursor: saving ? 'default' : 'pointer' }}>
-              {saving ? 'Сохраняем...' : 'Опубликовать во ВКонтакте'}
+              style={{
+                background: saving ? "rgba(0,119,255,0.5)" : "#0077ff",
+                color: "#fff",
+                cursor: saving ? "default" : "pointer",
+              }}
+            >
+              {saving ? "Сохраняем..." : "Опубликовать во ВКонтакте"}
             </button>
-            <p className="font-golos text-xs" style={{ color: 'rgba(200,210,240,0.3)' }}>
+            <p
+              className="font-golos text-xs"
+              style={{ color: "rgba(200,210,240,0.3)" }}
+            >
               После публикации твоя звезда появится на небосводе
             </p>
           </div>
@@ -276,13 +391,22 @@ export default function WishModal({ onClose, onSent }: Props) {
         {step === "done" && (
           <div className="text-center py-8">
             <div className="text-5xl mb-4 animate-appear-star">{tier.icon}</div>
-            <h2 className="font-cormorant text-2xl mb-3" style={{ color: '#f0e8d0' }}>
+            <h2
+              className="font-cormorant text-2xl mb-3"
+              style={{ color: "#f0e8d0" }}
+            >
               Звезда зажглась!
             </h2>
-            <p className="font-golos text-sm mb-2" style={{ color: 'rgba(200,210,240,0.55)' }}>
+            <p
+              className="font-golos text-sm mb-2"
+              style={{ color: "rgba(200,210,240,0.55)" }}
+            >
               Твоё желание теперь ждёт своего Ангела.
             </p>
-            <p className="font-golos text-xs" style={{ color: 'rgba(201,168,76,0.6)' }}>
+            <p
+              className="font-golos text-xs"
+              style={{ color: "rgba(201,168,76,0.6)" }}
+            >
               {tier.label} · {numAmount} ₽ · {tier.desc}
             </p>
           </div>
