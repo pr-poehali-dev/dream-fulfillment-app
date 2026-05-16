@@ -217,7 +217,17 @@ export default function PageSections({
           </p>
         </div>
       </section>
-
+      {/* Виджет сообщества ВК */}
+      <section className="relative z-10 py-10 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <div id="vk_community_messages"></div>
+          <script type="text/javascript">
+            {`
+              VK.Widgets.CommunityMessages("vk_community_messages", 238641413, {expandTimeout: 15000, widgetPosition: "left", buttonType: "blue_circle"});
+            `}
+          </script>
+        </div>
+      </section>
       {/* Footer */}
       <footer
         className="relative z-10 py-8 px-4 text-center mt-4"
