@@ -107,8 +107,7 @@ export default function HeroIntro({ introPhase }: Props) {
               lineHeight: 1,
               filter:
                 "drop-shadow(0 0 12px #fffde0) drop-shadow(0 0 24px #ffd700)",
-              opacity:
-                introPhase === "line2" || introPhase === "out" ? 1 : 0,
+              opacity: introPhase === "line2" || introPhase === "out" ? 1 : 0,
               transition: "opacity 0.8s ease",
             }}
           >
@@ -130,7 +129,7 @@ export default function HeroIntro({ introPhase }: Props) {
             textShadow: "0 0 30px rgba(255,200,50,0.4)",
           }}
         >
-          И кто-то твою мечту исполнит
+          И кто-то исполнит твою мечту
         </p>
       </div>
     </div>
