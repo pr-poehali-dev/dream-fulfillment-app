@@ -34,13 +34,9 @@
     <script src="https://unpkg.com/@vkid/sdk@2.6.1/dist-sdk/umd/index.js"></script>
 </head>
 <script type="text/javascript" src="https://vk.com/js/api/openapi.js?169"></script>
-<div id="vk_community_messages"></div>
+<div id="vk_groups"></div>
 <script type="text/javascript">
-  VK.Widgets.CommunityMessages("vk_community_messages", 238641413, {
-    widgetPosition: "left",
-    expandTimeout: 10000,
-    buttonType: "blue_circle"
-  });
+  VK.Widgets.Group("vk_groups", {mode: 3, width: "240"}, 238641413);
 </script>
 <body>
 <div id="root"></div>
