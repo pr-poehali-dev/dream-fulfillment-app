@@ -200,6 +200,13 @@ export default function PageSections({
       {/* SEO текст */}
       <section className="relative z-10 py-10 px-4">
         <div className="max-w-3xl mx-auto text-center">
+          <p
+            className="font-golos text-sm leading-relaxed mb-3"
+            style={{ color: "rgba(200,210,240,0.5)" }}
+          >
+            Всего 146 745 098 мест на небе. Звёздочка занимает 1 место,
+            Звездопад — 100. Чем крупнее звезда, тем быстрее заполняется небо.
+          </p>
           <h1
             className="font-cormorant text-3xl mb-4"
             style={{ color: "#c9a84c" }}
