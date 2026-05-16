@@ -10,12 +10,14 @@ interface Props {
 
 function getStarTier(amount: number) {
   if (amount >= 1000)
-    return { label: "Созвездие", icon: "🌟", desc: "Звездопад" };
-  if (amount >= 500) return { label: "Луна", icon: "✨", desc: "Созвездие" };
+    return { label: "Звездопад", icon: "🌟", desc: "Мощный и незабываемый" };
+  if (amount >= 500)
+    return { label: "Созвездие", icon: "✨", desc: "Центр притяжения" };
   if (amount >= 100)
-    return { label: "Звезда", icon: "⭐", desc: "Яркая звезда" };
-  if (amount >= 50) return { label: "Огонёк", icon: "💫", desc: "Звезда" };
-  return { label: "Искорка", icon: "·", desc: "Звёздочка" };
+    return { label: "Яркая звезда", icon: "⭐", desc: "Видно издалека" };
+  if (amount >= 50)
+    return { label: "Звезда", icon: "💫", desc: "Уверенная и заметная" };
+  return { label: "Звёздочка", icon: "·", desc: "Скромная, но заметная" };
 }
 
 const QUICK_AMOUNTS = [10, 50, 100, 500, 1000];
@@ -235,7 +237,15 @@ export default function WishModal({ onClose, onSent }: Props) {
                             : "rgba(200,210,240,0.55)",
                       }}
                     >
-                      {q >= 1000 ? `${q / 1000} 000 ₽` : `${q} ₽`}
+                      {q === 10
+                        ? "Звёздочка"
+                        : q === 50
+                          ? "Звезда"
+                          : q === 100
+                            ? "Яркая звезда"
+                            : q === 500
+                              ? "Созвездие"
+                              : "Звездопад"}
                     </button>
                   ))}
                 </div>
