@@ -22,23 +22,40 @@
     <meta name="twitter:image" content="https://cdn.poehali.dev/projects/f2ec5eb9-318b-4d91-873e-4b30179226d6/files/og-image-1778686599260.jpg">
 
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
-
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
-    <script src="https://cdn.poehali.dev/intertnal/js/pp-min-2.js"></script>
-    <script src="https://cdn.poehali.dev/intertnal/js/route-min.js"></script>
-    <script src="https://cdn.poehali.dev/intertnal/js/telemetry-min.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/pp-min-2.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/route-min.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/telemetry-min.js"></script>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
 
     <meta name="pp-name" value="dream-fulfillment-app">
-    <script src="https://cdn.poehali.dev/intertnal/js/inspector-min.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/inspector-min.js"></script>
+
+    <!-- Современная библиотека VK ID SDK -->
     <script src="https://unpkg.com/@vkid/sdk@2.6.1/dist-sdk/umd/index.js"></script>
-    <script type="text/javascript" src="https://vk.ru/js/api/openapi.js?169"></script>
-    <script type="text/javascript">
-  VK.init({
-    apiId: 54589468,
-    onlyWidgets: true
-  });
-</script>
+
+    <!-- Инициализация VK ID SDK -->
+    <script>
+      if ('VKIDSDK' in window) {
+        const VKID = window.VKIDSDK;
+        
+        VKID.Config.init({
+          app: 54589468, // Твой ID приложения
+          redirectUrl: 'https://zagadai.online/vk-callback',
+          responseMode: VKID.ConfigResponseMode.Callback,
+          source: VKID.ConfigSource.LOWCODE,
+          scope: ''
+        });
+
+        // Создание кнопки One Tap
+        const oneTap = new VKID.OneTap();
+        oneTap.render({
+          container: '#vk-auth-container', // Контейнер для кнопки
+          scheme: 'dark',
+          showAlternativeLogin: true,
+          oauthList: ['mail_ru', 'ok_ru']
+        });
+      }
+    </script>
 </head>
 
 <body>
@@ -58,6 +75,9 @@
 </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/109251552" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
+
+<!-- Контейнер для кнопки VK ID -->
+<div id="vk-auth-container"></div>
 
 </body>
 </html>
