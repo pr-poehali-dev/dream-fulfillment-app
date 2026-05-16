@@ -217,7 +217,17 @@ export default function PageSections({
           </p>
         </div>
       </section>
-
+      {/* Виджет сообщества ВК */}
+      <section className="relative z-10 py-6 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <div id="vk_groups"></div>
+          <script type="text/javascript">
+            {`
+              VK.Widgets.Group("vk_groups", {mode: 3, width: "240", color1: "060810", color2: "c9a84c", color3: "c9a84c"}, 238641413);
+            `}
+          </script>
+        </div>
+      </section>
       {/* Footer */}
       <footer
         className="relative z-10 py-8 px-4 text-center mt-4"
