@@ -24,14 +24,13 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
 
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
-    <script src="https://cdn.poehali.dev/intertnal/js/pp-min-2.js"></script>
-    <script src="https://cdn.poehali.dev/intertnal/js/route-min.js"></script>
-    <script src="https://cdn.poehali.dev/intertnal/js/telemetry-min.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/pp-min-2.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/route-min.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/telemetry-min.js"></script>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS COMMENT! -->
 
     <meta name="pp-name" value="dream-fulfillment-app">
-    <script src="https://cdn.poehali.dev/intertnal/js/inspector-min.js"></script>
-    <script src="https://unpkg.com/@vkid/sdk@2.6.1/dist-sdk/umd/index.js"></script>
+    <script src="https://cdn.poehali.dev/internal/js/inspector-min.js"></script>
 
     <!-- Подключение библиотеки ВКонтакте -->
     <script src="https://vk.com/js/api/openapi.js?169" type="text/javascript"></script>
@@ -39,38 +38,34 @@
     <!-- Инициализация виджета -->
     <script type="text/javascript">
       VK.init({
-        apiId: 54589468,
+        apiId: 54589468, // Твой ID приложения ВКонтакте
         onlyWidgets: true
       });
     </script>
-</head>
 
-<body>
-<div id="root"></div>
-<script type="module" src="/src/main.tsx"></script>
+    <!-- Виджет ВКонтакте -->
+    <div id="vk_groups"></div>
+    <script type="text/javascript">
+      VK.Widgets.Group(
+        "vk_groups", // ID контейнера
+        { mode: 0, width: "auto", height: "300" }, // Параметры
+        238641413 // ID твоего сообщества
+      );
+    </script>
 
-<!-- Yandex.Metrika counter -->
-<script type="text/javascript">
-    (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109251552', 'ym');
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=109251552', 'ym');
 
-    ym(109251552, 'init', {ssr:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-</script>
+        ym(109251552, 'init', {ssr:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    </script>
 <noscript><div><img src="https://mc.yandex.ru/watch/109251552" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
 
-<!-- Виджет ВКонтакте -->
-<div id="vk_groups"></div>
-<script type="text/javascript">
-  VK.Widgets.Group(
-    "vk_groups",
-    { mode: 0, width: "auto", height: "300" },
-    238641413
-  );
-</script>
 </body>
 </html>
