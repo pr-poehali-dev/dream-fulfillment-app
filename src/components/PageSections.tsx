@@ -246,6 +246,7 @@ export default function PageSections({
             { label: "Конфиденциальность", href: "/privacy" },
             { label: "Техподдержка", href: "/contacts" },
             { label: "О проекте", href: "/about" },
+            { label: "Публичная оферта", href: "/oferta" },
             { label: "ВКонтакте", href: "https://vk.com/club238641413" },
           ].map((link) => (
             <a
