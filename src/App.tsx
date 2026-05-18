@@ -12,6 +12,7 @@ import Shop from "./pages/Shop";
 import NotFound from "./pages/NotFound";
 import VKCallback from "./pages/VKCallback";
 import About from "./pages/About";
+import Oferta from "./pages/Oferta";
 import { UserProvider } from "./context/UserContext";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/shop" element={<Shop />} />
             <Route path="/vk-callback" element={<VKCallback />} />
             <Route path="/about" element={<About />} />
+            <Route path="/oferta" element={<Oferta />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
