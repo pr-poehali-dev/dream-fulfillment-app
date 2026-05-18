@@ -31,7 +31,7 @@ export default function Oferta() {
           className="font-golos text-sm mb-10"
           style={{ color: "rgba(200,210,240,0.4)" }}
         >
-          Редакция от 01.01.2024
+          Редакция от 01.01.2026
         </p>
 
         <div
