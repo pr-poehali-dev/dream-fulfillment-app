@@ -15,7 +15,7 @@ export default function Oferta() {
             className="font-cormorant text-xl font-medium tracking-widest uppercase"
             style={{ color: "#c9a84c" }}
           >
-            Загадай
+            Загадай.Онлайн
           </span>
         </a>
       </header>
