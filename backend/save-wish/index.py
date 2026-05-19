@@ -123,17 +123,15 @@ def handle_create_payment(body: dict) -> dict:
     receipt = {
         'EmailCompany': 'hello@zagadai.online',
         'Taxation': 'usn_income',
-        'FfdVersion': '1.2',
         'Items': [
             {
-                'Name': f'Зажечь звезду желания',
+                'Name': 'Зажечь звезду желания',
                 'Price': amount_kopecks,
-                'Quantity': 1.0,
+                'Quantity': 1,
                 'Amount': amount_kopecks,
                 'PaymentMethod': 'full_payment',
                 'PaymentObject': 'service',
                 'Tax': 'none',
-                'MeasurementUnit': 'шт',
             }
         ],
     }
@@ -160,11 +158,13 @@ def handle_create_payment(body: dict) -> dict:
     with urllib.request.urlopen(req, timeout=15) as resp:
         result = json.loads(resp.read().decode())
 
+    print(f"[Tbank Init] Success={result.get('Success')} ErrorCode={result.get('ErrorCode')} Message={result.get('Message')} Details={result.get('Details')}")
+
     if not result.get('Success'):
         return {
             'statusCode': 502,
             'headers': CORS,
-            'body': json.dumps({'error': result.get('Message', 'Ошибка Т-Банка')}),
+            'body': json.dumps({'error': result.get('Message', 'Ошибка Т-Банка'), 'details': result.get('Details', '')}),
         }
 
     payment_url = result.get('PaymentURL')
