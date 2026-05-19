@@ -30,6 +30,7 @@ export default function WishModal({ onClose, onSent }: Props) {
   const [amountInput, setAmountInput] = useState("100");
   const [step, setStep] = useState<"form" | "vk" | "done">("form");
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);
@@ -46,15 +47,17 @@ export default function WishModal({ onClose, onSent }: Props) {
     setAmountInput(String(val));
   };
 
+  const vkMessage = `${tier.icon} Хочу зажечь «${tier.label}»!\n\nМоё желание: ${wish}${story ? `\n\nПочему это важно: ${story}` : ""}\n\nСумма монетки: ${numAmount} ₽`;
+
   const handleSubmit = () => {
     if (!isValid) return;
-    const message = encodeURIComponent(
-      `Привет! Хочу зажечь ${tier.label}. Моё желание: ${wish}. Сумма: ${numAmount} ₽`,
-    );
-    window.open(
-      `https://vk.me/-238641413?text=${message}`,
-      "_blank",
-    );
+    setStep("vk");
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(vkMessage);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleVkPost = async () => {
@@ -351,54 +354,81 @@ export default function WishModal({ onClose, onSent }: Props) {
         )}
 
         {step === "vk" && (
-          <div className="text-center py-4">
-            <div className="text-4xl mb-4">📢</div>
-            <h2
-              className="font-cormorant text-2xl mb-3"
-              style={{ color: "#f0e8d0" }}
-            >
-              Расскажи миру о мечте
-            </h2>
-            <p
-              className="font-golos text-sm mb-6 leading-relaxed"
-              style={{ color: "rgba(200,210,240,0.55)" }}
-            >
-              Опубликуй пост ВКонтакте — это обязательное условие. Только
-              публичные мечты зажигают звёзды и исполняются.
-            </p>
-            <div
-              className="glass-panel rounded-xl p-4 mb-6 text-left"
-              style={{ border: "1px solid rgba(201,168,76,0.15)" }}
-            >
-              <p
-                className="font-golos text-sm"
-                style={{ color: "rgba(200,210,240,0.7)" }}
+          <div className="py-2">
+            <div className="text-center mb-5">
+              <div className="text-3xl mb-2">💬</div>
+              <h2
+                className="font-cormorant text-2xl mb-1"
+                style={{ color: "#f0e8d0" }}
               >
-                ✨ Я загадал желание на Загадай Онлайн! Мечтаю:{" "}
-                <em style={{ color: "#c9a84c" }}>«{wish}»</em>
-                <br />
-                <br />
-                Помоги исполниться моей мечте 🌠 zagadai.online #загадайонлайн
+                Напиши в сообщество
+              </h2>
+              <p
+                className="font-golos text-xs"
+                style={{ color: "rgba(200,210,240,0.45)" }}
+              >
+                Скопируй текст и вставь в сообщение
               </p>
             </div>
+
+            <div
+              className="rounded-xl p-4 mb-3 text-left"
+              style={{
+                background: "rgba(20,25,40,0.8)",
+                border: "1px solid rgba(201,168,76,0.2)",
+              }}
+            >
+              <p
+                className="font-golos text-sm whitespace-pre-line leading-relaxed"
+                style={{ color: "rgba(200,210,240,0.85)" }}
+              >
+                {vkMessage}
+              </p>
+            </div>
+
+            <button
+              onClick={handleCopy}
+              className="w-full py-2.5 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
+              style={{
+                background: copied
+                  ? "rgba(80,180,100,0.2)"
+                  : "linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1))",
+                border: `1px solid ${copied ? "rgba(80,180,100,0.5)" : "rgba(201,168,76,0.4)"}`,
+                color: copied ? "rgba(80,210,100,0.9)" : "#c9a84c",
+                cursor: "pointer",
+              }}
+            >
+              {copied ? "✓ Скопировано!" : "Скопировать текст"}
+            </button>
+
+            <button
+              onClick={() => {
+                window.open("https://vk.me/-238641413", "_blank");
+              }}
+              className="w-full py-2.5 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
+              style={{
+                background: "#0077ff",
+                color: "#fff",
+                cursor: "pointer",
+                border: "none",
+              }}
+            >
+              Открыть ВКонтакте →
+            </button>
+
             <button
               onClick={handleVkPost}
               disabled={saving}
-              className="w-full py-3 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
+              className="w-full py-2.5 rounded-full font-golos text-sm transition-all"
               style={{
-                background: saving ? "rgba(0,119,255,0.5)" : "#0077ff",
-                color: "#fff",
+                background: "transparent",
+                border: "1px solid rgba(200,210,240,0.15)",
+                color: saving ? "rgba(200,210,240,0.3)" : "rgba(200,210,240,0.5)",
                 cursor: saving ? "default" : "pointer",
               }}
             >
-              {saving ? "Сохраняем..." : "Опубликовать во ВКонтакте"}
+              {saving ? "Сохраняем..." : "Я отправил — зажечь звезду"}
             </button>
-            <p
-              className="font-golos text-xs"
-              style={{ color: "rgba(200,210,240,0.3)" }}
-            >
-              После публикации твоя звезда появится на небосводе
-            </p>
           </div>
         )}
 
