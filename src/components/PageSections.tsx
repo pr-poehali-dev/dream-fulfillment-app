@@ -285,6 +285,19 @@ export default function PageSections({
             zagadai.online@yandex.ru
           </a>
         </div>
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
+          <span className="font-golos text-xs" style={{ color: "#ffffff" }}>
+            Принимаем к оплате: Visa, Mastercard, МИР, Т-Банк
+          </span>
+          <a
+            href="https://tbank.ru"
+            target="_blank"
+            className="font-golos text-xs"
+            style={{ color: "#c9a84c", textDecoration: "none" }}
+          >
+            tbank.ru
+          </a>
+        </div>
         <p className="font-golos text-sm" style={{ color: "#ffffff" }}>
           © 2026 Загадай Онлайн · zagadai.online
         </p>
