@@ -28,9 +28,12 @@ export default function WishModal({ onClose, onSent }: Props) {
   const [story, setStory] = useState("");
   const [amount, setAmount] = useState<number | "">(100);
   const [amountInput, setAmountInput] = useState("100");
-  const [step, setStep] = useState<"form" | "vk" | "done">("form");
+  const [step, setStep] = useState<"form" | "paying" | "done">("form");
   const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [pendingStarId, setPendingStarId] = useState<number | null>(null);
+  const [pendingCoords, setPendingCoords] = useState<{ x: number; y: number } | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [payError, setPayError] = useState("");
 
   const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);
@@ -47,49 +50,57 @@ export default function WishModal({ onClose, onSent }: Props) {
     setAmountInput(String(val));
   };
 
-  const vkMessage = `${tier.icon} Хочу зажечь «${tier.label}»!\n\nМоё желание: ${wish}${story ? `\n\nПочему это важно: ${story}` : ""}\n\nСумма монетки: ${numAmount} ₽`;
-
-  const handleSubmit = () => {
-    if (!isValid) return;
-    setStep("vk");
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(vkMessage);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleVkPost = async () => {
+  const handleSubmit = async () => {
+    if (!isValid || !user) return;
     setSaving(true);
-    let starX: number | undefined;
-    let starY: number | undefined;
-    let starId: number | undefined;
-    if (user) {
-      try {
-        const res = await fetch(func2url["save-wish"], {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: user.id,
-            wish,
-            story,
-            amount: numAmount,
-          }),
-        });
-        const data = await res.json();
-        if (data.id) {
-          starId = data.id;
-          starX = data.x;
-          starY = data.y;
-        }
-      } catch {
-        // продолжаем даже при ошибке
+    setPayError("");
+    try {
+      const res = await fetch(func2url["save-wish"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "pay",
+          user_id: user.id,
+          wish,
+          story,
+          amount: numAmount,
+        }),
+      });
+      const data = await res.json();
+      if (data.payment_url) {
+        setPendingStarId(data.star_id);
+        setPendingCoords({ x: data.x, y: data.y });
+        window.open(data.payment_url, "_blank");
+        setStep("paying");
+      } else {
+        setPayError(data.error || "Не удалось создать платёж");
       }
+    } catch {
+      setPayError("Ошибка соединения. Попробуй ещё раз.");
     }
     setSaving(false);
-    setStep("done");
-    setTimeout(() => onSent(numAmount, wish, starX, starY), 1500);
+  };
+
+  const handleCheckStatus = async () => {
+    if (!pendingStarId) return;
+    setCheckingStatus(true);
+    try {
+      const res = await fetch(func2url["save-wish"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "status", star_id: pendingStarId }),
+      });
+      const data = await res.json();
+      if (data.status === "active") {
+        setStep("done");
+        setTimeout(() => onSent(numAmount, wish, pendingCoords?.x, pendingCoords?.y), 1500);
+      } else {
+        setPayError("Оплата ещё не подтверждена. Подожди немного и попробуй снова.");
+      }
+    } catch {
+      setPayError("Ошибка проверки. Попробуй ещё раз.");
+    }
+    setCheckingStatus(false);
   };
 
   return (
@@ -335,99 +346,76 @@ export default function WishModal({ onClose, onSent }: Props) {
                 )}
               </div>
 
+              {payError && (
+                <p className="font-golos text-xs text-center" style={{ color: "rgba(220,80,80,0.85)" }}>
+                  {payError}
+                </p>
+              )}
+
               <button
                 onClick={handleSubmit}
-                disabled={!isValid}
+                disabled={!isValid || saving || !user}
                 className="w-full py-3 rounded-full font-golos font-semibold text-sm transition-all mt-2"
                 style={{
-                  background: isValid
+                  background: isValid && user
                     ? "linear-gradient(135deg, #c9a84c, #8a6a20)"
                     : "rgba(201,168,76,0.15)",
-                  color: isValid ? "#060810" : "rgba(200,210,240,0.3)",
-                  cursor: isValid ? "pointer" : "not-allowed",
+                  color: isValid && user ? "#060810" : "rgba(200,210,240,0.3)",
+                  cursor: isValid && user && !saving ? "pointer" : "not-allowed",
                 }}
               >
-                {isValid ? `Написать в сообщество` : "Введи желание и сумму"}
+                {saving ? "Создаём платёж..." : !user ? "Войди, чтобы загадать желание" : isValid ? `Оплатить ${numAmount} ₽ и зажечь звезду` : "Введи желание и сумму"}
               </button>
             </div>
           </>
         )}
 
-        {step === "vk" && (
-          <div className="py-2">
-            <div className="text-center mb-5">
-              <div className="text-3xl mb-2">💬</div>
-              <h2
-                className="font-cormorant text-2xl mb-1"
-                style={{ color: "#f0e8d0" }}
-              >
-                Напиши в сообщество
-              </h2>
-              <p
-                className="font-golos text-xs"
-                style={{ color: "rgba(200,210,240,0.45)" }}
-              >
-                Скопируй текст и вставь в сообщение
-              </p>
-            </div>
+        {step === "paying" && (
+          <div className="text-center py-6">
+            <div className="text-5xl mb-4">💳</div>
+            <h2 className="font-cormorant text-2xl mb-3" style={{ color: "#f0e8d0" }}>
+              Оплата открыта
+            </h2>
+            <p className="font-golos text-sm mb-1" style={{ color: "rgba(200,210,240,0.6)" }}>
+              Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong> в открывшейся вкладке Т-Банка.
+            </p>
+            <p className="font-golos text-xs mb-6" style={{ color: "rgba(200,210,240,0.35)" }}>
+              После оплаты вернись сюда и нажми кнопку ниже
+            </p>
 
-            <div
-              className="rounded-xl p-4 mb-3 text-left"
-              style={{
-                background: "rgba(20,25,40,0.8)",
-                border: "1px solid rgba(201,168,76,0.2)",
-              }}
-            >
-              <p
-                className="font-golos text-sm whitespace-pre-line leading-relaxed"
-                style={{ color: "rgba(200,210,240,0.85)" }}
-              >
-                {vkMessage}
+            {payError && (
+              <p className="font-golos text-xs mb-4" style={{ color: "rgba(220,80,80,0.85)" }}>
+                {payError}
               </p>
-            </div>
+            )}
 
             <button
-              onClick={handleCopy}
-              className="w-full py-2.5 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
+              onClick={handleCheckStatus}
+              disabled={checkingStatus}
+              className="w-full py-3 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
               style={{
-                background: copied
-                  ? "rgba(80,180,100,0.2)"
-                  : "linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.1))",
-                border: `1px solid ${copied ? "rgba(80,180,100,0.5)" : "rgba(201,168,76,0.4)"}`,
-                color: copied ? "rgba(80,210,100,0.9)" : "#c9a84c",
-                cursor: "pointer",
-              }}
-            >
-              {copied ? "✓ Скопировано!" : "Скопировать текст"}
-            </button>
-
-            <button
-              onClick={() => {
-                window.open("https://vk.me/-238641413", "_blank");
-              }}
-              className="w-full py-2.5 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
-              style={{
-                background: "#0077ff",
-                color: "#fff",
-                cursor: "pointer",
+                background: checkingStatus
+                  ? "rgba(201,168,76,0.3)"
+                  : "linear-gradient(135deg, #c9a84c, #8a6a20)",
+                color: checkingStatus ? "rgba(200,210,240,0.4)" : "#060810",
+                cursor: checkingStatus ? "default" : "pointer",
                 border: "none",
               }}
             >
-              Открыть ВКонтакте →
+              {checkingStatus ? "Проверяем оплату..." : "Я оплатил — зажечь звезду ✨"}
             </button>
 
             <button
-              onClick={handleVkPost}
-              disabled={saving}
-              className="w-full py-2.5 rounded-full font-golos text-sm transition-all"
+              onClick={() => { setStep("form"); setPayError(""); }}
+              className="w-full py-2 rounded-full font-golos text-xs transition-all"
               style={{
                 background: "transparent",
-                border: "1px solid rgba(200,210,240,0.15)",
-                color: saving ? "rgba(200,210,240,0.3)" : "rgba(200,210,240,0.5)",
-                cursor: saving ? "default" : "pointer",
+                border: "1px solid rgba(200,210,240,0.1)",
+                color: "rgba(200,210,240,0.35)",
+                cursor: "pointer",
               }}
             >
-              {saving ? "Сохраняем..." : "Я отправил — зажечь звезду"}
+              Назад
             </button>
           </div>
         )}

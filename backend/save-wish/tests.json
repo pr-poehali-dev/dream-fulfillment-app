@@ -7,10 +7,31 @@
       "expectedStatus": 200
     },
     {
-      "name": "Missing fields returns 400",
+      "name": "Save - missing fields returns 400",
       "method": "POST",
       "path": "/",
-      "body": {},
+      "body": {"action": "save", "wish": "test"},
+      "expectedStatus": 400
+    },
+    {
+      "name": "Pay - missing fields returns 400",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "pay", "wish": "test"},
+      "expectedStatus": 400
+    },
+    {
+      "name": "Webhook - wrong terminal key returns 403",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "webhook", "TerminalKey": "WRONG", "Status": "CONFIRMED", "PaymentId": "123", "OrderId": "star-1-tx-1", "Token": "abc"},
+      "expectedStatus": 403
+    },
+    {
+      "name": "Status - missing star_id returns 400",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "status"},
       "expectedStatus": 400
     }
   ]
