@@ -111,12 +111,31 @@ export default function Index() {
     const t2 = setTimeout(() => setIntroPhase("out"), 5000);
     const t3 = setTimeout(() => setIntroPhase("done"), 6200);
 
-    // Загружаем реальный счётчик из БД
-    fetch(func2url["get-wish-by-number"])
+    // Загружаем все активные звёзды из БД
+    fetch(`${func2url["get-wish-by-number"]}?action=all`)
       .then((r) => r.json())
       .then((data) => {
         const parsed = typeof data === "string" ? JSON.parse(data) : data;
         if (parsed.total !== undefined) setStarsCount(parsed.total);
+        if (Array.isArray(parsed.stars) && parsed.stars.length > 0) {
+          const loaded: Star[] = parsed.stars.map((s: { id: number; x: number; y: number; amount: number; wish: string; name?: string; avatar?: string }) => {
+            const amt = s.amount ?? 10;
+            const baseSize = amt >= 1000 ? 3.5 : amt >= 500 ? 2.8 : amt >= 100 ? 2.2 : amt >= 50 ? 1.8 : 1.3;
+            return {
+              id: s.id,
+              x: s.x,
+              y: s.y,
+              size: baseSize + Math.random() * 0.5,
+              delay: Math.random() * 3,
+              lit: true,
+              amount: amt,
+              wish: s.wish,
+              name: s.name,
+              avatar: s.avatar,
+            };
+          });
+          setStars(loaded);
+        }
       })
       .catch(() => {});
 

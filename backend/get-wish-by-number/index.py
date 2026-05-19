@@ -20,12 +20,46 @@ MOCK_WISHES = [
 
 
 def handler(event: dict, context) -> dict:
-    """Возвращает желание по порядковому номеру (1-based). Также возвращает total — общее количество."""
+    """Возвращает желание по порядковому номеру (1-based), total или все звёзды (action=all)."""
 
     if event.get("httpMethod") == "OPTIONS":
         return {"statusCode": 200, "headers": CORS_HEADERS, "body": ""}
 
     params = event.get("queryStringParameters") or {}
+
+    if params.get("action") == "all":
+        db_url = os.environ.get("DATABASE_URL")
+        schema = os.environ.get("MAIN_DB_SCHEMA", "public")
+        if db_url:
+            try:
+                import psycopg2
+                conn = psycopg2.connect(db_url)
+                cur = conn.cursor()
+                cur.execute(f"""
+                    SELECT s.id, s.wish, s.amount, s.x, s.y, u.name, u.avatar_url
+                    FROM {schema}.stars s
+                    JOIN {schema}.users u ON u.id = s.user_id
+                    WHERE s.status = 'active'
+                    ORDER BY s.created_at ASC
+                """)
+                rows = cur.fetchall()
+                cur.close()
+                conn.close()
+                stars = [
+                    {
+                        "id": r[0], "wish": r[1], "amount": float(r[2]),
+                        "x": float(r[3]) if r[3] else 50,
+                        "y": float(r[4]) if r[4] else 50,
+                        "name": r[5],
+                        "avatar": r[6] or f"https://api.dicebear.com/7.x/adventurer/svg?seed={r[0]}",
+                    }
+                    for r in rows
+                ]
+                return {"statusCode": 200, "headers": CORS_HEADERS, "body": json.dumps({"stars": stars, "total": len(stars)})}
+            except Exception as e:
+                return {"statusCode": 500, "headers": CORS_HEADERS, "body": json.dumps({"error": str(e)})}
+        return {"statusCode": 200, "headers": CORS_HEADERS, "body": json.dumps({"stars": [], "total": 0})}
+
     number_str = params.get("number")
 
     db_url = os.environ.get("DATABASE_URL")
