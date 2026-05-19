@@ -284,6 +284,9 @@ export default function PageSections({
           >
             zagadai.online@yandex.ru
           </a>
+          <span className="font-golos text-xs" style={{ color: "#ffffff" }}>
+            Услуги предоставляются на территории РФ
+          </span>
         </div>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
           <span className="font-golos text-xs" style={{ color: "#ffffff" }}>
