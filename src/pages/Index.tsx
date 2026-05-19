@@ -51,34 +51,46 @@ export default function Index() {
     if (paid === "ok" && starId) {
       window.history.replaceState({}, "", window.location.pathname);
 
-      fetch(func2url["save-wish"], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "status", star_id: Number(starId) }),
-      })
-        .then((r) => r.json())
-        .then((raw) => {
-          const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-          if (data.status === "active") {
-            const amt: number = data.amount ?? 100;
-            const baseSize = amt >= 1000 ? 3.5 : amt >= 500 ? 2.8 : amt >= 100 ? 2.2 : amt >= 50 ? 1.8 : 1.3;
-            const newStar: Star = {
-              id: Date.now(),
-              x: data.x,
-              y: data.y,
-              size: baseSize + Math.random() * 0.5,
-              delay: Math.random() * 3,
-              lit: true,
-              amount: amt,
-              wish: data.wish ?? "",
-            };
-            setStarsCount((prev) => prev + 1);
-            setStars((prev) => [...prev.map((s) => ({ ...s, isNew: false })), { ...newStar, isNew: true }]);
-            setTimeout(() => setStars((prev) => prev.map((s) => (s.id === newStar.id ? { ...s, isNew: false } : s))), 3000);
-            setTimeout(() => playStarAppear(), 300);
-          }
+      const lightUpStar = (data: { x: number; y: number; amount: number; wish: string }) => {
+        const amt = data.amount ?? 100;
+        const baseSize = amt >= 1000 ? 3.5 : amt >= 500 ? 2.8 : amt >= 100 ? 2.2 : amt >= 50 ? 1.8 : 1.3;
+        const newStar: Star = {
+          id: Date.now(),
+          x: data.x,
+          y: data.y,
+          size: baseSize + Math.random() * 0.5,
+          delay: Math.random() * 3,
+          lit: true,
+          amount: amt,
+          wish: data.wish ?? "",
+        };
+        setStarsCount((prev) => prev + 1);
+        setStars((prev) => [...prev.map((s) => ({ ...s, isNew: false })), { ...newStar, isNew: true }]);
+        setTimeout(() => setStars((prev) => prev.map((s) => (s.id === newStar.id ? { ...s, isNew: false } : s))), 3000);
+        setTimeout(() => playStarAppear(), 300);
+      };
+
+      const checkStatus = (attemptsLeft: number) => {
+        fetch(func2url["save-wish"], {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "status", star_id: Number(starId) }),
         })
-        .catch(() => {});
+          .then((r) => r.json())
+          .then((raw) => {
+            const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+            if (data.status === "active") {
+              lightUpStar(data);
+            } else if (attemptsLeft > 1) {
+              setTimeout(() => checkStatus(attemptsLeft - 1), 2000);
+            }
+          })
+          .catch(() => {
+            if (attemptsLeft > 1) setTimeout(() => checkStatus(attemptsLeft - 1), 2000);
+          });
+      };
+
+      checkStatus(6);
     }
   }, []);
 
