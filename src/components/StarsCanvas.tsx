@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; isNew?: boolean; amount?: number; wish?: string };
+type Star = { id: number; x: number; y: number; size: number; delay: number; lit: boolean; isNew?: boolean; amount?: number; wish?: string; name?: string; avatar?: string };
 
 interface Props {
   stars: Star[];
@@ -133,15 +133,43 @@ export default function StarsCanvas({ stars }: Props) {
               onMouseLeave={() => setHoveredId(null)}
             />
 
+            {/* Аватар пользователя над звездой */}
+            {star.avatar && star.size >= 2 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: 0, top: 0,
+                  width: `${star.size * 2.2}px`,
+                  height: `${star.size * 2.2}px`,
+                  marginLeft: `-${star.size * 1.1}px`,
+                  marginTop: `-${star.size * 1.1}px`,
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  opacity: isHovered ? 0.95 : 0.45,
+                  transform: `scale(${scale})`,
+                  transition: 'opacity 0.25s ease, transform 0.25s ease',
+                  boxShadow: `0 0 ${star.size * 3}px ${star.size}px rgba(255,240,180,0.18)`,
+                  pointerEvents: 'none',
+                }}
+              >
+                <img
+                  src={star.avatar}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.85) saturate(0.7)' }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              </div>
+            )}
+
             {/* Попап при ховере */}
             {isHovered && star.wish && (
               <div style={{
                 position: 'absolute',
-                bottom: `${star.size * scale + 10}px`,
+                bottom: `${star.size * scale + 14}px`,
                 left: '50%',
                 transform: 'translateX(-50%)',
                 background: 'rgba(6,8,22,0.93)',
-                border: '1px solid rgba(201,168,76,0.35)',
+                border: '1px solid rgba(201,168,76,0.25)',
                 borderRadius: 12,
                 padding: '10px 14px',
                 minWidth: 180,
@@ -152,6 +180,16 @@ export default function StarsCanvas({ stars }: Props) {
                 zIndex: 60,
                 whiteSpace: 'normal',
               }}>
+                {(star.name || star.avatar) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    {star.avatar && (
+                      <img src={star.avatar} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', opacity: 0.85, flexShrink: 0 }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    )}
+                    {star.name && (
+                      <span style={{ fontSize: 11, color: 'rgba(200,210,240,0.6)', fontFamily: 'Golos Text, sans-serif' }}>{star.name}</span>
+                    )}
+                  </div>
+                )}
                 <p style={{ color: 'rgba(240,232,208,0.9)', fontSize: 12, lineHeight: 1.5, margin: 0, fontStyle: 'italic', fontFamily: 'Cormorant Garamond, serif' }}>
                   «{star.wish}»
                 </p>

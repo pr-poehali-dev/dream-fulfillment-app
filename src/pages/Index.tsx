@@ -18,6 +18,8 @@ type Star = {
   lit: boolean;
   amount?: number;
   wish?: string;
+  name?: string;
+  avatar?: string;
 };
 
 export default function Index() {
@@ -37,6 +39,7 @@ export default function Index() {
   const [altruistsCount] = useState(0);
   const [randomWish, setRandomWish] = useState<WishItem | null>(null);
   const [randomLoading, setRandomLoading] = useState(false);
+  const [payNotice, setPayNotice] = useState<"success" | "fail" | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -45,13 +48,16 @@ export default function Index() {
 
     if (paid === "fail") {
       window.history.replaceState({}, "", window.location.pathname);
+      setPayNotice("fail");
+      setTimeout(() => setPayNotice(null), 5000);
       return;
     }
 
     if (paid === "ok" && starId) {
       window.history.replaceState({}, "", window.location.pathname);
+      setPayNotice("success");
 
-      const lightUpStar = (data: { x: number; y: number; amount: number; wish: string }) => {
+      const lightUpStar = (data: { x: number; y: number; amount: number; wish: string; name?: string; avatar?: string }) => {
         const amt = data.amount ?? 100;
         const baseSize = amt >= 1000 ? 3.5 : amt >= 500 ? 2.8 : amt >= 100 ? 2.2 : amt >= 50 ? 1.8 : 1.3;
         const newStar: Star = {
@@ -63,18 +69,21 @@ export default function Index() {
           lit: true,
           amount: amt,
           wish: data.wish ?? "",
+          name: data.name,
+          avatar: data.avatar,
         };
         setStarsCount((prev) => prev + 1);
         setStars((prev) => [...prev.map((s) => ({ ...s, isNew: false })), { ...newStar, isNew: true }]);
         setTimeout(() => setStars((prev) => prev.map((s) => (s.id === newStar.id ? { ...s, isNew: false } : s))), 3000);
         setTimeout(() => playStarAppear(), 300);
+        setTimeout(() => setPayNotice(null), 5000);
       };
 
-      const checkStatus = (attemptsLeft: number) => {
+      const tryConfirm = (attemptsLeft: number) => {
         fetch(func2url["save-wish"], {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "status", star_id: Number(starId) }),
+          body: JSON.stringify({ action: "confirm", star_id: Number(starId) }),
         })
           .then((r) => r.json())
           .then((raw) => {
@@ -82,15 +91,17 @@ export default function Index() {
             if (data.status === "active") {
               lightUpStar(data);
             } else if (attemptsLeft > 1) {
-              setTimeout(() => checkStatus(attemptsLeft - 1), 2000);
+              setTimeout(() => tryConfirm(attemptsLeft - 1), 2000);
+            } else {
+              setPayNotice(null);
             }
           })
           .catch(() => {
-            if (attemptsLeft > 1) setTimeout(() => checkStatus(attemptsLeft - 1), 2000);
+            if (attemptsLeft > 1) setTimeout(() => tryConfirm(attemptsLeft - 1), 2000);
           });
       };
 
-      checkStatus(6);
+      tryConfirm(8);
     }
   }, []);
 
@@ -195,20 +206,12 @@ export default function Index() {
     }
   };
 
-  const handleWishSent = (amount: number, wish: string, starX?: number, starY?: number) => {
+  const handleWishSent = (amount: number, wish: string, starX?: number, starY?: number, name?: string, avatar?: string) => {
     setShowModal(false);
     setStarsCount((prev) => prev + 1);
     setTimeout(() => playStarAppear(), 300);
     const baseSize =
-      amount >= 1000
-        ? 3.5
-        : amount >= 500
-          ? 2.8
-          : amount >= 100
-            ? 2.2
-            : amount >= 50
-              ? 1.8
-              : 1.3;
+      amount >= 1000 ? 3.5 : amount >= 500 ? 2.8 : amount >= 100 ? 2.2 : amount >= 50 ? 1.8 : 1.3;
     const newStar: Star = {
       id: Date.now(),
       x: starX ?? (5 + Math.random() * 85),
@@ -218,6 +221,8 @@ export default function Index() {
       lit: true,
       amount,
       wish,
+      name,
+      avatar,
     };
     setStars((prev) => {
       const updated = prev.map((s) => ({ ...s, isNew: false }));
@@ -261,6 +266,28 @@ export default function Index() {
 
       {randomWish && (
         <WishCardModal wish={randomWish} onClose={() => setRandomWish(null)} />
+      )}
+
+      {payNotice && (
+        <div style={{
+          position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)",
+          zIndex: 300, pointerEvents: "none",
+        }}>
+          <div style={{
+            padding: "14px 24px",
+            background: payNotice === "success" ? "rgba(6,20,12,0.95)" : "rgba(20,6,8,0.95)",
+            border: `1px solid ${payNotice === "success" ? "rgba(80,200,100,0.5)" : "rgba(220,80,80,0.5)"}`,
+            borderRadius: 99,
+            color: payNotice === "success" ? "rgba(120,220,140,0.95)" : "rgba(220,100,100,0.95)",
+            fontFamily: '"Golos Text", sans-serif',
+            fontSize: 14,
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+            whiteSpace: "nowrap",
+          }}>
+            {payNotice === "success" ? "✦ Оплата прошла успешно! Звезда зажигается..." : "✕ Оплата не прошла. Попробуйте ещё раз."}
+          </div>
+        </div>
       )}
 
       {randomLoading && (

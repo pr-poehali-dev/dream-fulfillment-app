@@ -28,7 +28,7 @@ def get_cabinet_data(user_id: str, schema: str, db_url: str) -> dict:
     cur.execute(f"""
         SELECT id, wish, amount, status, created_at, fulfilled_at
         FROM {schema}.stars
-        WHERE user_id = %s
+        WHERE user_id = %s AND status IN ('active', 'fulfilled')
         ORDER BY created_at DESC
     """, (user_id,))
     wishes = []

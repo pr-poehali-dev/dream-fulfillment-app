@@ -225,14 +225,19 @@ def handle_webhook(body: dict) -> dict:
 
 
 def handle_status(body: dict) -> dict:
-    """Проверяет статус звезды по star_id."""
+    """Проверяет статус звезды по star_id. Возвращает статус, координаты, желание, сумму и аватар."""
     star_id = body.get('star_id')
     if not star_id:
         return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'star_id required'})}
 
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor()
-    cur.execute(f"SELECT status, x, y, wish, amount FROM {SCHEMA}.stars WHERE id = %s", (star_id,))
+    cur.execute(f"""
+        SELECT s.status, s.x, s.y, s.wish, s.amount, u.name, u.avatar_url
+        FROM {SCHEMA}.stars s
+        JOIN {SCHEMA}.users u ON u.id = s.user_id
+        WHERE s.id = %s
+    """, (star_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
@@ -243,7 +248,104 @@ def handle_status(body: dict) -> dict:
     return {
         'statusCode': 200,
         'headers': CORS,
-        'body': json.dumps({'status': row[0], 'x': float(row[1]), 'y': float(row[2]), 'wish': row[3], 'amount': float(row[4])}),
+        'body': json.dumps({
+            'status': row[0],
+            'x': float(row[1]),
+            'y': float(row[2]),
+            'wish': row[3],
+            'amount': float(row[4]),
+            'name': row[5],
+            'avatar': row[6] or '',
+        }),
+    }
+
+
+def handle_confirm(body: dict) -> dict:
+    """Подтверждает оплату через Т-Банк GetState и активирует звезду. Используется при возврате с платёжной страницы."""
+    star_id = body.get('star_id')
+    if not star_id:
+        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'star_id required'})}
+
+    terminal_key = os.environ['TBANK_TERMINAL_KEY']
+    secret_key = os.environ['TBANK_SECRET_KEY']
+
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
+    cur = conn.cursor()
+    cur.execute(f"""
+        SELECT t.payment_id, s.status, s.x, s.y, s.wish, s.amount, u.name, u.avatar_url
+        FROM {SCHEMA}.stars s
+        JOIN {SCHEMA}.transactions t ON t.star_id = s.id
+        JOIN {SCHEMA}.users u ON u.id = s.user_id
+        WHERE s.id = %s
+        ORDER BY t.created_at DESC LIMIT 1
+    """, (star_id,))
+    row = cur.fetchone()
+
+    if not row:
+        cur.close()
+        conn.close()
+        return {'statusCode': 404, 'headers': CORS, 'body': json.dumps({'error': 'not found'})}
+
+    payment_id, star_status, x, y, wish, amount, name, avatar_url = row
+
+    if star_status == 'active':
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 200,
+            'headers': CORS,
+            'body': json.dumps({
+                'status': 'active', 'x': float(x), 'y': float(y),
+                'wish': wish, 'amount': float(amount), 'name': name, 'avatar': avatar_url or '',
+            }),
+        }
+
+    confirmed = False
+    if payment_id:
+        try:
+            params = {'TerminalKey': terminal_key, 'PaymentId': payment_id}
+            params['Token'] = make_token(params, secret_key)
+            req = urllib.request.Request(
+                f'{TBANK_API}/GetState',
+                data=json.dumps(params).encode(),
+                headers={'Content-Type': 'application/json'},
+                method='POST',
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                result = json.loads(resp.read().decode())
+            tbank_status = result.get('Status', '')
+            if tbank_status in ('CONFIRMED', 'AUTHORIZED'):
+                confirmed = True
+        except Exception:
+            pass
+
+    if confirmed:
+        cur.execute(
+            f"UPDATE {SCHEMA}.stars SET status='active', paid_at=now() WHERE id=%s AND status='pending'",
+            (star_id,),
+        )
+        cur.execute(
+            f"UPDATE {SCHEMA}.transactions SET status='paid' WHERE star_id=%s AND status='pending'",
+            (star_id,),
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 200,
+            'headers': CORS,
+            'body': json.dumps({
+                'status': 'active', 'x': float(x), 'y': float(y),
+                'wish': wish, 'amount': float(amount), 'name': name, 'avatar': avatar_url or '',
+            }),
+        }
+
+    cur.close()
+    conn.close()
+    return {
+        'statusCode': 200,
+        'headers': CORS,
+        'body': json.dumps({'status': 'pending'}),
     }
 
 
@@ -261,5 +363,7 @@ def handler(event: dict, context) -> dict:
         return handle_webhook(body)
     elif action == 'status':
         return handle_status(body)
+    elif action == 'confirm':
+        return handle_confirm(body)
     else:
         return handle_save(body)
