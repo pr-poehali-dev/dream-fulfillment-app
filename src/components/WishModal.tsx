@@ -34,10 +34,12 @@ export default function WishModal({ onClose, onSent }: Props) {
   const [pendingCoords, setPendingCoords] = useState<{ x: number; y: number } | null>(null);
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [payError, setPayError] = useState("");
+  const [email, setEmail] = useState("");
 
   const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);
-  const isValid = wish.trim() && numAmount >= 10;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValid = wish.trim() && numAmount >= 10 && isEmailValid;
 
   const handleAmountInput = (val: string) => {
     setAmountInput(val);
@@ -64,6 +66,7 @@ export default function WishModal({ onClose, onSent }: Props) {
           wish,
           story,
           amount: numAmount,
+          email,
           success_url: `${window.location.origin}/?paid=ok`,
           fail_url: `${window.location.origin}/?paid=fail`,
         }),
@@ -347,6 +350,33 @@ export default function WishModal({ onClose, onSent }: Props) {
                 )}
               </div>
 
+              <div>
+                <label
+                  className="font-golos text-xs mb-2 block"
+                  style={{ color: "rgba(201,168,76,0.7)", letterSpacing: "0.1em", textTransform: "uppercase" }}
+                >
+                  Email для чека
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full rounded-xl px-4 py-3 font-golos text-sm focus:outline-none transition-all"
+                  style={{
+                    background: "rgba(20,25,40,0.8)",
+                    border: `1px solid ${email && !isEmailValid ? "rgba(220,80,80,0.5)" : "rgba(201,168,76,0.2)"}`,
+                    color: "#f0e8d0",
+                    caretColor: "#c9a84c",
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = "rgba(201,168,76,0.5)")}
+                  onBlur={(e) => (e.target.style.borderColor = email && !isEmailValid ? "rgba(220,80,80,0.5)" : "rgba(201,168,76,0.2)")}
+                />
+                <p className="font-golos text-xs mt-1" style={{ color: "rgba(200,210,240,0.3)" }}>
+                  Чек придёт на этот адрес
+                </p>
+              </div>
+
               {payError && (
                 <p className="font-golos text-xs text-center" style={{ color: "rgba(220,80,80,0.85)" }}>
                   {payError}
@@ -365,7 +395,7 @@ export default function WishModal({ onClose, onSent }: Props) {
                   cursor: isValid && user && !saving ? "pointer" : "not-allowed",
                 }}
               >
-                {saving ? "Создаём платёж..." : !user ? "Войди, чтобы загадать желание" : isValid ? `Оплатить ${numAmount} ₽ и зажечь звезду` : "Введи желание и сумму"}
+                {saving ? "Создаём платёж..." : !user ? "Войди, чтобы загадать желание" : !wish.trim() || numAmount < 10 ? "Введи желание и сумму" : !isEmailValid ? "Введи email для чека" : `Оплатить ${numAmount} ₽ и зажечь звезду`}
               </button>
             </div>
           </>

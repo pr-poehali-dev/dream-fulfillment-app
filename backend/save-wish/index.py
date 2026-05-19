@@ -118,6 +118,27 @@ def handle_create_payment(body: dict) -> dict:
     description = f"Зажечь звезду: {wish[:50]}"
     success_url = body.get('success_url', 'https://zagadai.online/?paid=ok')
     fail_url = body.get('fail_url', 'https://zagadai.online/?paid=fail')
+    email = (body.get('email') or '').strip()
+
+    receipt = {
+        'EmailCompany': 'hello@zagadai.online',
+        'Taxation': 'usn_income',
+        'FfdVersion': '1.2',
+        'Items': [
+            {
+                'Name': f'Зажечь звезду желания',
+                'Price': amount_kopecks,
+                'Quantity': 1.0,
+                'Amount': amount_kopecks,
+                'PaymentMethod': 'full_payment',
+                'PaymentObject': 'service',
+                'Tax': 'none',
+                'MeasurementUnit': 'шт',
+            }
+        ],
+    }
+    if email:
+        receipt['Email'] = email
 
     params = {
         'TerminalKey': terminal_key,
@@ -126,6 +147,7 @@ def handle_create_payment(body: dict) -> dict:
         'Description': description,
         'SuccessURL': f"{success_url}&star_id={star_id}",
         'FailURL': fail_url,
+        'Receipt': receipt,
     }
     params['Token'] = make_token(params, secret_key)
 
