@@ -8,15 +8,7 @@ CORS_HEADERS = {
     "Access-Control-Allow-Headers": "Content-Type",
 }
 
-MOCK_WISHES = [
-    {"id": 1, "wish": "Поехать с семьёй на море этим летом", "amount": 150, "name": "Алина К.", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=alina", "x": 23, "y": 18},
-    {"id": 2, "wish": "Открыть небольшую пекарню в родном городе", "amount": 500, "name": "Максим Г.", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=maxim", "x": 67, "y": 32},
-    {"id": 3, "wish": "Купить маме новый ноутбук для работы", "amount": 80, "name": "Света П.", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=sveta", "x": 45, "y": 55},
-    {"id": 4, "wish": "Научиться играть на гитаре и выступить на сцене", "amount": 1000, "name": "Дима В.", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=dima", "x": 12, "y": 70},
-    {"id": 5, "wish": "Отучиться на курсах дизайна и сменить профессию", "amount": 300, "name": "Катя Р.", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=katya", "x": 80, "y": 15},
-    {"id": 6, "wish": "Вылечить спину и снова начать бегать по утрам", "amount": 200, "name": "Игорь С.", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=igor", "x": 55, "y": 40},
-    {"id": 7, "wish": "Переехать в дом с садом и завести собаку", "amount": 750, "name": "Марина Д.", "avatar": "https://api.dicebear.com/7.x/adventurer/svg?seed=marina", "x": 35, "y": 62},
-]
+MOCK_WISHES = []
 
 
 def get_cabinet_data(user_id: str, schema: str, db_url: str) -> dict:
