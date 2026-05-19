@@ -52,7 +52,7 @@ export default function WishModal({ onClose, onSent }: Props) {
       `Привет! Хочу зажечь ${tier.label}. Моё желание: ${wish}. Сумма: ${numAmount} ₽`,
     );
     window.open(
-      `https://vk.com/im?media=&sel=-238641413&text=${message}`,
+      `https://vk.me/-238641413?text=${message}`,
       "_blank",
     );
   };
