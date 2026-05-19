@@ -116,12 +116,16 @@ def handle_create_payment(body: dict) -> dict:
 
     order_id = f"star-{star_id}-tx-{transaction_id}"
     description = f"Зажечь звезду: {wish[:50]}"
+    success_url = body.get('success_url', 'https://zagadai.online/?paid=ok')
+    fail_url = body.get('fail_url', 'https://zagadai.online/?paid=fail')
 
     params = {
         'TerminalKey': terminal_key,
         'Amount': amount_kopecks,
         'OrderId': order_id,
         'Description': description,
+        'SuccessURL': f"{success_url}&star_id={star_id}",
+        'FailURL': fail_url,
     }
     params['Token'] = make_token(params, secret_key)
 
@@ -228,7 +232,7 @@ def handle_status(body: dict) -> dict:
 
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor()
-    cur.execute(f"SELECT status, x, y FROM {SCHEMA}.stars WHERE id = %s", (star_id,))
+    cur.execute(f"SELECT status, x, y, wish, amount FROM {SCHEMA}.stars WHERE id = %s", (star_id,))
     row = cur.fetchone()
     cur.close()
     conn.close()
@@ -239,7 +243,7 @@ def handle_status(body: dict) -> dict:
     return {
         'statusCode': 200,
         'headers': CORS,
-        'body': json.dumps({'status': row[0], 'x': float(row[1]), 'y': float(row[2])}),
+        'body': json.dumps({'status': row[0], 'x': float(row[1]), 'y': float(row[2]), 'wish': row[3], 'amount': float(row[4])}),
     }
 
 
