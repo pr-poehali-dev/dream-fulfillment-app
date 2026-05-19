@@ -31,7 +31,10 @@ export default function WishModal({ onClose, onSent }: Props) {
   const [step, setStep] = useState<"form" | "paying" | "done">("form");
   const [saving, setSaving] = useState(false);
   const [pendingStarId, setPendingStarId] = useState<number | null>(null);
-  const [pendingCoords, setPendingCoords] = useState<{ x: number; y: number } | null>(null);
+  const [pendingCoords, setPendingCoords] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [payError, setPayError] = useState("");
   const [email, setEmail] = useState("");
@@ -97,9 +100,14 @@ export default function WishModal({ onClose, onSent }: Props) {
       const data = await res.json();
       if (data.status === "active") {
         setStep("done");
-        setTimeout(() => onSent(numAmount, wish, pendingCoords?.x, pendingCoords?.y), 1500);
+        setTimeout(
+          () => onSent(numAmount, wish, pendingCoords?.x, pendingCoords?.y),
+          1500,
+        );
       } else {
-        setPayError("Оплата ещё не подтверждена. Подожди немного и попробуй снова.");
+        setPayError(
+          "Оплата ещё не подтверждена. Подожди немного и попробуй снова.",
+        );
       }
     } catch {
       setPayError("Ошибка проверки. Попробуй ещё раз.");
@@ -353,7 +361,11 @@ export default function WishModal({ onClose, onSent }: Props) {
               <div>
                 <label
                   className="font-golos text-xs mb-2 block"
-                  style={{ color: "rgba(201,168,76,0.7)", letterSpacing: "0.1em", textTransform: "uppercase" }}
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
                 >
                   Email для чека
                 </label>
@@ -369,16 +381,29 @@ export default function WishModal({ onClose, onSent }: Props) {
                     color: "#f0e8d0",
                     caretColor: "#c9a84c",
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "rgba(201,168,76,0.5)")}
-                  onBlur={(e) => (e.target.style.borderColor = email && !isEmailValid ? "rgba(220,80,80,0.5)" : "rgba(201,168,76,0.2)")}
+                  onFocus={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.5)")
+                  }
+                  onBlur={(e) =>
+                    (e.target.style.borderColor =
+                      email && !isEmailValid
+                        ? "rgba(220,80,80,0.5)"
+                        : "rgba(201,168,76,0.2)")
+                  }
                 />
-                <p className="font-golos text-xs mt-1" style={{ color: "rgba(200,210,240,0.3)" }}>
+                <p
+                  className="font-golos text-xs mt-1"
+                  style={{ color: "rgba(200,210,240,0.3)" }}
+                >
                   Чек придёт на этот адрес
                 </p>
               </div>
 
               {payError && (
-                <p className="font-golos text-xs text-center" style={{ color: "rgba(220,80,80,0.85)" }}>
+                <p
+                  className="font-golos text-xs text-center"
+                  style={{ color: "rgba(220,80,80,0.85)" }}
+                >
                   {payError}
                 </p>
               )}
@@ -388,14 +413,24 @@ export default function WishModal({ onClose, onSent }: Props) {
                 disabled={!isValid || saving || !user}
                 className="w-full py-3 rounded-full font-golos font-semibold text-sm transition-all mt-2"
                 style={{
-                  background: isValid && user
-                    ? "linear-gradient(135deg, #c9a84c, #8a6a20)"
-                    : "rgba(201,168,76,0.15)",
+                  background:
+                    isValid && user
+                      ? "linear-gradient(135deg, #c9a84c, #8a6a20)"
+                      : "rgba(201,168,76,0.15)",
                   color: isValid && user ? "#060810" : "rgba(200,210,240,0.3)",
-                  cursor: isValid && user && !saving ? "pointer" : "not-allowed",
+                  cursor:
+                    isValid && user && !saving ? "pointer" : "not-allowed",
                 }}
               >
-                {saving ? "Создаём платёж..." : !user ? "Войди, чтобы загадать желание" : !wish.trim() || numAmount < 10 ? "Введи желание и сумму" : !isEmailValid ? "Введи email для чека" : `Оплатить ${numAmount} ₽ и зажечь звезду`}
+                {saving
+                  ? "Создаём платёж..."
+                  : !user
+                    ? "Войди, чтобы загадать желание"
+                    : !wish.trim() || numAmount < 10
+                      ? "Введи желание и сумму"
+                      : !isEmailValid
+                        ? "Введи email для чека"
+                        : `Оплатить ${numAmount} ₽ и зажечь звезду`}
               </button>
             </div>
           </>
@@ -404,18 +439,31 @@ export default function WishModal({ onClose, onSent }: Props) {
         {step === "paying" && (
           <div className="text-center py-6">
             <div className="text-5xl mb-4">💳</div>
-            <h2 className="font-cormorant text-2xl mb-3" style={{ color: "#f0e8d0" }}>
+            <h2
+              className="font-cormorant text-2xl mb-3"
+              style={{ color: "#f0e8d0" }}
+            >
               Оплата открыта
             </h2>
-            <p className="font-golos text-sm mb-1" style={{ color: "rgba(200,210,240,0.6)" }}>
-              Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong> в открывшейся вкладке Т-Банка.
+            <p
+              className="font-golos text-sm mb-1"
+              style={{ color: "rgba(200,210,240,0.6)" }}
+            >
+              Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong>{" "}
+              в открывшейся вкладке Т-Банка.
             </p>
-            <p className="font-golos text-xs mb-6" style={{ color: "rgba(200,210,240,0.35)" }}>
+            <p
+              className="font-golos text-xs mb-6"
+              style={{ color: "rgba(200,210,240,0.35)" }}
+            >
               После оплаты вернись сюда и нажми кнопку ниже
             </p>
 
             {payError && (
-              <p className="font-golos text-xs mb-4" style={{ color: "rgba(220,80,80,0.85)" }}>
+              <p
+                className="font-golos text-xs mb-4"
+                style={{ color: "rgba(220,80,80,0.85)" }}
+              >
                 {payError}
               </p>
             )}
@@ -433,11 +481,16 @@ export default function WishModal({ onClose, onSent }: Props) {
                 border: "none",
               }}
             >
-              {checkingStatus ? "Проверяем оплату..." : "Я оплатил — зажечь звезду ✨"}
+              {checkingStatus
+                ? "Проверяем оплату..."
+                : "Я оплатил — зажечь звезду ✨"}
             </button>
 
             <button
-              onClick={() => { setStep("form"); setPayError(""); }}
+              onClick={() => {
+                setStep("form");
+                setPayError("");
+              }}
               className="w-full py-2 rounded-full font-golos text-xs transition-all"
               style={{
                 background: "transparent",
@@ -471,6 +524,28 @@ export default function WishModal({ onClose, onSent }: Props) {
               style={{ color: "rgba(201,168,76,0.6)" }}
             >
               {tier.label} · {numAmount} ₽ · {tier.desc}
+            </p>
+            <p className="mt-4">
+              <button
+                onClick={() => {
+                  const shareText = encodeURIComponent(
+                    `✨ Я только что зажёг ${tier.label} на «Загадай Онлайн»!\n\nМоё желание: ${wish}\n\nПрисоединяйтесь: https://zagadai.online\n\n#ЗагадайОнлайн #КолодецЖеланий`,
+                  );
+                  window.open(
+                    `https://vk.com/share.php?url=https://zagadai.online&title=${shareText}`,
+                    "_blank",
+                  );
+                }}
+                className="px-5 py-2 rounded-full font-golos text-sm transition-all"
+                style={{
+                  background: "#0077ff",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                📢 Поделиться ВКонтакте
+              </button>
             </p>
           </div>
         )}
