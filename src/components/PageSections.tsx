@@ -215,7 +215,7 @@ export default function PageSections({
           </h1>
           <p
             className="font-golos text-sm leading-relaxed"
-            style={{ color: "rgba(200,210,240,0.5)" }}
+            style={{ color: "#ffffff" }}
           >
             «Загадай Онлайн» — это платформа, где каждый может загадать желание
             онлайн, бросить виртуальную монетку в Колодец Желаний и зажечь свою
