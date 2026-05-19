@@ -64,15 +64,14 @@ export default function WishModal({ onClose, onSent }: Props) {
           wish,
           story,
           amount: numAmount,
-          success_url: `${window.location.origin}/?paid=ok`,
-          fail_url: `${window.location.origin}/?paid=fail`,
         }),
       });
       const data = await res.json();
       if (data.payment_url) {
         setPendingStarId(data.star_id);
         setPendingCoords({ x: data.x, y: data.y });
-        window.location.href = data.payment_url;
+        window.open(data.payment_url, "_blank");
+        setStep("paying");
       } else {
         setPayError(data.error || "Не удалось создать платёж");
       }
