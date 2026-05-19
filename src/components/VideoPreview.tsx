@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+
 interface Props {
   onClose: () => void;
 }
@@ -10,8 +12,6 @@ const SUBTITLES = [
   { time: 12, text: "146 745 098 желаний ждут исполнения." },
   { time: 15, text: "Твоё — следующее." },
 ];
-
-import { useState, useEffect } from "react";
 
 export default function VideoPreview({ onClose }: Props) {
   const [elapsed, setElapsed] = useState(0);
