@@ -48,7 +48,13 @@ export default function WishModal({ onClose, onSent }: Props) {
 
   const handleSubmit = () => {
     if (!isValid) return;
-    setStep("vk");
+    const message = encodeURIComponent(
+      `Привет! Хочу зажечь ${tier.label}. Моё желание: ${wish}. Сумма: ${numAmount} ₽`,
+    );
+    window.open(
+      `https://vk.com/im?media=&sel=-238641413&text=${message}`,
+      "_blank",
+    );
   };
 
   const handleVkPost = async () => {
@@ -338,9 +344,7 @@ export default function WishModal({ onClose, onSent }: Props) {
                   cursor: isValid ? "pointer" : "not-allowed",
                 }}
               >
-                {isValid
-                  ? `Бросить монетку · ${numAmount} ₽`
-                  : "Введи желание и сумму"}
+                {isValid ? `Написать в сообщество` : "Введи желание и сумму"}
               </button>
             </div>
           </>
