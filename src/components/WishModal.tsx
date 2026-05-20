@@ -80,7 +80,7 @@ export default function WishModal({ onClose, onSent }: Props) {
         setPendingCoords({ x: data.x, y: data.y });
         setStep("paying");
         window.open(
-          `https://arsenalpay.ru/widget.html?widget=19814&destination=12345&amount=${numAmount}`,
+          `https://arsenalpay.ru/widget.html?widget=19814&destination=123456&amount=${numAmount}`,
           "_blank",
         );
       } else {
