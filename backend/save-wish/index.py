@@ -1,391 +1,552 @@
-import json
-import os
-import hashlib
-import random
-import psycopg2
-import urllib.request
+import { useState } from "react";
+import Icon from "@/components/ui/icon";
+import { useUser } from "@/context/UserContext";
+import func2url from "../../backend/func2url.json";
 
-SCHEMA = os.environ.get('MAIN_DB_SCHEMA', 'public')
-TBANK_API = 'https://securepay.tinkoff.ru/v2'
-
-CORS = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+interface Props {
+  onClose: () => void;
+  onSent: (amount: number, wish: string, x?: number, y?: number) => void;
 }
 
+function getStarTier(amount: number) {
+  if (amount >= 1000)
+    return { label: "Звездопад", icon: "🌟", desc: "Мощный и незабываемый" };
+  if (amount >= 500)
+    return { label: "Созвездие", icon: "✨", desc: "Центр притяжения" };
+  if (amount >= 100)
+    return { label: "Яркая звезда", icon: "⭐", desc: "Видно издалека" };
+  if (amount >= 50)
+    return { label: "Звезда", icon: "💫", desc: "Уверенная и заметная" };
+  return { label: "Звёздочка", icon: "·", desc: "Скромная, но заметная" };
+}
 
-def make_token(params: dict, secret: str) -> str:
-    filtered = {k: v for k, v in params.items() if k not in ('Token', 'Receipt', 'DATA') and v is not None}
-    filtered['Password'] = secret
-    sorted_vals = ''.join(str(v) for k, v in sorted(filtered.items()))
-    return hashlib.sha256(sorted_vals.encode()).hexdigest()
+const QUICK_AMOUNTS = [10, 50, 100, 500, 1000];
 
+export default function WishModal({ onClose, onSent }: Props) {
+  const { user } = useUser();
+  const [wish, setWish] = useState("");
+  const [story, setStory] = useState("");
+  const [amount, setAmount] = useState<number | "">(100);
+  const [amountInput, setAmountInput] = useState("100");
+  const [step, setStep] = useState<"form" | "paying" | "done">("form");
+  const [saving, setSaving] = useState(false);
+  const [pendingStarId, setPendingStarId] = useState<number | null>(null);
+  const [pendingCoords, setPendingCoords] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [payError, setPayError] = useState("");
+  const [email, setEmail] = useState("");
 
-def handle_save(body: dict) -> dict:
-    """Старая логика: сохраняет желание без оплаты (статус active сразу)."""
-    user_id = body.get('user_id')
-    wish = (body.get('wish') or '').strip()
-    story = (body.get('story') or '').strip()
-    amount = body.get('amount', 0)
-    x = body.get('x')
-    y = body.get('y')
+  const numAmount = typeof amount === "number" ? amount : 0;
+  const tier = getStarTier(numAmount);
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValid = wish.trim() && numAmount >= 10 && isEmailValid;
 
-    if not user_id or not wish or not amount or float(amount) < 10:
-        return {
-            'statusCode': 400,
-            'headers': CORS,
-            'body': json.dumps({'error': 'user_id, wish и amount (>=10) обязательны'}),
-        }
+  const handleAmountInput = (val: string) => {
+    setAmountInput(val);
+    const n = parseInt(val, 10);
+    setAmount(isNaN(n) ? "" : n);
+  };
 
-    if x is None:
-        x = round(5 + random.random() * 85, 2)
-    if y is None:
-        y = round(2 + random.random() * 45, 2)
+  const handleQuick = (val: number) => {
+    setAmount(val);
+    setAmountInput(String(val));
+  };
 
-    angel_fund = round(float(amount) * 0.7, 2)
-
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    cur.execute(
-        f"""
-        INSERT INTO {SCHEMA}.stars (user_id, wish, story, amount, angel_fund, status, x, y)
-        VALUES (%s, %s, %s, %s, %s, 'active', %s, %s)
-        RETURNING id, x, y
-        """,
-        (user_id, wish, story or None, float(amount), angel_fund, x, y),
-    )
-    row = cur.fetchone()
-    star_id, star_x, star_y = row
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return {
-        'statusCode': 200,
-        'headers': CORS,
-        'body': json.dumps({'id': star_id, 'x': float(star_x), 'y': float(star_y)}),
-    }
-
-
-def handle_create_payment(body: dict) -> dict:
-    """Создаёт звезду (pending) и возвращает URL оплаты Т-Банка."""
-    user_id = body.get('user_id')
-    wish = (body.get('wish') or '').strip()
-    story = (body.get('story') or '').strip()
-    amount = body.get('amount', 0)
-
-    if not user_id or not wish or not amount or float(amount) < 10:
-        return {
-            'statusCode': 400,
-            'headers': CORS,
-            'body': json.dumps({'error': 'user_id, wish и amount (>=10) обязательны'}),
-        }
-
-    terminal_key = os.environ['TBANK_TERMINAL_KEY']
-    secret_key = os.environ['TBANK_SECRET_KEY']
-
-    x = round(5 + random.random() * 85, 2)
-    y = round(2 + random.random() * 45, 2)
-    angel_fund = round(float(amount) * 0.7, 2)
-    amount_kopecks = int(float(amount) * 100)
-
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    cur.execute(
-        f"""
-        INSERT INTO {SCHEMA}.stars (user_id, wish, story, amount, angel_fund, status, x, y)
-        VALUES (%s, %s, %s, %s, %s, 'pending', %s, %s)
-        RETURNING id
-        """,
-        (user_id, wish, story or None, float(amount), angel_fund, x, y),
-    )
-    star_id = cur.fetchone()[0]
-    cur.execute(
-        f"""
-        INSERT INTO {SCHEMA}.transactions (user_id, star_id, amount, angel_fund, status)
-        VALUES (%s, %s, %s, %s, 'pending')
-        RETURNING id
-        """,
-        (user_id, star_id, float(amount), angel_fund),
-    )
-    transaction_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    order_id = f"star-{star_id}-tx-{transaction_id}"
-    description = f"Зажечь звезду: {wish[:50]}"
-    success_url = body.get('success_url', 'https://zagadai.online/?paid=ok')
-    fail_url = body.get('fail_url', 'https://zagadai.online/?paid=fail')
-    email = (body.get('email') or '').strip()
-
-    receipt = {
-        'EmailCompany': 'hello@zagadai.online',
-        'Taxation': 'usn_income',
-        'Items': [
-            {
-                'Name': 'Зажечь звезду желания',
-                'Price': amount_kopecks,
-                'Quantity': 1,
-                'Amount': amount_kopecks,
-                'PaymentMethod': 'full_payment',
-                'PaymentObject': 'service',
-                'Tax': 'none',
-            }
-        ],
-    }
-    if email:
-        receipt['Email'] = email
-
-    params = {
-        'TerminalKey': terminal_key,
-        'Amount': amount_kopecks,
-        'OrderId': order_id,
-        'Description': description,
-        'SuccessURL': f"{success_url}&star_id={star_id}",
-        'FailURL': fail_url,
-        'Receipt': receipt,
-    }
-    params['Token'] = make_token(params, secret_key)
-
-    req = urllib.request.Request(
-        f'{TBANK_API}/Init',
-        data=json.dumps(params).encode(),
-        headers={'Content-Type': 'application/json'},
-        method='POST',
-    )
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        result = json.loads(resp.read().decode())
-
-    print(f"[Tbank Init] Success={result.get('Success')} ErrorCode={result.get('ErrorCode')} Message={result.get('Message')} Details={result.get('Details')}")
-
-    if not result.get('Success'):
-        return {
-            'statusCode': 502,
-            'headers': CORS,
-            'body': json.dumps({'error': result.get('Message', 'Ошибка Т-Банка'), 'details': result.get('Details', '')}),
-        }
-
-    payment_url = result.get('PaymentURL')
-    payment_id = str(result.get('PaymentId', ''))
-
-    conn2 = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur2 = conn2.cursor()
-    cur2.execute(
-        f"UPDATE {SCHEMA}.transactions SET payment_id = %s WHERE id = %s",
-        (payment_id, transaction_id),
-    )
-    conn2.commit()
-    cur2.close()
-    conn2.close()
-
-    return {
-        'statusCode': 200,
-        'headers': CORS,
-        'body': json.dumps({
-            'payment_url': payment_url,
-            'star_id': star_id,
-            'x': x,
-            'y': y,
+  const handleSubmit = async () => {
+    if (!isValid || !user) return;
+    setSaving(true);
+    setPayError("");
+    try {
+      const res = await fetch(func2url["save-wish"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          wish,
+          story,
+          amount: numAmount,
+          email,
         }),
+      });
+      const data = await res.json();
+      if (data.id) {
+        setPendingStarId(data.id);
+        setPendingCoords({ x: data.x, y: data.y });
+        window.open(
+          `https://arsenalpay.ru/widget.html?widget=19814&destination=${data.id}&amount=${numAmount}`,
+          "_blank"
+        );
+        setStep("paying");
+      } else {
+        setPayError(data.error || "Не удалось создать звезду");
+      }
+    } catch {
+      setPayError("Ошибка соединения. Попробуй ещё раз.");
     }
+    setSaving(false);
+  };
 
-
-def handle_webhook(body: dict) -> dict:
-    """Webhook от Т-Банка: при CONFIRMED переводит звезду в статус active."""
-    terminal_key = os.environ['TBANK_TERMINAL_KEY']
-    secret_key = os.environ['TBANK_SECRET_KEY']
-
-    if body.get('TerminalKey') != terminal_key:
-        return {'statusCode': 403, 'headers': CORS, 'body': 'Forbidden'}
-
-    received_token = body.get('Token', '')
-    expected_token = make_token(body, secret_key)
-    if received_token != expected_token:
-        return {'statusCode': 403, 'headers': CORS, 'body': 'Invalid token'}
-
-    status = body.get('Status')
-    payment_id = str(body.get('PaymentId', ''))
-    order_id = body.get('OrderId', '')
-
-    if status != 'CONFIRMED':
-        return {'statusCode': 200, 'headers': CORS, 'body': 'OK'}
-
-    star_id = None
-    try:
-        parts = order_id.split('-')
-        star_idx = parts.index('star')
-        star_id = int(parts[star_idx + 1])
-    except (ValueError, IndexError):
-        pass
-
-    if not star_id:
-        return {'statusCode': 400, 'headers': CORS, 'body': 'Bad OrderId'}
-
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    cur.execute(
-        f"""
-        UPDATE {SCHEMA}.stars SET status = 'active', paid_at = now()
-        WHERE id = %s AND status = 'pending'
-        """,
-        (star_id,),
-    )
-    cur.execute(
-        f"""
-        UPDATE {SCHEMA}.transactions SET status = 'paid', payment_id = %s
-        WHERE star_id = %s AND status = 'pending'
-        """,
-        (payment_id, star_id),
-    )
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    return {'statusCode': 200, 'headers': CORS, 'body': 'OK'}
-
-
-def handle_status(body: dict) -> dict:
-    """Проверяет статус звезды по star_id. Возвращает статус, координаты, желание, сумму и аватар."""
-    star_id = body.get('star_id')
-    if not star_id:
-        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'star_id required'})}
-
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    cur.execute(f"""
-        SELECT s.status, s.x, s.y, s.wish, s.amount, u.name, u.avatar_url
-        FROM {SCHEMA}.stars s
-        JOIN {SCHEMA}.users u ON u.id = s.user_id
-        WHERE s.id = %s
-    """, (star_id,))
-    row = cur.fetchone()
-    cur.close()
-    conn.close()
-
-    if not row:
-        return {'statusCode': 404, 'headers': CORS, 'body': json.dumps({'error': 'not found'})}
-
-    return {
-        'statusCode': 200,
-        'headers': CORS,
-        'body': json.dumps({
-            'status': row[0],
-            'x': float(row[1]),
-            'y': float(row[2]),
-            'wish': row[3],
-            'amount': float(row[4]),
-            'name': row[5],
-            'avatar': row[6] or '',
-        }),
+  const handleCheckStatus = async () => {
+    if (!pendingStarId) return;
+    setCheckingStatus(true);
+    try {
+      const res = await fetch(func2url["save-wish"], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "status", star_id: pendingStarId }),
+      });
+      const data = await res.json();
+      if (data.status === "active") {
+        setStep("done");
+        setTimeout(
+          () => onSent(numAmount, wish, pendingCoords?.x, pendingCoords?.y),
+          1500,
+        );
+      } else {
+        setPayError(
+          "Оплата ещё не подтверждена. Подожди немного и попробуй снова.",
+        );
+      }
+    } catch {
+      setPayError("Ошибка проверки. Попробуй ещё раз.");
     }
+    setCheckingStatus(false);
+  };
 
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(6,8,16,0.92)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div
+        className="animate-modal-in w-full max-w-lg glass-panel rounded-3xl p-6 md:p-8 relative"
+        style={{
+          border: "1px solid rgba(201,168,76,0.2)",
+          maxHeight: "90vh",
+          overflowY: "auto",
+        }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 transition-colors"
+          style={{
+            color: "rgba(200,210,240,0.4)",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#c9a84c")}
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.color = "rgba(200,210,240,0.4)")
+          }
+        >
+          <Icon name="X" size={20} />
+        </button>
 
-def handle_confirm(body: dict) -> dict:
-    """Подтверждает оплату через Т-Банк GetState и активирует звезду. Используется при возврате с платёжной страницы."""
-    star_id = body.get('star_id')
-    if not star_id:
-        return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'star_id required'})}
+        {step === "form" && (
+          <>
+            <div className="text-center mb-6">
+              <div className="text-3xl mb-2"></div>
+              <h2
+                className="font-cormorant text-2xl md:text-3xl mb-1"
+                style={{ color: "#f0e8d0" }}
+              >
+                Загадай желание
+              </h2>
+              <p
+                className="font-golos text-xs"
+                style={{ color: "rgba(200,210,240,0.45)" }}
+              >
+                Колодец слушает тебя
+              </p>
+            </div>
 
-    terminal_key = os.environ['TBANK_TERMINAL_KEY']
-    secret_key = os.environ['TBANK_SECRET_KEY']
+            <div className="space-y-4">
+              <div>
+                <label
+                  className="font-golos text-xs mb-2 block"
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Твоё желание
+                </label>
+                <textarea
+                  value={wish}
+                  onChange={(e) => setWish(e.target.value)}
+                  placeholder="Опиши своё желание подробно и искренне..."
+                  rows={3}
+                  maxLength={300}
+                  className="w-full rounded-xl px-4 py-3 font-golos text-sm resize-none focus:outline-none transition-all"
+                  style={{
+                    background: "rgba(20,25,40,0.8)",
+                    border: "1px solid rgba(201,168,76,0.2)",
+                    color: "#f0e8d0",
+                    caretColor: "#c9a84c",
+                  }}
+                  onFocus={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.5)")
+                  }
+                  onBlur={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.2)")
+                  }
+                />
+                <div
+                  className="text-right mt-1 font-golos text-xs"
+                  style={{ color: "rgba(200,210,240,0.3)" }}
+                >
+                  {wish.length}/300
+                </div>
+              </div>
 
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    cur.execute(f"""
-        SELECT t.payment_id, s.status, s.x, s.y, s.wish, s.amount, u.name, u.avatar_url
-        FROM {SCHEMA}.stars s
-        JOIN {SCHEMA}.transactions t ON t.star_id = s.id
-        JOIN {SCHEMA}.users u ON u.id = s.user_id
-        WHERE s.id = %s
-        ORDER BY t.created_at DESC LIMIT 1
-    """, (star_id,))
-    row = cur.fetchone()
+              <div>
+                <label
+                  className="font-golos text-xs mb-2 block"
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  История (необязательно)
+                </label>
+                <textarea
+                  value={story}
+                  onChange={(e) => setStory(e.target.value)}
+                  placeholder="Расскажи, почему это желание важно для тебя..."
+                  rows={2}
+                  maxLength={500}
+                  className="w-full rounded-xl px-4 py-3 font-golos text-sm resize-none focus:outline-none transition-all"
+                  style={{
+                    background: "rgba(20,25,40,0.8)",
+                    border: "1px solid rgba(201,168,76,0.15)",
+                    color: "#f0e8d0",
+                    caretColor: "#c9a84c",
+                  }}
+                  onFocus={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.5)")
+                  }
+                  onBlur={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.15)")
+                  }
+                />
+              </div>
 
-    if not row:
-        cur.close()
-        conn.close()
-        return {'statusCode': 404, 'headers': CORS, 'body': json.dumps({'error': 'not found'})}
+              <div>
+                <label
+                  className="font-golos text-xs mb-3 block"
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Размер монетки — любая сумма от 10 ₽
+                </label>
 
-    payment_id, star_status, x, y, wish, amount, name, avatar_url = row
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  {QUICK_AMOUNTS.map((q) => (
+                    <button
+                      key={q}
+                      onClick={() => handleQuick(q)}
+                      className="px-3 py-1.5 rounded-full font-golos text-sm transition-all"
+                      style={{
+                        background:
+                          numAmount === q
+                            ? "linear-gradient(135deg, rgba(201,168,76,0.3), rgba(201,168,76,0.1))"
+                            : "rgba(20,25,40,0.6)",
+                        border: `1px solid ${numAmount === q ? "rgba(201,168,76,0.6)" : "rgba(201,168,76,0.15)"}`,
+                        color:
+                          numAmount === q
+                            ? "#c9a84c"
+                            : "rgba(200,210,240,0.55)",
+                      }}
+                    >
+                      {q === 10
+                        ? "Звёздочка"
+                        : q === 50
+                          ? "Звезда"
+                          : q === 100
+                            ? "Яркая звезда"
+                            : q === 500
+                              ? "Созвездие"
+                              : "Звездопад"}
+                    </button>
+                  ))}
+                </div>
 
-    if star_status == 'active':
-        cur.close()
-        conn.close()
-        return {
-            'statusCode': 200,
-            'headers': CORS,
-            'body': json.dumps({
-                'status': 'active', 'x': float(x), 'y': float(y),
-                'wish': wish, 'amount': float(amount), 'name': name, 'avatar': avatar_url or '',
-            }),
-        }
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <input
+                      type="number"
+                      min={10}
+                      value={amountInput}
+                      onChange={(e) => handleAmountInput(e.target.value)}
+                      placeholder="Своя сумма"
+                      className="w-full rounded-xl px-4 py-3 font-golos text-sm focus:outline-none transition-all"
+                      style={{
+                        background: "rgba(20,25,40,0.8)",
+                        border: `1px solid ${numAmount >= 10 ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.15)"}`,
+                        color: "#f0e8d0",
+                        caretColor: "#c9a84c",
+                      }}
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = "rgba(201,168,76,0.6)")
+                      }
+                      onBlur={(e) =>
+                        (e.target.style.borderColor =
+                          numAmount >= 10
+                            ? "rgba(201,168,76,0.4)"
+                            : "rgba(201,168,76,0.15)")
+                      }
+                    />
+                    <span
+                      className="absolute right-4 top-1/2 -translate-y-1/2 font-golos text-sm"
+                      style={{ color: "rgba(201,168,76,0.5)" }}
+                    >
+                      ₽
+                    </span>
+                  </div>
 
-    confirmed = False
-    if payment_id:
-        try:
-            params = {'TerminalKey': terminal_key, 'PaymentId': payment_id}
-            params['Token'] = make_token(params, secret_key)
-            req = urllib.request.Request(
-                f'{TBANK_API}/GetState',
-                data=json.dumps(params).encode(),
-                headers={'Content-Type': 'application/json'},
-                method='POST',
-            )
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                result = json.loads(resp.read().decode())
-            tbank_status = result.get('Status', '')
-            if tbank_status in ('CONFIRMED', 'AUTHORIZED'):
-                confirmed = True
-        except Exception:
-            pass
+                  {numAmount >= 10 && (
+                    <div className="flex flex-col items-center gap-1 min-w-[64px]">
+                      <span
+                        style={{
+                          fontSize:
+                            numAmount >= 1000 ? 28 : numAmount >= 100 ? 22 : 16,
+                        }}
+                      >
+                        {tier.icon}
+                      </span>
+                      <span
+                        className="font-golos text-xs text-center"
+                        style={{
+                          color: "rgba(201,168,76,0.7)",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {tier.label}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-    if confirmed:
-        cur.execute(
-            f"UPDATE {SCHEMA}.stars SET status='active', paid_at=now() WHERE id=%s AND status='pending'",
-            (star_id,),
-        )
-        cur.execute(
-            f"UPDATE {SCHEMA}.transactions SET status='paid' WHERE star_id=%s AND status='pending'",
-            (star_id,),
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {
-            'statusCode': 200,
-            'headers': CORS,
-            'body': json.dumps({
-                'status': 'active', 'x': float(x), 'y': float(y),
-                'wish': wish, 'amount': float(amount), 'name': name, 'avatar': avatar_url or '',
-            }),
-        }
+                {numAmount >= 10 && (
+                  <p
+                    className="font-golos text-xs mt-2"
+                    style={{ color: "rgba(200,210,240,0.4)" }}
+                  >
+                    {tier.desc} · чем крупнее монета, тем ярче звезда
+                  </p>
+                )}
+                {numAmount > 0 && numAmount < 10 && (
+                  <p
+                    className="font-golos text-xs mt-2"
+                    style={{ color: "rgba(220,80,80,0.7)" }}
+                  >
+                    Минимальная сумма — 10 ₽
+                  </p>
+                )}
+              </div>
 
-    cur.close()
-    conn.close()
-    return {
-        'statusCode': 200,
-        'headers': CORS,
-        'body': json.dumps({'status': 'pending'}),
-    }
+              <div>
+                <label
+                  className="font-golos text-xs mb-2 block"
+                  style={{
+                    color: "rgba(201,168,76,0.7)",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Email для чека
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full rounded-xl px-4 py-3 font-golos text-sm focus:outline-none transition-all"
+                  style={{
+                    background: "rgba(20,25,40,0.8)",
+                    border: `1px solid ${email && !isEmailValid ? "rgba(220,80,80,0.5)" : "rgba(201,168,76,0.2)"}`,
+                    color: "#f0e8d0",
+                    caretColor: "#c9a84c",
+                  }}
+                  onFocus={(e) =>
+                    (e.target.style.borderColor = "rgba(201,168,76,0.5)")
+                  }
+                  onBlur={(e) =>
+                    (e.target.style.borderColor =
+                      email && !isEmailValid
+                        ? "rgba(220,80,80,0.5)"
+                        : "rgba(201,168,76,0.2)")
+                  }
+                />
+                <p
+                  className="font-golos text-xs mt-1"
+                  style={{ color: "rgba(200,210,240,0.3)" }}
+                >
+                  Чек придёт на этот адрес
+                </p>
+              </div>
 
+              {payError && (
+                <p
+                  className="font-golos text-xs text-center"
+                  style={{ color: "rgba(220,80,80,0.85)" }}
+                >
+                  {payError}
+                </p>
+              )}
 
-def handler(event: dict, context) -> dict:
-    """Управляет желаниями и платежами. action=pay — создать платёж, action=webhook — колбек Т-Банка, action=status — статус звезды, иначе — сохранить."""
-    if event.get('httpMethod') == 'OPTIONS':
-        return {'statusCode': 200, 'headers': CORS, 'body': ''}
+              <button
+                onClick={handleSubmit}
+                disabled={!isValid || saving || !user}
+                className="w-full py-3 rounded-full font-golos font-semibold text-sm transition-all mt-2"
+                style={{
+                  background:
+                    isValid && user
+                      ? "linear-gradient(135deg, #c9a84c, #8a6a20)"
+                      : "rgba(201,168,76,0.15)",
+                  color: isValid && user ? "#060810" : "rgba(200,210,240,0.3)",
+                  cursor:
+                    isValid && user && !saving ? "pointer" : "not-allowed",
+                }}
+              >
+                {saving
+                  ? "Создаём платёж..."
+                  : !user
+                    ? "Войди, чтобы загадать желание"
+                    : !wish.trim() || numAmount < 10
+                      ? "Введи желание и сумму"
+                      : !isEmailValid
+                        ? "Введи email для чека"
+                        : `Оплатить ${numAmount} ₽ и зажечь звезду`}
+              </button>
+            </div>
+          </>
+        )}
 
-    body = json.loads(event.get('body') or '{}')
-    action = body.get('action', 'save')
+        {step === "paying" && (
+          <div className="text-center py-6">
+            <div className="text-5xl mb-4">💳</div>
+            <h2
+              className="font-cormorant text-2xl mb-3"
+              style={{ color: "#f0e8d0" }}
+            >
+              Оплата открыта
+            </h2>
+            <p
+              className="font-golos text-sm mb-1"
+              style={{ color: "rgba(200,210,240,0.6)" }}
+            >
+              Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong>{" "}
+              в открывшейся вкладке ArsenalPay.
+            </p>
+            <p
+              className="font-golos text-xs mb-6"
+              style={{ color: "rgba(200,210,240,0.35)" }}
+            >
+              После оплаты вернись сюда и нажми кнопку ниже
+            </p>
 
-    if action == 'pay':
-        return handle_create_payment(body)
-    elif action == 'webhook':
-        return handle_webhook(body)
-    elif action == 'status':
-        return handle_status(body)
-    elif action == 'confirm':
-        return handle_confirm(body)
-    else:
-        return handle_save(body)
+            {payError && (
+              <p
+                className="font-golos text-xs mb-4"
+                style={{ color: "rgba(220,80,80,0.85)" }}
+              >
+                {payError}
+              </p>
+            )}
+
+            <button
+              onClick={handleCheckStatus}
+              disabled={checkingStatus}
+              className="w-full py-3 rounded-full font-golos font-semibold text-sm mb-3 transition-all"
+              style={{
+                background: checkingStatus
+                  ? "rgba(201,168,76,0.3)"
+                  : "linear-gradient(135deg, #c9a84c, #8a6a20)",
+                color: checkingStatus ? "rgba(200,210,240,0.4)" : "#060810",
+                cursor: checkingStatus ? "default" : "pointer",
+                border: "none",
+              }}
+            >
+              {checkingStatus
+                ? "Проверяем оплату..."
+                : "Я оплатил — зажечь звезду ✨"}
+            </button>
+
+            <button
+              onClick={() => {
+                setStep("form");
+                setPayError("");
+              }}
+              className="w-full py-2 rounded-full font-golos text-xs transition-all"
+              style={{
+                background: "transparent",
+                border: "1px solid rgba(200,210,240,0.1)",
+                color: "rgba(200,210,240,0.35)",
+                cursor: "pointer",
+              }}
+            >
+              Назад
+            </button>
+          </div>
+        )}
+
+        {step === "done" && (
+          <div className="text-center py-8">
+            <div className="text-5xl mb-4 animate-appear-star">{tier.icon}</div>
+            <h2
+              className="font-cormorant text-2xl mb-3"
+              style={{ color: "#f0e8d0" }}
+            >
+              Звезда зажглась!
+            </h2>
+            <p
+              className="font-golos text-sm mb-2"
+              style={{ color: "rgba(200,210,240,0.55)" }}
+            >
+              Твоё желание теперь ждёт своего Ангела.
+            </p>
+            <p
+              className="font-golos text-xs"
+              style={{ color: "rgba(201,168,76,0.6)" }}
+            >
+              {tier.label} · {numAmount} ₽ · {tier.desc}
+            </p>
+            <p className="mt-4">
+              <button
+                onClick={() => {
+                  const shareText = encodeURIComponent(
+                    `✨ Я только что зажёг ${tier.label} на «Загадай Онлайн»!\n\nМоё желание: ${wish}\n\nПрисоединяйтесь: https://zagadai.online\n\n#ЗагадайОнлайн #КолодецЖеланий`,
+                  );
+                  window.open(
+                    `https://vk.com/share.php?url=https://zagadai.online&title=${shareText}`,
+                    "_blank",
+                  );
+                }}
+                className="px-5 py-2 rounded-full font-golos text-sm transition-all"
+                style={{
+                  background: "#0077ff",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                📢 Поделиться ВКонтакте
+              </button>
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
