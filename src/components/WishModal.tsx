@@ -78,7 +78,10 @@ export default function WishModal({ onClose, onSent }: Props) {
       if (data.payment_url) {
         setPendingStarId(data.star_id);
         setPendingCoords({ x: data.x, y: data.y });
-        window.location.href = data.payment_url;
+        window.open(
+          `https://arsenalpay.ru/widget.html?widget=19814&destination=123456&amount=${numAmount}`,
+          "_blank",
+        );
       } else {
         setPayError(data.error || "Не удалось создать платёж");
       }
