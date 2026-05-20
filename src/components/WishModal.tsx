@@ -79,7 +79,7 @@ export default function WishModal({ onClose, onSent }: Props) {
         setPendingStarId(data.star_id);
         setPendingCoords({ x: data.x, y: data.y });
         window.open(
-          `https://arsenalpay.ru/widget.html?widget=19814&destination=123456&amount=${numAmount}`,
+          `https://arsenalpay.ru/widget.html?widget=19814&destination=${data.star_id}&amount=${numAmount}`,
           "_blank",
         );
       } else {
