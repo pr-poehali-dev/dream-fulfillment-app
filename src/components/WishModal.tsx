@@ -64,26 +64,24 @@ export default function WishModal({ onClose, onSent }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "pay",
           user_id: user.id,
           wish,
           story,
           amount: numAmount,
           email,
-          success_url: `${window.location.origin}/?paid=ok`,
-          fail_url: `${window.location.origin}/?paid=fail`,
         }),
       });
       const data = await res.json();
-      if (data.payment_url) {
-        setPendingStarId(data.star_id);
+      if (data.id) {
+        setPendingStarId(data.id);
         setPendingCoords({ x: data.x, y: data.y });
         window.open(
-          `https://arsenalpay.ru/widget.html?widget=19814&destination=${data.star_id}&amount=${numAmount}`,
+          `https://arsenalpay.ru/widget.html?widget=19814&destination=${data.id}&amount=${numAmount}`,
           "_blank",
         );
+        setStep("paying");
       } else {
-        setPayError(data.error || "Не удалось создать платёж");
+        setPayError(data.error || "Не удалось создать звезду");
       }
     } catch {
       setPayError("Ошибка соединения. Попробуй ещё раз.");
@@ -240,7 +238,6 @@ export default function WishModal({ onClose, onSent }: Props) {
                 />
               </div>
 
-              {/* Размер монетки — свободная сумма */}
               <div>
                 <label
                   className="font-golos text-xs mb-3 block"
@@ -253,7 +250,6 @@ export default function WishModal({ onClose, onSent }: Props) {
                   Размер монетки — любая сумма от 10 ₽
                 </label>
 
-                {/* Быстрый выбор */}
                 <div className="flex gap-2 mb-3 flex-wrap">
                   {QUICK_AMOUNTS.map((q) => (
                     <button
@@ -285,7 +281,6 @@ export default function WishModal({ onClose, onSent }: Props) {
                   ))}
                 </div>
 
-                {/* Ввод своей суммы */}
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1">
                     <input
@@ -319,7 +314,6 @@ export default function WishModal({ onClose, onSent }: Props) {
                     </span>
                   </div>
 
-                  {/* Превью звезды */}
                   {numAmount >= 10 && (
                     <div className="flex flex-col items-center gap-1 min-w-[64px]">
                       <span
@@ -453,7 +447,7 @@ export default function WishModal({ onClose, onSent }: Props) {
               style={{ color: "rgba(200,210,240,0.6)" }}
             >
               Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong>{" "}
-              в открывшейся вкладке Т-Банка.
+              в открывшейся вкладке ArsenalPay.
             </p>
             <p
               className="font-golos text-xs mb-6"
