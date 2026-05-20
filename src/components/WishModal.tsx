@@ -75,10 +75,14 @@ export default function WishModal({ onClose, onSent }: Props) {
         }),
       });
       const data = await res.json();
-      if (data.payment_url) {
+      if (data.payment_url || data.star_id) {
         setPendingStarId(data.star_id);
         setPendingCoords({ x: data.x, y: data.y });
-        window.location.href = data.payment_url;
+        setStep("paying");
+        window.open(
+          `https://arsenalpay.ru/widget.html?widget=19814&destination=12345&amount=${numAmount}`,
+          "_blank",
+        );
       } else {
         setPayError(data.error || "Не удалось создать платёж");
       }
@@ -450,7 +454,7 @@ export default function WishModal({ onClose, onSent }: Props) {
               style={{ color: "rgba(200,210,240,0.6)" }}
             >
               Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong>{" "}
-              в открывшейся вкладке Т-Банка.
+              в открывшейся вкладке ArsenalPay.
             </p>
             <p
               className="font-golos text-xs mb-6"
