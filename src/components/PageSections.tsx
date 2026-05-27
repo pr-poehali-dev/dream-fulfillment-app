@@ -118,39 +118,6 @@ export default function PageSections({
           </div>
         </div>
       </section>
-
-      {/* Support CTA */}
-      <section className="relative z-10 py-10 px-4 text-center">
-        <div className="max-w-md mx-auto glass-panel rounded-3xl p-8">
-          <div className="text-4xl mb-4">🙏</div>
-          <h2
-            className="font-cormorant text-2xl mb-3"
-            style={{ color: "#f0e8d0" }}
-          >
-            Поддержать проект
-          </h2>
-          <p
-            className="font-golos text-sm mb-6"
-            style={{ color: "rgba(200,210,240,0.45)" }}
-          >
-            Помоги нам зажечь все 146 745 098 звёзд
-          </p>
-          <button
-            onClick={() =>
-              (window.location.href = "mailto:zagadai.online@yandex.ru")
-            }
-            className="w-full py-3 rounded-full font-golos font-semibold text-sm animate-glow-pulse transition-all"
-            style={{
-              background: "linear-gradient(135deg, #c9a84c, #8a6a20)",
-              color: "#060810",
-              cursor: "pointer",
-            }}
-          >
-            Помочь-Ангелам
-          </button>
-        </div>
-      </section>
-
       {/* Partners */}
       <section className="relative z-10 py-10 px-4">
         <div className="max-w-4xl mx-auto">
