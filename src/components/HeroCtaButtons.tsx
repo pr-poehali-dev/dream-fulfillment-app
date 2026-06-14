@@ -5,6 +5,7 @@ interface Props {
   onWellClick: () => void;
   onRandomStar: () => void;
   onFindStar: (number: number) => Promise<"ok" | "out_of_range" | "error">;
+  onOpenMap: () => void;
 }
 
 export default function HeroCtaButtons({
@@ -12,6 +13,7 @@ export default function HeroCtaButtons({
   onWellClick,
   onRandomStar,
   onFindStar,
+  onOpenMap,
 }: Props) {
   const [findOpen, setFindOpen] = useState(false);
   const [findValue, setFindValue] = useState("");
@@ -171,6 +173,13 @@ export default function HeroCtaButtons({
           style={{ color: "rgba(200,210,240,0.75)" }}
         >
           🔍 Найти звезду
+        </button>
+        <button
+          onClick={onOpenMap}
+          className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-golos glass-panel transition-all"
+          style={{ color: "rgba(200,210,240,0.75)" }}
+        >
+          🗺 Карта звёзд
         </button>
       </div>
     </div>

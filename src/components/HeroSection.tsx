@@ -12,6 +12,7 @@ interface Props {
   onWellClick: () => void;
   onRandomStar: () => void;
   onFindStar: (number: number) => Promise<"ok" | "out_of_range" | "error">;
+  onOpenMap: () => void;
 }
 
 export default function HeroSection({
@@ -20,6 +21,7 @@ export default function HeroSection({
   onWellClick,
   onRandomStar,
   onFindStar,
+  onOpenMap,
 }: Props) {
   const [showFulfilled, setShowFulfilled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,6 +60,7 @@ export default function HeroSection({
           onWellClick={onWellClick}
           onRandomStar={onRandomStar}
           onFindStar={onFindStar}
+          onOpenMap={onOpenMap}
         />
       </main>
 

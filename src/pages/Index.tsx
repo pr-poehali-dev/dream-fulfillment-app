@@ -4,6 +4,7 @@ import WishCardModal from "@/components/WishCardModal";
 import PageBackground from "@/components/PageBackground";
 import HeroSection from "@/components/HeroSection";
 import PageSections from "@/components/PageSections";
+import StarMap from "@/components/StarMap";
 import { useSound } from "@/hooks/useSound";
 import { getCategory, calcBrightness } from "@/components/WishStar";
 import type { WishItem } from "@/components/WishStar";
@@ -26,6 +27,7 @@ export default function Index() {
   const { playCoin, playSplash, playMagic, playStarAppear } = useSound();
 
   const [showModal, setShowModal] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [coinAnim, setCoinAnim] = useState(false);
   const [smokeAnim, setSmokeAnim] = useState(false);
   const [rippleAnim, setRippleAnim] = useState(false);
@@ -267,6 +269,7 @@ export default function Index() {
         onWellClick={handleWellClick}
         onRandomStar={handleRandomStar}
         onFindStar={handleFindStar}
+        onOpenMap={() => setShowMap(true)}
       />
 
       <PageSections
@@ -275,6 +278,10 @@ export default function Index() {
         angelsCount={angelsCount}
         altruistsCount={altruistsCount}
       />
+
+      {showMap && (
+        <StarMap onClose={() => setShowMap(false)} />
+      )}
 
       {showModal && (
         <WishModal
