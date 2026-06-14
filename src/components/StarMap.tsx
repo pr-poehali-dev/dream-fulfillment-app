@@ -27,7 +27,9 @@ function generateBgStars() {
     x: Math.random() * MAP_W,
     y: Math.random() * MAP_H,
     r: Math.random() * 1.2 + 0.3,
-    opacity: Math.random() * 0.5 + 0.15,
+    baseOpacity: Math.random() * 0.4 + 0.1,
+    twinkleSpeed: Math.random() * 0.8 + 0.3,
+    twinklePhase: Math.random() * Math.PI * 2,
   }));
 }
 
@@ -59,6 +61,8 @@ export default function StarMap({ onClose }: Props) {
           ...s,
           x: s.x * (MAP_W / 100),
           y: s.y * (MAP_H / 100),
+          twinklePhase: Math.random() * Math.PI * 2,
+          twinkleSpeed: Math.random() * 0.6 + 0.2,
         }));
         setStars(list);
         starsRef.current = list;
@@ -98,6 +102,7 @@ export default function StarMap({ onClose }: Props) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const t = performance.now() / 1000;
     const { zoom } = camRef.current;
     const W = canvas.width;
     const H = canvas.height;
@@ -109,10 +114,11 @@ export default function StarMap({ onClose }: Props) {
     bgStars.forEach((s) => {
       const { sx, sy } = worldToScreen(s.x, s.y, canvas);
       if (sx < -2 || sx > W + 2 || sy < -2 || sy > H + 2) return;
-      ctx.globalAlpha = s.opacity;
+      const twinkle = 0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.twinklePhase);
+      ctx.globalAlpha = s.baseOpacity * (0.5 + 0.5 * twinkle);
       ctx.fillStyle = "#c8d4ff";
       ctx.beginPath();
-      ctx.arc(sx, sy, s.r * Math.min(zoom * 1.5, 1.8), 0, Math.PI * 2);
+      ctx.arc(sx, sy, s.r * (0.85 + 0.15 * twinkle) * Math.min(zoom * 1.5, 1.8), 0, Math.PI * 2);
       ctx.fill();
     });
 
@@ -122,21 +128,28 @@ export default function StarMap({ onClose }: Props) {
       const { sx, sy } = worldToScreen(star.x, star.y, canvas);
       if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) return;
 
+      const phase = (star as StarData & { twinklePhase?: number }).twinklePhase ?? 0;
+      const speed = (star as StarData & { twinkleSpeed?: number }).twinkleSpeed ?? 0.4;
+      const twinkle = 0.5 + 0.5 * Math.sin(t * speed + phase);
+      const twinkleFactor = 0.82 + 0.18 * twinkle;
+
       const r = getStarRadius(star.brightness, zoom);
       const isHovered = hoveredRef.current?.id === star.id;
       const isClicked = clickedRef.current?.id === star.id;
-      const displayR = isHovered ? r * 1.4 : r;
+      const displayR = (isHovered ? r * 1.4 : r) * twinkleFactor;
 
       const hue = star.brightness > 0.7 ? 45 : star.brightness > 0.4 ? 200 : 220;
       const sat = star.brightness > 0.7 ? "80%" : "60%";
       const color = `hsl(${hue}, ${sat}, 90%)`;
 
-      const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, displayR * 3);
-      glow.addColorStop(0, color.replace(")", ", 0.6)").replace("hsl", "hsla"));
+      const glowAlpha = (0.45 + 0.25 * twinkle).toFixed(2);
+      const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, displayR * 3.5);
+      glow.addColorStop(0, color.replace(")", `, ${glowAlpha})`).replace("hsl", "hsla"));
+      glow.addColorStop(0.5, color.replace(")", ", 0.12)").replace("hsl", "hsla"));
       glow.addColorStop(1, "transparent");
       ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(sx, sy, displayR * 3, 0, Math.PI * 2);
+      ctx.arc(sx, sy, displayR * 3.5, 0, Math.PI * 2);
       ctx.fill();
 
       const core = ctx.createRadialGradient(sx, sy, 0, sx, sy, displayR);
