@@ -51,6 +51,7 @@ export default function StarMap({ onClose }: Props) {
   const starsRef = useRef<StarData[]>([]);
   const lastClickTime = useRef(0);
   const lastClickStar = useRef<StarData | null>(null);
+  const flyRef = useRef<{ tx: number; ty: number; tz: number } | null>(null);
 
   useEffect(() => {
     fetch(`${func2url["get-wish-by-number"]}?action=all`)
@@ -222,6 +223,22 @@ export default function StarMap({ onClose }: Props) {
 
   useEffect(() => {
     const loop = () => {
+      if (flyRef.current && !dragRef.current.active) {
+        const { tx, ty, tz } = flyRef.current;
+        const speed = 0.072;
+        camRef.current.x += (tx - camRef.current.x) * speed;
+        camRef.current.y += (ty - camRef.current.y) * speed;
+        camRef.current.zoom += (tz - camRef.current.zoom) * speed;
+        const dx = Math.abs(camRef.current.x - tx);
+        const dy = Math.abs(camRef.current.y - ty);
+        const dz = Math.abs(camRef.current.zoom - tz);
+        if (dx < 0.5 && dy < 0.5 && dz < 0.005) {
+          camRef.current.x = tx;
+          camRef.current.y = ty;
+          camRef.current.zoom = tz;
+          flyRef.current = null;
+        }
+      }
       draw();
       rafRef.current = requestAnimationFrame(loop);
     };
@@ -293,6 +310,7 @@ export default function StarMap({ onClose }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
+    flyRef.current = null;
     dragRef.current = {
       active: true,
       startX: e.clientX - rect.left,
@@ -327,9 +345,11 @@ export default function StarMap({ onClose }: Props) {
           clickedRef.current = clickedRef.current?.id === hit.id ? null : hit;
           const { sx: hsx, sy: hsy } = worldToScreen(hit.x, hit.y, canvas);
           tooltipRef.current = { star: hit, cx: hsx, cy: hsy };
+          flyRef.current = { tx: hit.x, ty: hit.y, tz: Math.max(camRef.current.zoom, 1.8) };
         }
       } else {
         clickedRef.current = null;
+        flyRef.current = null;
       }
     }
   }, [getHitStar, worldToScreen]);
@@ -403,10 +423,12 @@ export default function StarMap({ onClose }: Props) {
           clickedRef.current = clickedRef.current?.id === hit.id ? null : hit;
           const { sx: hsx, sy: hsy } = worldToScreen(hit.x, hit.y, canvas);
           tooltipRef.current = { star: hit, cx: hsx, cy: hsy };
+          flyRef.current = { tx: hit.x, ty: hit.y, tz: Math.max(camRef.current.zoom, 1.8) };
         }
       } else {
         clickedRef.current = null;
         tooltipRef.current = null;
+        flyRef.current = null;
       }
     }
   }, [getHitStar, worldToScreen]);
