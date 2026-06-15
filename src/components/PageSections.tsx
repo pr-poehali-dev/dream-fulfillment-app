@@ -266,7 +266,7 @@ export default function PageSections({
         </div>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
           <span className="font-golos text-xs" style={{ color: "#ffffff" }}>
-            Принимаем к оплате: Visa, Mastercard, МИР, Т-Банк
+            Принимаем к оплате: Visa, Mastercard, МИР
           </span>
           <a
             href="https://tbank.ru"
