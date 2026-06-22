@@ -237,7 +237,7 @@ export default function PageSections({
           ))}
         </div>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
-          {["ИП ХАБИБУЛЛИН РР", "ИНН 027411103939", "Россия, г.Уфа ул. Нехаева 99", "ОГРН 317028000155545"].map(
+          {["ИП ХАБИБУЛЛИН РР", "ИНН 027411103939", "ОГРН 317028000155545"].map(
             (r) => (
               <span
                 key={r}
@@ -249,10 +249,30 @@ export default function PageSections({
             ),
           )}
           <a
-              <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
+            href="mailto:zagadai.online@yandex.ru"
+            className="font-golos text-xs"
+            style={{ color: "#ffffff", textDecoration: "none" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#c9a84c")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#ffffff")}
+          >
+            zagadai.online@yandex.ru
+          </a>
           <span className="font-golos text-xs" style={{ color: "#ffffff" }}>
-            Принимаем к оплате: Visa, Mastercard, МИР
+            Услуги предоставляются на территории РФ
           </span>
+        </div>
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
+          <span className="font-golos text-xs" style={{ color: "#ffffff" }}>
+            Принимаем к оплате: Visa, Mastercard, МИР, Т-Банк
+          </span>
+          <a
+            href="https://tbank.ru"
+            target="_blank"
+            className="font-golos text-xs"
+            style={{ color: "#c9a84c", textDecoration: "none" }}
+          >
+            tbank.ru
+          </a>
         </div>
         <p className="font-golos text-sm" style={{ color: "#ffffff" }}>
           © 2026 Загадай Онлайн · zagadai.online
