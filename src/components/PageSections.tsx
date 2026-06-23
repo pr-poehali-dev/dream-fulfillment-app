@@ -237,7 +237,7 @@ export default function PageSections({
           ))}
         </div>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mb-3">
-          {["ИП ХАБИБУЛЛИН РР", "ИНН 027411103939", "ОГРН 317028000155545"].map(
+          {["ИП ХАБИБУЛЛИН РР", "ИНН 027411103939", "ОГРН 317028000155545", г.УФА УЛ. НЕХАЕВА 99].map(
             (r) => (
               <span
                 key={r}
