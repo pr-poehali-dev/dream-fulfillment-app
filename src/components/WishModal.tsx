@@ -1,6 +1,3 @@
-Ты написал "полный код сложно дать?". Держи полный код `WishModal.tsx`. Копируй и вставляй целиком.
-
-```tsx
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
@@ -553,4 +550,3 @@ export default function WishModal({ onClose, onSent }: Props) {
     </div>
   );
 }
-```
