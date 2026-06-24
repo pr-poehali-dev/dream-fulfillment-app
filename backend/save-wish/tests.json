@@ -21,11 +21,11 @@
       "expectedStatus": 400
     },
     {
-      "name": "Webhook - wrong terminal key returns 403",
+      "name": "Unknown action returns 400",
       "method": "POST",
       "path": "/",
-      "body": {"action": "webhook", "TerminalKey": "WRONG", "Status": "CONFIRMED", "PaymentId": "123", "OrderId": "star-1-tx-1", "Token": "abc"},
-      "expectedStatus": 403
+      "body": {"action": "unknown"},
+      "expectedStatus": 400
     },
     {
       "name": "Status - missing star_id returns 400",
