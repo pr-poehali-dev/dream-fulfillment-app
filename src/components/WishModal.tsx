@@ -1,3 +1,6 @@
+Ты написал "полный код сложно дать?". Держи полный код `WishModal.tsx`. Копируй и вставляй целиком.
+
+```tsx
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
@@ -76,7 +79,7 @@ export default function WishModal({ onClose, onSent }: Props) {
         setPendingStarId(data.id);
         setPendingCoords({ x: data.x, y: data.y });
         window.open(
-          `https://arsenalpay.ru/widget.html?widget=19814&destination=${data.id}&amount=${numAmount}`,
+          `https://www.walletone.com/checkout/default?i=828301c3&m=zagadai.online&o=${data.id}&a=${numAmount}&c=RUB`,
           "_blank",
         );
         setStep("paying");
@@ -447,7 +450,7 @@ export default function WishModal({ onClose, onSent }: Props) {
               style={{ color: "rgba(200,210,240,0.6)" }}
             >
               Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong>{" "}
-              в открывшейся вкладке ArsenalPay.
+              в открывшейся вкладке Wallet One.
             </p>
             <p
               className="font-golos text-xs mb-6"
@@ -550,3 +553,4 @@ export default function WishModal({ onClose, onSent }: Props) {
     </div>
   );
 }
+```
