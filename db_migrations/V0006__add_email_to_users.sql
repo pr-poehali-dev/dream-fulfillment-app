@@ -1,0 +1,1 @@
+ALTER TABLE t_p75577017_dream_fulfillment_ap.users ADD COLUMN IF NOT EXISTS email text NULL;

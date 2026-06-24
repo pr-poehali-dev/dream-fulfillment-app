@@ -5,6 +5,7 @@ export interface VKUser {
   vk_id: number;
   name: string;
   avatar_url: string;
+  email?: string;
 }
 
 interface UserContextValue {

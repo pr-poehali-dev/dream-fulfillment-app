@@ -37,7 +37,7 @@ export default function WishModal({ onClose, onSent }: Props) {
   } | null>(null);
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [payError, setPayError] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(user?.email || "");
 
   const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);

@@ -87,6 +87,7 @@ def handler(event: dict, context) -> dict:
     first_name = user.get('first_name', '')
     last_name = user.get('last_name', '')
     name = f"{first_name} {last_name}".strip()
+    email = user.get('email') or ''
     # VK ID API может вернуть avatar, photo_200, photo_100, photo_50
     avatar_url = (
         user.get('avatar') or
@@ -108,12 +109,13 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
     cur.execute(
         f"""
-        INSERT INTO {SCHEMA}.users (vk_id, name, avatar_url)
-        VALUES (%s, %s, %s)
-        ON CONFLICT (vk_id) DO UPDATE SET name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url
+        INSERT INTO {SCHEMA}.users (vk_id, name, avatar_url, email)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (vk_id) DO UPDATE SET name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url,
+            email = COALESCE(EXCLUDED.email, {SCHEMA}.users.email)
         RETURNING id
         """,
-        (str(vk_id), name, avatar_url),
+        (str(vk_id), name, avatar_url, email or None),
     )
     user_id = cur.fetchone()[0]
     conn.commit()
@@ -128,5 +130,6 @@ def handler(event: dict, context) -> dict:
             'vk_id': vk_id,
             'name': name,
             'avatar_url': avatar_url,
+            'email': email,
         }),
     }
