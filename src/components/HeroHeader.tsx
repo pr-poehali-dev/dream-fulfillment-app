@@ -56,7 +56,11 @@ export default function HeroHeader({
   };
 
   useEffect(() => {
-    if (!window.VKIDSDK) return;
+    const initVK = () => {
+      if (!window.VKIDSDK) {
+        setTimeout(initVK, 200);
+        return;
+      }
     const VKID = window.VKIDSDK;
 
     // Генерируем PKCE verifier, сохраняем в localStorage — он переживает редирект на vk-callback
@@ -137,6 +141,8 @@ export default function HeroHeader({
             },
           );
       });
+    };
+    initVK();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
