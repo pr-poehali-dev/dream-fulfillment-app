@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import func2url from "../../backend/func2url.json";
@@ -38,6 +38,10 @@ export default function WishModal({ onClose, onSent }: Props) {
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [payError, setPayError] = useState("");
   const [email, setEmail] = useState(user?.email || "");
+
+  useEffect(() => {
+    if (user?.email && !email) setEmail(user.email);
+  }, [user?.email]);
 
   const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);
