@@ -1,3 +1,6 @@
+Ты написал "полный код сложно дать?". Держи полный код `WishModal.tsx`. Копируй и вставляй целиком.
+
+```tsx
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
@@ -10,14 +13,14 @@ interface Props {
 
 function getStarTier(amount: number) {
   if (amount >= 1000)
-    return { label: "Звездопад", icon: "🌟", desc: "100 мест на небосводе" };
+    return { label: "Звездопад", icon: "🌟", desc: "Мощный и незабываемый" };
   if (amount >= 500)
-    return { label: "Созвездие", icon: "✨", desc: "50 мест на небосводе" };
+    return { label: "Созвездие", icon: "✨", desc: "Центр притяжения" };
   if (amount >= 100)
-    return { label: "Яркая звезда", icon: "⭐", desc: "10 мест на небосводе" };
+    return { label: "Яркая звезда", icon: "⭐", desc: "Видно издалека" };
   if (amount >= 50)
-    return { label: "Звезда", icon: "💫", desc: "5 мест на небосводе" };
-  return { label: "Звёздочка", icon: "·", desc: "1 место на небосводе" };
+    return { label: "Звезда", icon: "💫", desc: "Уверенная и заметная" };
+  return { label: "Звёздочка", icon: "·", desc: "Скромная, но заметная" };
 }
 
 const QUICK_AMOUNTS = [10, 50, 100, 500, 1000];
@@ -26,7 +29,8 @@ export default function WishModal({ onClose, onSent }: Props) {
   const { user } = useUser();
   const [wish, setWish] = useState("");
   const [story, setStory] = useState("");
-  const [amount, setAmount] = useState<number>(100);
+  const [amount, setAmount] = useState<number | "">(100);
+  const [amountInput, setAmountInput] = useState("100");
   const [step, setStep] = useState<"form" | "paying" | "done">("form");
   const [saving, setSaving] = useState(false);
   const [pendingStarId, setPendingStarId] = useState<number | null>(null);
@@ -38,13 +42,20 @@ export default function WishModal({ onClose, onSent }: Props) {
   const [payError, setPayError] = useState("");
   const [email, setEmail] = useState("");
 
-  const numAmount = amount;
+  const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isValid = wish.trim() && numAmount >= 10 && isEmailValid;
 
+  const handleAmountInput = (val: string) => {
+    setAmountInput(val);
+    const n = parseInt(val, 10);
+    setAmount(isNaN(n) ? "" : n);
+  };
+
   const handleQuick = (val: number) => {
     setAmount(val);
+    setAmountInput(String(val));
   };
 
   const handleSubmit = async () => {
@@ -68,7 +79,7 @@ export default function WishModal({ onClose, onSent }: Props) {
         setPendingStarId(data.id);
         setPendingCoords({ x: data.x, y: data.y });
         window.open(
-          `https://arsenalpay.ru/widget.html?widget=19814&destination=${data.id}&amount=${numAmount}`,
+          `https://www.walletone.com/checkout/default?i=828301c3&m=zagadai.online&o=${data.id}&a=${numAmount}&c=RUB`,
           "_blank",
         );
         setStep("paying");
@@ -239,7 +250,7 @@ export default function WishModal({ onClose, onSent }: Props) {
                     textTransform: "uppercase",
                   }}
                 >
-                  Выберите тариф
+                  Размер монетки — любая сумма от 10 ₽
                 </label>
 
                 <div className="flex gap-2 mb-3 flex-wrap">
@@ -261,46 +272,90 @@ export default function WishModal({ onClose, onSent }: Props) {
                       }}
                     >
                       {q === 10
-                        ? "Звёздочка · 10 ₽"
+                        ? "Звёздочка"
                         : q === 50
-                          ? "Звезда · 50 ₽"
+                          ? "Звезда"
                           : q === 100
-                            ? "Яркая звезда · 100 ₽"
+                            ? "Яркая звезда"
                             : q === 500
-                              ? "Созвездие · 500 ₽"
-                              : "Звездопад · 1000 ₽"}
+                              ? "Созвездие"
+                              : "Звездопад"}
                     </button>
                   ))}
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="flex flex-col items-center gap-1 min-w-[64px]">
-                    <span
+                  <div className="relative flex-1">
+                    <input
+                      type="number"
+                      min={10}
+                      value={amountInput}
+                      onChange={(e) => handleAmountInput(e.target.value)}
+                      placeholder="Своя сумма"
+                      className="w-full rounded-xl px-4 py-3 font-golos text-sm focus:outline-none transition-all"
                       style={{
-                        fontSize:
-                          numAmount >= 1000 ? 28 : numAmount >= 100 ? 22 : 16,
+                        background: "rgba(20,25,40,0.8)",
+                        border: `1px solid ${numAmount >= 10 ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.15)"}`,
+                        color: "#f0e8d0",
+                        caretColor: "#c9a84c",
                       }}
-                    >
-                      {tier.icon}
-                    </span>
+                      onFocus={(e) =>
+                        (e.target.style.borderColor = "rgba(201,168,76,0.6)")
+                      }
+                      onBlur={(e) =>
+                        (e.target.style.borderColor =
+                          numAmount >= 10
+                            ? "rgba(201,168,76,0.4)"
+                            : "rgba(201,168,76,0.15)")
+                      }
+                    />
                     <span
-                      className="font-golos text-xs text-center"
-                      style={{
-                        color: "rgba(201,168,76,0.7)",
-                        lineHeight: 1.2,
-                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 font-golos text-sm"
+                      style={{ color: "rgba(201,168,76,0.5)" }}
                     >
-                      {tier.label}
+                      ₽
                     </span>
                   </div>
+
+                  {numAmount >= 10 && (
+                    <div className="flex flex-col items-center gap-1 min-w-[64px]">
+                      <span
+                        style={{
+                          fontSize:
+                            numAmount >= 1000 ? 28 : numAmount >= 100 ? 22 : 16,
+                        }}
+                      >
+                        {tier.icon}
+                      </span>
+                      <span
+                        className="font-golos text-xs text-center"
+                        style={{
+                          color: "rgba(201,168,76,0.7)",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {tier.label}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                <p
-                  className="font-golos text-xs mt-2"
-                  style={{ color: "rgba(200,210,240,0.4)" }}
-                >
-                  {tier.desc}
-                </p>
+                {numAmount >= 10 && (
+                  <p
+                    className="font-golos text-xs mt-2"
+                    style={{ color: "rgba(200,210,240,0.4)" }}
+                  >
+                    {tier.desc} · чем крупнее монета, тем ярче звезда
+                  </p>
+                )}
+                {numAmount > 0 && numAmount < 10 && (
+                  <p
+                    className="font-golos text-xs mt-2"
+                    style={{ color: "rgba(220,80,80,0.7)" }}
+                  >
+                    Минимальная сумма — 10 ₽
+                  </p>
+                )}
               </div>
 
               <div>
@@ -371,8 +426,8 @@ export default function WishModal({ onClose, onSent }: Props) {
                   ? "Создаём платёж..."
                   : !user
                     ? "Войди, чтобы загадать желание"
-                    : !wish.trim()
-                      ? "Введи желание"
+                    : !wish.trim() || numAmount < 10
+                      ? "Введи желание и сумму"
                       : !isEmailValid
                         ? "Введи email для чека"
                         : `Оплатить ${numAmount} ₽ и зажечь звезду`}
@@ -395,7 +450,7 @@ export default function WishModal({ onClose, onSent }: Props) {
               style={{ color: "rgba(200,210,240,0.6)" }}
             >
               Оплати <strong style={{ color: "#c9a84c" }}>{numAmount} ₽</strong>{" "}
-              в открывшейся вкладке ArsenalPay.
+              в открывшейся вкладке Wallet One.
             </p>
             <p
               className="font-golos text-xs mb-6"
@@ -498,3 +553,4 @@ export default function WishModal({ onClose, onSent }: Props) {
     </div>
   );
 }
+```
