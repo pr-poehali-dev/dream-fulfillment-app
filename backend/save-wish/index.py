@@ -23,11 +23,15 @@ def get_conn():
 
 
 def w1_signature(params: dict, secret: str) -> str:
-    """Считает подпись WalletOne: сортируем WMI_*-параметры по имени, склеиваем
-    значения, добавляем секретный ключ, берём MD5 и кодируем в Base64."""
-    keys = sorted(k for k in params if k.startswith("WMI_") and k != "WMI_SIGNATURE")
+    """Считает подпись WalletOne: сортируем WMI_*-параметры по имени без учёта
+    регистра, склеиваем значения, добавляем секретный ключ, берём SHA256
+    и кодируем в Base64 (метод ЭЦП в кабинете W1 настроен на SHA256)."""
+    keys = sorted(
+        (k for k in params if k.startswith("WMI_") and k != "WMI_SIGNATURE"),
+        key=lambda k: k.lower(),
+    )
     raw = "".join(str(params[k]) for k in keys) + secret
-    digest = hashlib.md5(raw.encode("utf-8")).digest()
+    digest = hashlib.sha256(raw.encode("utf-8")).digest()
     return base64.b64encode(digest).decode("utf-8")
 
 
