@@ -67,19 +67,41 @@ def handler(event: dict, context) -> dict:
                 "body": "WMI_RESULT=RETRY&WMI_DESCRIPTION=bad_signature",
             }
 
-        star_id = params.get("WMI_PAYMENT_NO")
+        pending_id = params.get("WMI_PAYMENT_NO")
         payment_id = params.get("WMI_ORDER_ID", "")
 
         conn = get_conn()
         cur = conn.cursor()
         cur.execute(
-            f"UPDATE {SCHEMA}.stars SET status = 'active', paid_at = now() WHERE id = %s",
-            (star_id,),
+            f"SELECT id, user_id, wish, story, amount, angel_fund, x, y "
+            f"FROM {SCHEMA}.pending_payments WHERE id = %s",
+            (pending_id,),
+        )
+        row = cur.fetchone()
+
+        if not row:
+            # Уже обработано ранее (повторное уведомление) — просто подтверждаем
+            cur.close()
+            conn.close()
+            return {
+                "statusCode": 200,
+                "headers": {**CORS, "Content-Type": "text/plain"},
+                "body": "WMI_RESULT=OK",
+            }
+
+        star_id, user_id, wish, story, amount, angel_fund, x, y = row
+
+        cur.execute(
+            f"INSERT INTO {SCHEMA}.stars (id, user_id, wish, story, amount, angel_fund, status, x, y, paid_at) "
+            f"VALUES (%s, %s, %s, %s, %s, %s, 'active', %s, %s, now())",
+            (star_id, user_id, wish, story, amount, angel_fund, x, y),
         )
         cur.execute(
-            f"UPDATE {SCHEMA}.transactions SET status = 'paid', payment_id = %s WHERE star_id = %s",
-            (payment_id, star_id),
+            f"INSERT INTO {SCHEMA}.transactions (user_id, star_id, amount, angel_fund, status, payment_id) "
+            f"VALUES (%s, %s, %s, %s, 'paid', %s)",
+            (user_id, star_id, amount, angel_fund, payment_id),
         )
+        cur.execute(f"DELETE FROM {SCHEMA}.pending_payments WHERE id = %s", (pending_id,))
         conn.commit()
         cur.close()
         conn.close()
@@ -116,16 +138,11 @@ def handler(event: dict, context) -> dict:
         conn = get_conn()
         cur = conn.cursor()
         cur.execute(
-            f"INSERT INTO {SCHEMA}.stars (user_id, wish, story, amount, angel_fund, status, x, y) "
-            f"VALUES (%s, %s, %s, %s, %s, 'pending', %s, %s) RETURNING id",
-            (user_id, wish, story, amount, angel_fund, x, y),
+            f"INSERT INTO {SCHEMA}.pending_payments (user_id, wish, story, amount, angel_fund, email, x, y) "
+            f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
+            (user_id, wish, story, amount, angel_fund, email, x, y),
         )
         star_id = cur.fetchone()[0]
-        cur.execute(
-            f"INSERT INTO {SCHEMA}.transactions (user_id, star_id, amount, angel_fund, status) "
-            f"VALUES (%s, %s, %s, %s, 'pending')",
-            (user_id, star_id, amount, angel_fund),
-        )
         conn.commit()
         cur.close()
         conn.close()
@@ -167,13 +184,20 @@ def handler(event: dict, context) -> dict:
         cur = conn.cursor()
         cur.execute(f"SELECT status FROM {SCHEMA}.stars WHERE id = %s", (star_id,))
         row = cur.fetchone()
+        if row:
+            cur.close()
+            conn.close()
+            return {"statusCode": 200, "headers": CORS, "body": json.dumps({"status": row[0]})}
+
+        cur.execute(f"SELECT 1 FROM {SCHEMA}.pending_payments WHERE id = %s", (star_id,))
+        pending_row = cur.fetchone()
         cur.close()
         conn.close()
 
-        if not row:
-            return {"statusCode": 404, "headers": CORS, "body": json.dumps({"error": "Звезда не найдена"})}
+        if pending_row:
+            return {"statusCode": 200, "headers": CORS, "body": json.dumps({"status": "pending"})}
 
-        return {"statusCode": 200, "headers": CORS, "body": json.dumps({"status": row[0]})}
+        return {"statusCode": 404, "headers": CORS, "body": json.dumps({"error": "Звезда не найдена"})}
 
     # --- Подтверждение после возврата с оплаты ---
     if action == "confirm":
