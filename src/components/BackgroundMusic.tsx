@@ -9,31 +9,57 @@ export default function BackgroundMusic() {
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
-    const audio = new Audio(MUSIC_URL);
+    let objectUrl: string | null = null;
+    let cancelled = false;
+    const audio = new Audio();
     audio.loop = true;
     audio.volume = 0.05;
+    audio.preload = "auto";
     audioRef.current = audio;
 
-    audio
-      .play()
-      .then(() => setPlaying(true))
+    const attemptPlay = () => {
+      audio
+        .play()
+        .then(() => setPlaying(true))
+        .catch(() => setPlaying(false));
+    };
+
+    const startOnInteraction = () => {
+      attemptPlay();
+      window.removeEventListener("click", startOnInteraction);
+      window.removeEventListener("touchstart", startOnInteraction);
+      window.removeEventListener("keydown", startOnInteraction);
+    };
+    window.addEventListener("click", startOnInteraction);
+    window.addEventListener("touchstart", startOnInteraction);
+    window.addEventListener("keydown", startOnInteraction);
+
+    // Перезагружаем файл как Blob с корректным MIME-типом —
+    // сервер хранилища отдаёт audio/mpeg как application/octet-stream,
+    // из-за чего некоторые браузеры отказываются воспроизводить <audio>.
+    fetch(MUSIC_URL)
+      .then((r) => r.blob())
+      .then((blob) => {
+        if (cancelled) return;
+        const typed = new Blob([blob], { type: "audio/mpeg" });
+        objectUrl = URL.createObjectURL(typed);
+        audio.src = objectUrl;
+        attemptPlay();
+      })
       .catch(() => {
-        setPlaying(false);
-        const startOnInteraction = () => {
-          audio
-            .play()
-            .then(() => setPlaying(true))
-            .catch(() => {});
-          window.removeEventListener("click", startOnInteraction);
-          window.removeEventListener("touchstart", startOnInteraction);
-        };
-        window.addEventListener("click", startOnInteraction);
-        window.addEventListener("touchstart", startOnInteraction);
+        if (cancelled) return;
+        audio.src = MUSIC_URL;
+        attemptPlay();
       });
 
     return () => {
+      cancelled = true;
       audio.pause();
       audioRef.current = null;
+      window.removeEventListener("click", startOnInteraction);
+      window.removeEventListener("touchstart", startOnInteraction);
+      window.removeEventListener("keydown", startOnInteraction);
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, []);
 
