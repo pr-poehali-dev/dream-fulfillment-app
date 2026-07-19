@@ -6,7 +6,6 @@ interface Props {
   story: string;
   setStory: (v: string) => void;
   amountInput: string;
-  handleAmountInput: (v: string) => void;
   handleQuick: (v: number) => void;
   numAmount: number;
   tier: { label: string; icon: string; desc: string };
@@ -25,8 +24,6 @@ export default function WishFormStep({
   setWish,
   story,
   setStory,
-  amountInput,
-  handleAmountInput,
   handleQuick,
   numAmount,
   tier,
@@ -139,7 +136,7 @@ export default function WishFormStep({
               textTransform: "uppercase",
             }}
           >
-            Размер монетки — любая сумма от 10 ₽
+            Выберите тариф
           </label>
 
           <div className="flex gap-2 mb-3 flex-wrap">
@@ -161,51 +158,19 @@ export default function WishFormStep({
                 }}
               >
                 {q === 10
-                  ? "Звёздочка"
+                  ? "Звёздочка · 10 ₽"
                   : q === 50
-                    ? "Звезда"
+                    ? "Звезда · 50 ₽"
                     : q === 100
-                      ? "Яркая звезда"
+                      ? "Яркая звезда · 100 ₽"
                       : q === 500
-                        ? "Созвездие"
-                        : "Звездопад"}
+                        ? "Созвездие · 500 ₽"
+                        : "Звездопад · 1000 ₽"}
               </button>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <input
-                type="number"
-                min={10}
-                value={amountInput}
-                onChange={(e) => handleAmountInput(e.target.value)}
-                placeholder="Своя сумма"
-                className="w-full rounded-xl px-4 py-3 font-golos text-sm focus:outline-none transition-all"
-                style={{
-                  background: "rgba(20,25,40,0.8)",
-                  border: `1px solid ${numAmount >= 10 ? "rgba(201,168,76,0.4)" : "rgba(201,168,76,0.15)"}`,
-                  color: "#f0e8d0",
-                  caretColor: "#c9a84c",
-                }}
-                onFocus={(e) =>
-                  (e.target.style.borderColor = "rgba(201,168,76,0.6)")
-                }
-                onBlur={(e) =>
-                  (e.target.style.borderColor =
-                    numAmount >= 10
-                      ? "rgba(201,168,76,0.4)"
-                      : "rgba(201,168,76,0.15)")
-                }
-              />
-              <span
-                className="absolute right-4 top-1/2 -translate-y-1/2 font-golos text-sm"
-                style={{ color: "rgba(201,168,76,0.5)" }}
-              >
-                ₽
-              </span>
-            </div>
-
             {numAmount >= 10 && (
               <div className="flex flex-col items-center gap-1 min-w-[64px]">
                 <span
@@ -234,15 +199,7 @@ export default function WishFormStep({
               className="font-golos text-xs mt-2"
               style={{ color: "rgba(200,210,240,0.4)" }}
             >
-              {tier.desc} · чем крупнее монета, тем ярче звезда
-            </p>
-          )}
-          {numAmount > 0 && numAmount < 10 && (
-            <p
-              className="font-golos text-xs mt-2"
-              style={{ color: "rgba(220,80,80,0.7)" }}
-            >
-              Минимальная сумма — 10 ₽
+              {tier.desc}
             </p>
           )}
         </div>
@@ -315,8 +272,8 @@ export default function WishFormStep({
             ? "Создаём платёж..."
             : !user
               ? "Войди, чтобы загадать желание"
-              : !wish.trim() || numAmount < 10
-                ? "Введи желание и сумму"
+              : !wish.trim()
+                ? "Введи желание"
                 : !isEmailValid
                   ? "Введи email для чека"
                   : `Оплатить ${numAmount} ₽ и зажечь звезду`}
