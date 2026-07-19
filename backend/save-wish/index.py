@@ -23,18 +23,20 @@ def get_conn():
 
 
 def w1_signature(params: dict, secret: str) -> str:
-    """Считает подпись WalletOne: сортируем WMI_*-параметры по имени без учёта
-    регистра, склеиваем значения, добавляем секретный ключ, кодируем строку
-    в Windows-1251 (как требует документация W1 «Защита платёжной формы»),
-    берём SHA256 и кодируем результат в Base64."""
+    """Считает подпись WalletOne (метод ЭЦП в кабинете W1 — MD5): сортируем
+    WMI_*-параметры по имени без учёта регистра, склеиваем значения,
+    добавляем секретный ключ, кодируем строку в Windows-1251, берём MD5 (hex),
+    затем как в официальном примере W1 — pack("H*", md5_hex) (hex -> байты)
+    и результат кодируем в Base64."""
     keys = sorted(
         (k for k in params if k.startswith("WMI_") and k != "WMI_SIGNATURE"),
         key=lambda k: k.lower(),
     )
     raw = "".join(str(params[k]) for k in keys) + secret
     encoded = raw.encode("cp1251", errors="replace")
-    digest = hashlib.sha256(encoded).digest()
-    return base64.b64encode(digest).decode("utf-8")
+    md5_hex = hashlib.md5(encoded).hexdigest()
+    packed = bytes.fromhex(md5_hex)
+    return base64.b64encode(packed).decode("utf-8")
 
 
 def is_form_urlencoded(event: dict) -> bool:
@@ -154,34 +156,17 @@ def handler(event: dict, context) -> dict:
 
         merchant_id = os.environ["WALLETONE_MERCHANT_ID"]
         secret = os.environ["WALLETONE_SECRET_KEY"]
-        description_b64 = base64.b64encode(wish[:150].encode("utf-8")).decode("utf-8")
         amount_str = f"{amount:.2f}"
-
-        order_items = json.dumps(
-            [
-                {
-                    "Title": "Рекламное место на zagadai.online",
-                    "Quantity": "1.000",
-                    "UnitPrice": amount_str,
-                    "SubTotal": amount_str,
-                    "TaxType": "tax_ru_1",
-                    "Tax": "0.00",
-                }
-            ],
-            ensure_ascii=False,
-            separators=(",", ":"),
-        )
 
         payment_params = {
             "WMI_MERCHANT_ID": merchant_id,
             "WMI_PAYMENT_AMOUNT": amount_str,
             "WMI_CURRENCY_ID": W1_CURRENCY_RUB,
             "WMI_PAYMENT_NO": str(star_id),
-            "WMI_DESCRIPTION": description_b64,
+            "WMI_DESCRIPTION": "zagadai.online order",
             "WMI_SUCCESS_URL": SUCCESS_URL,
             "WMI_FAIL_URL": FAIL_URL,
             "WMI_CUSTOMER_EMAIL": email,
-            "WMI_ORDER_ITEMS": order_items,
         }
         payment_params["WMI_SIGNATURE"] = w1_signature(payment_params, secret)
 
