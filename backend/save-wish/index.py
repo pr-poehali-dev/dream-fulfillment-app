@@ -153,16 +153,32 @@ def handler(event: dict, context) -> dict:
         merchant_id = os.environ["WALLETONE_MERCHANT_ID"]
         secret = os.environ["WALLETONE_SECRET_KEY"]
         description_b64 = base64.b64encode(wish[:150].encode("utf-8")).decode("utf-8")
+        amount_str = f"{amount:.2f}"
+
+        order_items = json.dumps(
+            [
+                {
+                    "Title": "Рекламное место на zagadai.online",
+                    "Quantity": "1.000",
+                    "UnitPrice": amount_str,
+                    "SubTotal": amount_str,
+                    "TaxType": "tax_ru_1",
+                    "Tax": "0.00",
+                }
+            ],
+            ensure_ascii=False,
+        )
 
         payment_params = {
             "WMI_MERCHANT_ID": merchant_id,
-            "WMI_PAYMENT_AMOUNT": f"{amount:.2f}",
+            "WMI_PAYMENT_AMOUNT": amount_str,
             "WMI_CURRENCY_ID": W1_CURRENCY_RUB,
             "WMI_PAYMENT_NO": str(star_id),
             "WMI_DESCRIPTION": description_b64,
             "WMI_SUCCESS_URL": SUCCESS_URL,
             "WMI_FAIL_URL": FAIL_URL,
             "WMI_CUSTOMER_EMAIL": email,
+            "WMI_ORDER_ITEMS": order_items,
         }
         payment_params["WMI_SIGNATURE"] = w1_signature(payment_params, secret)
 
