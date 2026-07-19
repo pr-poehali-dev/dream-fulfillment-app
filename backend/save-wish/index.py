@@ -2,7 +2,7 @@ import base64
 import hashlib
 import json
 import os
-import random
+import random  # noqa: F401 restart trigger
 import urllib.parse
 import psycopg2
 
