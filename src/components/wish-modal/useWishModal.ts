@@ -64,6 +64,7 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
         const form = document.createElement("form");
         form.method = "POST";
         form.action = "https://wl.walletone.com/checkout/checkout/Index";
+        form.acceptCharset = "UTF-8";
         form.target = "_blank";
         Object.entries(data.payment as Record<string, string>).forEach(
           ([key, value]) => {

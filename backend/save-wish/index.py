@@ -24,14 +24,16 @@ def get_conn():
 
 def w1_signature(params: dict, secret: str) -> str:
     """Считает подпись WalletOne: сортируем WMI_*-параметры по имени без учёта
-    регистра, склеиваем значения, добавляем секретный ключ, берём SHA256
-    и кодируем в Base64 (метод ЭЦП в кабинете W1 настроен на SHA256)."""
+    регистра, склеиваем значения, добавляем секретный ключ, кодируем строку
+    в Windows-1251 (как требует документация W1 «Защита платёжной формы»),
+    берём SHA256 и кодируем результат в Base64."""
     keys = sorted(
         (k for k in params if k.startswith("WMI_") and k != "WMI_SIGNATURE"),
         key=lambda k: k.lower(),
     )
     raw = "".join(str(params[k]) for k in keys) + secret
-    digest = hashlib.sha256(raw.encode("utf-8")).digest()
+    encoded = raw.encode("cp1251", errors="replace")
+    digest = hashlib.sha256(encoded).digest()
     return base64.b64encode(digest).decode("utf-8")
 
 
@@ -167,6 +169,7 @@ def handler(event: dict, context) -> dict:
                 }
             ],
             ensure_ascii=False,
+            separators=(",", ":"),
         )
 
         payment_params = {
