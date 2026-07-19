@@ -14,6 +14,7 @@ import VKCallback from "./pages/VKCallback";
 import About from "./pages/About";
 import Oferta from "./pages/Oferta";
 import { UserProvider } from "./context/UserContext";
+import BackgroundMusic from "./components/BackgroundMusic";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
       <UserProvider>
         <Toaster />
         <Sonner />
+        <BackgroundMusic />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
