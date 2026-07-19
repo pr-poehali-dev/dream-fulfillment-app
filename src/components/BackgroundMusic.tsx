@@ -11,7 +11,7 @@ export default function BackgroundMusic() {
   useEffect(() => {
     const audio = new Audio(MUSIC_URL);
     audio.loop = true;
-    audio.volume = 0.12;
+    audio.volume = 0.05;
     audioRef.current = audio;
 
     audio
