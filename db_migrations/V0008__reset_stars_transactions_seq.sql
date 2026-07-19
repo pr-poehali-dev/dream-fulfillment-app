@@ -1,0 +1,2 @@
+ALTER SEQUENCE t_p75577017_dream_fulfillment_ap.stars_id_seq RESTART WITH 1;
+ALTER SEQUENCE t_p75577017_dream_fulfillment_ap.transactions_id_seq RESTART WITH 1;
