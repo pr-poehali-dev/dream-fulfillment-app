@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import WishModal from "@/components/WishModal";
 import WishCardModal from "@/components/WishCardModal";
 import PageBackground from "@/components/PageBackground";
@@ -176,6 +177,13 @@ export default function Index() {
       const res = await fetch(`${func2url["get-random-wish"]}${excludeParam}`);
       const raw = await res.json();
       const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (!res.ok || !parsed || parsed.error || !parsed.wish) {
+        setRandomWish(null);
+        toast("Пока нет ни одной зажжённой звезды", {
+          description: "Стань первым, кто загадает желание!",
+        });
+        return;
+      }
       const brightness = calcBrightness(parsed.amount, 10, 1000);
       const category = getCategory(Math.max(0.1, brightness));
       setRandomWish({

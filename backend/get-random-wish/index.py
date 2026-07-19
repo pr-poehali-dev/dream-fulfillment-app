@@ -125,5 +125,13 @@ def handler(event: dict, context) -> dict:
     candidates = [w for w in MOCK_WISHES if w["id"] != exclude_id]
     if not candidates:
         candidates = MOCK_WISHES
+
+    if not candidates:
+        return {
+            "statusCode": 404,
+            "headers": CORS_HEADERS,
+            "body": json.dumps({"error": "no_wishes"}),
+        }
+
     wish_data = {**random.choice(candidates), "source": "mock"}
     return {"statusCode": 200, "headers": CORS_HEADERS, "body": json.dumps(wish_data)}

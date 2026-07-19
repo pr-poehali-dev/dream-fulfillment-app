@@ -1,16 +1,16 @@
 {
   "tests": [
     {
-      "name": "Get random wish",
+      "name": "Get random wish - no stars returns 404",
       "method": "GET",
       "path": "/",
-      "expectedStatus": 200
+      "expectedStatus": 404
     },
     {
-      "name": "Get random wish with exclude",
+      "name": "Get random wish with exclude - no stars returns 404",
       "method": "GET",
       "path": "/?exclude=1",
-      "expectedStatus": 200
+      "expectedStatus": 404
     }
   ]
 }
