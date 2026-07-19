@@ -76,13 +76,27 @@ export default function WishModal({ onClose, onSent }: Props) {
         }),
       });
       const data = await res.json();
-      if (data.id) {
+      if (data.id && data.payment) {
         setPendingStarId(data.id);
         setPendingCoords({ x: data.x, y: data.y });
-        window.open(
-          `https://www.walletone.com/checkout/default?i=828301c3&m=zagadai.online&o=${data.id}&a=${numAmount}&c=RUB`,
-          "_blank",
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "https://wl.walletone.com/checkout/checkout/Index";
+        form.target = "_blank";
+        Object.entries(data.payment as Record<string, string>).forEach(
+          ([key, value]) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+          },
         );
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
+
         setStep("paying");
       } else {
         setPayError(data.error || "Не удалось создать звезду");

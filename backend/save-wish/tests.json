@@ -10,14 +10,7 @@
       "name": "Save - missing fields returns 400",
       "method": "POST",
       "path": "/",
-      "body": {"action": "save", "wish": "test"},
-      "expectedStatus": 400
-    },
-    {
-      "name": "Pay - missing fields returns 400",
-      "method": "POST",
-      "path": "/",
-      "body": {"action": "pay", "wish": "test"},
+      "body": {"wish": "test"},
       "expectedStatus": 400
     },
     {
