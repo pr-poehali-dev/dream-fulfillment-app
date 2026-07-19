@@ -138,6 +138,9 @@ def handler(event: dict, context) -> dict:
         conn = get_conn()
         cur = conn.cursor()
         cur.execute(
+            f"DELETE FROM {SCHEMA}.pending_payments WHERE created_at < now() - interval '24 hours'"
+        )
+        cur.execute(
             f"INSERT INTO {SCHEMA}.pending_payments (user_id, wish, story, amount, angel_fund, email, x, y) "
             f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
             (user_id, wish, story, amount, angel_fund, email, x, y),
