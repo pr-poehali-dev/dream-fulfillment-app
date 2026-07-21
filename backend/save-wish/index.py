@@ -27,7 +27,10 @@ def w1_signature(params: dict, secret: str) -> str:
     WMI_*-параметры по имени без учёта регистра, склеиваем значения,
     добавляем секретный ключ, кодируем строку в Windows-1251, берём MD5 (hex),
     затем как в официальном примере W1 — pack("H*", md5_hex) (hex -> байты)
-    и результат кодируем в Base64."""
+    и результат кодируем в Base64.
+
+    ЗАМЕТКА: WMI_ORDER_ITEMS обязателен всегда — без него Wcheck от W1
+    отклоняет форму (подтверждено поддержкой W1)."""
     keys = sorted(
         (k for k in params if k.startswith("WMI_") and k != "WMI_SIGNATURE"),
         key=lambda k: k.lower(),
@@ -158,15 +161,33 @@ def handler(event: dict, context) -> dict:
         secret = os.environ["WALLETONE_SECRET_KEY"]
         amount_str = f"{amount:.2f}"
 
+        # WMI_ORDER_ITEMS обязателен для Wcheck (требование W1)
+        order_items = json.dumps(
+            [
+                {
+                    "Title": "Цифровой актив на zagadai.online",
+                    "Quantity": "1.000",
+                    "UnitPrice": amount_str,
+                    "SubTotal": amount_str,
+                    "TaxType": "tax_ru_1",
+                    "Tax": "0.00",
+                }
+            ],
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        description = urllib.parse.quote(f"Заказ №{star_id}", safe="")
+
         payment_params = {
             "WMI_MERCHANT_ID": merchant_id,
             "WMI_PAYMENT_AMOUNT": amount_str,
             "WMI_CURRENCY_ID": W1_CURRENCY_RUB,
             "WMI_PAYMENT_NO": str(star_id),
-            "WMI_DESCRIPTION": "zagadai.online order",
+            "WMI_DESCRIPTION": description,
             "WMI_SUCCESS_URL": SUCCESS_URL,
             "WMI_FAIL_URL": FAIL_URL,
             "WMI_CUSTOMER_EMAIL": email,
+            "WMI_ORDER_ITEMS": order_items,
         }
         payment_params["WMI_SIGNATURE"] = w1_signature(payment_params, secret)
 
