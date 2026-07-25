@@ -188,6 +188,9 @@ def handler(event: dict, context) -> dict:
             "WMI_FAIL_URL": FAIL_URL,
             "WMI_CUSTOMER_EMAIL": email,
             "WMI_ORDER_ITEMS": order_items,
+            # Пока у мерчанта подключён только СБП (карты отклонены, ЮMoney
+            # в процессе подключения) — форсируем единственный способ оплаты
+            "WMI_PTENABLED": "SbpRub",
         }
         payment_params["WMI_SIGNATURE"] = w1_signature(payment_params, secret)
 
