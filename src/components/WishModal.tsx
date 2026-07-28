@@ -100,7 +100,12 @@ export default function WishModal({ onClose, onSent }: Props) {
         )}
 
         {step === "done" && (
-          <WishDoneStep tier={tier} numAmount={numAmount} wish={wish} />
+          <WishDoneStep
+            tier={tier}
+            numAmount={numAmount}
+            wish={wish}
+            onClose={onClose}
+          />
         )}
       </div>
     </div>
