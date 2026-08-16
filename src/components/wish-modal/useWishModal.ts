@@ -19,6 +19,7 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [payError, setPayError] = useState("");
   const [email, setEmail] = useState(user?.email || "");
+  const [agreeToRules, setAgreeToRules] = useState(false);
 
   useEffect(() => {
     if (user?.email && !email) setEmail(user.email);
@@ -27,7 +28,7 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
   const numAmount = typeof amount === "number" ? amount : 0;
   const tier = getStarTier(numAmount);
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const isValid = wish.trim() && numAmount >= 10 && isEmailValid;
+  const isValid = wish.trim() && numAmount >= 10 && isEmailValid && agreeToRules;
 
   const handleAmountInput = (val: string) => {
     setAmountInput(val);
@@ -131,6 +132,8 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
     setPayError,
     email,
     setEmail,
+    agreeToRules,
+    setAgreeToRules,
     numAmount,
     tier,
     isEmailValid,

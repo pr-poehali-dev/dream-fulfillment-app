@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
 import { useUser } from "@/context/UserContext";
 import func2url from "../../backend/func2url.json";
+import { getStarTier } from "@/components/wish-modal/constants";
+import { generateCertificateHtml } from "@/lib/certificate";
 
 const cabinetUrl = func2url["get-random-wish"];
 
@@ -12,6 +14,8 @@ interface Wish {
   status: "active" | "fulfilled" | "pending";
   created_at: string | null;
   fulfilled_at: string | null;
+  x: number;
+  y: number;
 }
 
 interface CabinetData {
@@ -121,6 +125,27 @@ export default function Cabinet() {
   const [data, setData] = useState<CabinetData | null>(null);
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<"wishes" | "fulfilled">("wishes");
+
+  const handleDownloadCertificate = (w: Wish) => {
+    if (!user) return;
+    const tier = getStarTier(w.amount);
+    const html = generateCertificateHtml({
+      starId: w.id,
+      wish: w.wish,
+      amount: w.amount,
+      tierLabel: tier.label,
+      x: w.x,
+      y: w.y,
+      ownerName: user.name,
+      createdAt: w.created_at,
+    });
+    const win = window.open("", "_blank");
+    if (win) {
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -336,7 +361,7 @@ export default function Cabinet() {
                 {/* Вкладки */}
                 <div className="flex gap-2 mb-5">
                   {[
-                    { key: "wishes", label: "Мои желания" },
+                    { key: "wishes", label: "Мои звёзды" },
                     { key: "fulfilled", label: "Исполнены другими" },
                   ].map((t) => (
                     <button
@@ -359,7 +384,7 @@ export default function Cabinet() {
                   ))}
                 </div>
 
-                {/* Список желаний */}
+                {/* Список звёзд */}
                 {tab === "wishes" && (
                   <div className="flex flex-col gap-3">
                     {!data?.wishes.length ? (
@@ -389,7 +414,7 @@ export default function Cabinet() {
                             <StatusBadge status={w.status} />
                           </div>
                           <div
-                            className="flex items-center gap-3 font-golos text-xs"
+                            className="flex items-center gap-3 font-golos text-xs mb-3"
                             style={{ color: "rgba(200,210,240,0.35)" }}
                           >
                             <span>{formatAmount(w.amount)}</span>
@@ -404,6 +429,19 @@ export default function Cabinet() {
                               </>
                             )}
                           </div>
+                          <button
+                            onClick={() => handleDownloadCertificate(w)}
+                            className="font-golos text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all"
+                            style={{
+                              color: "#c9a84c",
+                              border: "1px solid rgba(201,168,76,0.3)",
+                              background: "rgba(201,168,76,0.06)",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <Icon name="Download" size={13} />
+                            Скачать сертификат
+                          </button>
                         </div>
                       ))
                     )}

@@ -12,6 +12,8 @@ interface Props {
   email: string;
   setEmail: (v: string) => void;
   isEmailValid: boolean;
+  agreeToRules: boolean;
+  setAgreeToRules: (v: boolean) => void;
   payError: string;
   isValid: string | boolean;
   saving: boolean;
@@ -30,6 +32,8 @@ export default function WishFormStep({
   email,
   setEmail,
   isEmailValid,
+  agreeToRules,
+  setAgreeToRules,
   payError,
   isValid,
   saving,
@@ -254,6 +258,36 @@ export default function WishFormStep({
           </p>
         )}
 
+        <label
+          className="flex items-start gap-2.5 cursor-pointer select-none"
+          style={{ color: "rgba(200,210,240,0.55)" }}
+        >
+          <input
+            type="checkbox"
+            checked={agreeToRules}
+            onChange={(e) => setAgreeToRules(e.target.checked)}
+            className="mt-0.5"
+            style={{
+              width: 16,
+              height: 16,
+              accentColor: "#c9a84c",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          />
+          <span className="font-golos text-xs leading-snug">
+            Согласен с{" "}
+            <a
+              href="/rules"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#c9a84c", textDecoration: "underline" }}
+            >
+              правилами размещения рекламы
+            </a>
+          </span>
+        </label>
+
         <button
           onClick={handleSubmit}
           disabled={!isValid || saving || !user}
@@ -276,7 +310,9 @@ export default function WishFormStep({
                 ? "Введи желание"
                 : !isEmailValid
                   ? "Введи email для чека"
-                  : `Оплатить ${numAmount} ₽ и зажечь звезду`}
+                  : !agreeToRules
+                    ? "Согласись с правилами"
+                    : `Оплатить ${numAmount} ₽ и зажечь звезду`}
         </button>
       </div>
     </>

@@ -18,14 +18,14 @@ def get_cabinet_data(user_id: str, schema: str, db_url: str) -> dict:
     cur = conn.cursor()
 
     cur.execute(f"""
-        SELECT id, wish, amount, status, created_at, fulfilled_at
+        SELECT id, wish, amount, status, created_at, fulfilled_at, x, y
         FROM {schema}.stars
         WHERE user_id = %s AND status IN ('active', 'fulfilled')
         ORDER BY created_at DESC
     """, (user_id,))
     wishes = []
     for row in cur.fetchall():
-        star_id, wish, amount, status, created_at, fulfilled_at = row
+        star_id, wish, amount, status, created_at, fulfilled_at, x, y = row
         wishes.append({
             'id': star_id,
             'wish': wish,
@@ -33,6 +33,8 @@ def get_cabinet_data(user_id: str, schema: str, db_url: str) -> dict:
             'status': status,
             'created_at': created_at.isoformat() if created_at else None,
             'fulfilled_at': fulfilled_at.isoformat() if fulfilled_at else None,
+            'x': float(x) if x is not None else 50.0,
+            'y': float(y) if y is not None else 50.0,
         })
 
     cur.execute(f"SELECT COUNT(*) FROM {schema}.stars WHERE user_id = %s AND status = 'fulfilled'", (user_id,))

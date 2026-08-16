@@ -25,6 +25,8 @@ export default function WishModal({ onClose, onSent }: Props) {
     setPayError,
     email,
     setEmail,
+    agreeToRules,
+    setAgreeToRules,
     numAmount,
     tier,
     isEmailValid,
@@ -80,6 +82,8 @@ export default function WishModal({ onClose, onSent }: Props) {
             email={email}
             setEmail={setEmail}
             isEmailValid={isEmailValid}
+            agreeToRules={agreeToRules}
+            setAgreeToRules={setAgreeToRules}
             payError={payError}
             isValid={isValid}
             saving={saving}

@@ -132,12 +132,28 @@ def handler(event: dict, context) -> dict:
                         "source": "db",
                     }),
                 }
-        except Exception:
-            pass
+            return {
+                "statusCode": 404,
+                "headers": CORS_HEADERS,
+                "body": json.dumps({"error": "out_of_range", "total": total}),
+            }
+        except Exception as e:
+            return {
+                "statusCode": 500,
+                "headers": CORS_HEADERS,
+                "body": json.dumps({"error": str(e)}),
+            }
 
-    item = MOCK_WISHES[number - 1]
+    if 0 <= number - 1 < len(MOCK_WISHES):
+        item = MOCK_WISHES[number - 1]
+        return {
+            "statusCode": 200,
+            "headers": CORS_HEADERS,
+            "body": json.dumps({**item, "number": number, "total": total, "source": "mock"}),
+        }
+
     return {
-        "statusCode": 200,
+        "statusCode": 404,
         "headers": CORS_HEADERS,
-        "body": json.dumps({**item, "number": number, "total": total, "source": "mock"}),
+        "body": json.dumps({"error": "out_of_range", "total": total}),
     }
