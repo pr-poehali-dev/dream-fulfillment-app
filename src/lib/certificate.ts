@@ -26,7 +26,10 @@ export function generateCertificateHtml(data: CertificateData): string {
     s
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+  const shareText = `Я зажёг звезду на zagadai.online! Моё желание: ${wish}. Присоединяйся: https://zagadai.online`;
 
   return `<!DOCTYPE html>
 <html lang="ru">
@@ -163,6 +166,23 @@ export function generateCertificateHtml(data: CertificateData): string {
     font-size: 14px;
     cursor: pointer;
   }
+  .share-btn {
+    background: #0077ff;
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 32px;
+    font-family: 'Golos Text', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
   @media print {
     body { background: #060810 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .no-print { display: none !important; }
@@ -209,8 +229,18 @@ export function generateCertificateHtml(data: CertificateData): string {
       доступным на сайте zagadai.online.
     </div>
 
-    <button class="print-btn no-print" onclick="window.print()">🖨 Распечатать</button>
+    <div class="actions no-print">
+      <button class="print-btn" onclick="window.print()">🖨 Распечатать</button>
+      <button class="share-btn" id="share-vk-btn" data-share-text="${escape(shareText)}">📢 Поделиться ВКонтакте</button>
+    </div>
   </div>
+  <script>
+    document.getElementById('share-vk-btn').addEventListener('click', function () {
+      var text = this.getAttribute('data-share-text');
+      var url = 'https://vk.com/share.php?url=https://zagadai.online&title=' + encodeURIComponent(text);
+      window.open(url, '_blank');
+    });
+  </script>
 </body>
 </html>`;
 }

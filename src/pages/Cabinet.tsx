@@ -147,6 +147,16 @@ export default function Cabinet() {
     }
   };
 
+  const handleShareVk = (wish: string) => {
+    const shareText = encodeURIComponent(
+      `Я зажёг звезду на zagadai.online! Моё желание: ${wish}. Присоединяйся: https://zagadai.online`,
+    );
+    window.open(
+      `https://vk.com/share.php?url=https://zagadai.online&title=${shareText}`,
+      "_blank",
+    );
+  };
+
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -429,19 +439,34 @@ export default function Cabinet() {
                               </>
                             )}
                           </div>
-                          <button
-                            onClick={() => handleDownloadCertificate(w)}
-                            className="font-golos text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all"
-                            style={{
-                              color: "#c9a84c",
-                              border: "1px solid rgba(201,168,76,0.3)",
-                              background: "rgba(201,168,76,0.06)",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <Icon name="Download" size={13} />
-                            Скачать сертификат
-                          </button>
+                          <div className="flex gap-2 flex-wrap">
+                            <button
+                              onClick={() => handleDownloadCertificate(w)}
+                              className="font-golos text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all"
+                              style={{
+                                color: "#c9a84c",
+                                border: "1px solid rgba(201,168,76,0.3)",
+                                background: "rgba(201,168,76,0.06)",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <Icon name="Download" size={13} />
+                              Скачать сертификат
+                            </button>
+                            <button
+                              onClick={() => handleShareVk(w.wish)}
+                              className="font-golos text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all"
+                              style={{
+                                color: "#fff",
+                                border: "1px solid rgba(0,119,255,0.4)",
+                                background: "rgba(0,119,255,0.12)",
+                                cursor: "pointer",
+                              }}
+                            >
+                              <Icon name="Share2" size={13} />
+                              Поделиться ВКонтакте
+                            </button>
+                          </div>
                         </div>
                       ))
                     )}
