@@ -59,6 +59,11 @@ def handler(event: dict, context) -> dict:
         return {"statusCode": 200, "headers": CORS, "body": ""}
 
     raw_body = event.get("body") or ""
+    if event.get("isBase64Encoded"):
+        try:
+            raw_body = base64.b64decode(raw_body).decode("utf-8", errors="replace")
+        except Exception:
+            pass
 
     # --- Уведомление об оплате от WalletOne (ResultURL, form-urlencoded) ---
     if event.get("httpMethod") == "POST" and is_form_urlencoded(event) and "WMI_" in raw_body:
@@ -119,7 +124,18 @@ def handler(event: dict, context) -> dict:
             "body": "WMI_RESULT=OK",
         }
 
-    body = json.loads(raw_body or "{}")
+    try:
+        body = json.loads(raw_body or "{}")
+    except json.JSONDecodeError:
+        # Неожиданный формат тела (например, form-urlencoded без WMI_ или
+        # уже обработанный запрос) — отвечаем OK, чтобы W1 не повторял вебхук.
+        if "WMI_" in raw_body:
+            return {
+                "statusCode": 200,
+                "headers": {**CORS, "Content-Type": "text/plain"},
+                "body": "WMI_RESULT=RETRY&WMI_DESCRIPTION=unparsable_body",
+            }
+        return {"statusCode": 400, "headers": CORS, "body": json.dumps({"error": "Некорректный запрос"})}
     action = body.get("action")
 
     # --- Создание звезды + подписанная платёжная форма WalletOne ---
