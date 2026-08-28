@@ -37,8 +37,8 @@ export default function Index() {
     "line1" | "line2" | "out" | "done"
   >("line1");
   const [starsCount, setStarsCount] = useState(0);
-  const [copilkaAmount] = useState(0);
-  const [angelsCount] = useState(0);
+  const [copilkaAmount, setCopilkaAmount] = useState(0);
+  const [angelsCount, setAngelsCount] = useState(0);
   const [altruistsCount] = useState(0);
   const [randomWish, setRandomWish] = useState<WishItem | null>(null);
   const [randomLoading, setRandomLoading] = useState(false);
@@ -120,6 +120,8 @@ export default function Index() {
       .then((data) => {
         const parsed = typeof data === "string" ? JSON.parse(data) : data;
         if (parsed.total !== undefined) setStarsCount(parsed.total);
+        if (parsed.copilka_amount !== undefined) setCopilkaAmount(parsed.copilka_amount);
+        if (parsed.fulfilled_count !== undefined) setAngelsCount(parsed.fulfilled_count);
         if (Array.isArray(parsed.stars) && parsed.stars.length > 0) {
           const loaded: Star[] = parsed.stars.map((s: { id: number; x: number; y: number; amount: number; wish: string; name?: string; avatar?: string }) => {
             const amt = s.amount ?? 10;
@@ -236,7 +238,6 @@ export default function Index() {
   };
 
   const handleWishSent = (amount: number, wish: string, starX?: number, starY?: number, name?: string, avatar?: string) => {
-    setShowModal(false);
     setStarsCount((prev) => prev + 1);
     setTimeout(() => playStarAppear(), 300);
     const baseSize =

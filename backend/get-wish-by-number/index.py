@@ -35,8 +35,6 @@ def handler(event: dict, context) -> dict:
                     ORDER BY s.created_at ASC
                 """)
                 rows = cur.fetchall()
-                cur.close()
-                conn.close()
                 stars = [
                     {
                         "id": r[0], "wish": r[1], "amount": float(r[2]),
@@ -47,10 +45,31 @@ def handler(event: dict, context) -> dict:
                     }
                     for r in rows
                 ]
-                return {"statusCode": 200, "headers": CORS_HEADERS, "body": json.dumps({"stars": stars, "total": len(stars)})}
+                cur.execute(f"""
+                    SELECT COALESCE(SUM(angel_fund), 0)
+                    FROM {schema}.stars
+                    WHERE status IN ('active', 'fulfilled')
+                """)
+                copilka_amount = float(cur.fetchone()[0])
+                cur.execute(f"""
+                    SELECT COUNT(*) FROM {schema}.stars WHERE status = 'fulfilled'
+                """)
+                fulfilled_count = cur.fetchone()[0]
+                cur.close()
+                conn.close()
+                return {
+                    "statusCode": 200,
+                    "headers": CORS_HEADERS,
+                    "body": json.dumps({
+                        "stars": stars,
+                        "total": len(stars),
+                        "copilka_amount": copilka_amount,
+                        "fulfilled_count": fulfilled_count,
+                    }),
+                }
             except Exception as e:
                 return {"statusCode": 500, "headers": CORS_HEADERS, "body": json.dumps({"error": str(e)})}
-        return {"statusCode": 200, "headers": CORS_HEADERS, "body": json.dumps({"stars": [], "total": 0})}
+        return {"statusCode": 200, "headers": CORS_HEADERS, "body": json.dumps({"stars": [], "total": 0, "copilka_amount": 0, "fulfilled_count": 0})}
 
     number_str = params.get("number")
 

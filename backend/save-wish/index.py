@@ -154,7 +154,7 @@ def handler(event: dict, context) -> dict:
         except (TypeError, ValueError):
             return {"statusCode": 400, "headers": CORS, "body": json.dumps({"error": "Некорректная сумма"})}
 
-        angel_fund = round(amount * 0.1, 2)
+        angel_fund = round(amount * 0.5, 2)
         x = round(random.uniform(2, 98), 2)
         y = round(random.uniform(2, 98), 2)
 

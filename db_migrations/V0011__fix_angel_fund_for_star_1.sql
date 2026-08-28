@@ -1,0 +1,1 @@
+UPDATE t_p75577017_dream_fulfillment_ap.stars SET angel_fund = ROUND(amount * 0.5, 2) WHERE id = 1;

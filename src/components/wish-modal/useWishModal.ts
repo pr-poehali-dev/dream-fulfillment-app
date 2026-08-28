@@ -102,10 +102,7 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
       const data = await res.json();
       if (data.status === "active") {
         setStep("done");
-        setTimeout(
-          () => onSent(numAmount, wish, pendingCoords?.x, pendingCoords?.y),
-          1500,
-        );
+        onSent(numAmount, wish, pendingCoords?.x, pendingCoords?.y);
       } else {
         setPayError(
           "Оплата ещё не подтверждена. Подожди немного и попробуй снова.",
