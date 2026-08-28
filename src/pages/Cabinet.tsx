@@ -147,12 +147,13 @@ export default function Cabinet() {
     }
   };
 
-  const handleShareVk = (wish: string) => {
+  const handleShareVk = (w: Wish) => {
+    const starUrl = `https://zagadai.online/star/${w.id}`;
     const shareText = encodeURIComponent(
-      `Я зажёг звезду на zagadai.online! Моё желание: ${wish}. Присоединяйся: https://zagadai.online`,
+      `Я зажёг звезду №${w.id} на zagadai.online! Моё желание: ${w.wish}. Смотри: ${starUrl}`,
     );
     window.open(
-      `https://vk.com/share.php?url=https://zagadai.online&title=${shareText}`,
+      `https://vk.com/share.php?url=${starUrl}&title=${shareText}`,
       "_blank",
     );
   };
@@ -454,7 +455,7 @@ export default function Cabinet() {
                               Скачать сертификат
                             </button>
                             <button
-                              onClick={() => handleShareVk(w.wish)}
+                              onClick={() => handleShareVk(w)}
                               className="font-golos text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all"
                               style={{
                                 color: "#fff",

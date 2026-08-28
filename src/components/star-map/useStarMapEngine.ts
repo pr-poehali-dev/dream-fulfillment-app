@@ -2,11 +2,12 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import func2url from "../../../backend/func2url.json";
 import { StarData, MAP_W, MAP_H, bgStars } from "./constants";
 
-export function useStarMapEngine() {
+export function useStarMapEngine(focusStarId?: number) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stars, setStars] = useState<StarData[]>([]);
   const [loading, setLoading] = useState(true);
   const [tooltip, setTooltip] = useState<{ star: StarData; sx: number; sy: number; pinned: boolean } | null>(null);
+  const [starNotFound, setStarNotFound] = useState(false);
 
   const camRef = useRef({ x: MAP_W / 2, y: MAP_H / 2, zoom: 0.25 });
   const dragRef = useRef<{ active: boolean; startX: number; startY: number; camX: number; camY: number }>({
@@ -35,10 +36,24 @@ export function useStarMapEngine() {
         }));
         setStars(list);
         starsRef.current = list;
+
+        if (focusStarId) {
+          const target = list.find((s) => s.id === focusStarId);
+          if (target) {
+            clickedRef.current = target;
+            lastClickStar.current = target;
+            camRef.current.zoom = 1.8;
+            camRef.current.x = target.x;
+            camRef.current.y = target.y;
+          } else {
+            setStarNotFound(true);
+          }
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusStarId]);
 
   const worldToScreen = useCallback((wx: number, wy: number, canvas: HTMLCanvasElement) => {
     const { x, y, zoom } = camRef.current;
@@ -367,6 +382,7 @@ export function useStarMapEngine() {
     canvasRef,
     stars,
     loading,
+    starNotFound,
     dragRef,
     tooltip,
     closeTooltip,

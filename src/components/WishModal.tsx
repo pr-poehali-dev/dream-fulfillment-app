@@ -31,6 +31,7 @@ export default function WishModal({ onClose, onSent }: Props) {
     tier,
     isEmailValid,
     isValid,
+    pendingStarId,
     handleAmountInput,
     handleQuick,
     handleSubmit,
@@ -108,6 +109,7 @@ export default function WishModal({ onClose, onSent }: Props) {
             tier={tier}
             numAmount={numAmount}
             wish={wish}
+            starId={pendingStarId}
             onClose={onClose}
           />
         )}

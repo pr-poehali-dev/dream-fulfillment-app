@@ -29,7 +29,8 @@ export function generateCertificateHtml(data: CertificateData): string {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
 
-  const shareText = `Я зажёг звезду на zagadai.online! Моё желание: ${wish}. Присоединяйся: https://zagadai.online`;
+  const starUrl = `https://zagadai.online/star/${starId}`;
+  const shareText = `Я зажёг звезду №${starId} на zagadai.online! Моё желание: ${wish}. Смотри: ${starUrl}`;
 
   return `<!DOCTYPE html>
 <html lang="ru">
@@ -231,13 +232,14 @@ export function generateCertificateHtml(data: CertificateData): string {
 
     <div class="actions no-print">
       <button class="print-btn" onclick="window.print()">🖨 Распечатать</button>
-      <button class="share-btn" id="share-vk-btn" data-share-text="${escape(shareText)}">📢 Поделиться ВКонтакте</button>
+      <button class="share-btn" id="share-vk-btn" data-share-text="${escape(shareText)}" data-share-url="${escape(starUrl)}">📢 Поделиться ВКонтакте</button>
     </div>
   </div>
   <script>
     document.getElementById('share-vk-btn').addEventListener('click', function () {
       var text = this.getAttribute('data-share-text');
-      var url = 'https://vk.com/share.php?url=https://zagadai.online&title=' + encodeURIComponent(text);
+      var shareUrl = this.getAttribute('data-share-url');
+      var url = 'https://vk.com/share.php?url=' + encodeURIComponent(shareUrl) + '&title=' + encodeURIComponent(text);
       window.open(url, '_blank');
     });
   </script>

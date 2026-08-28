@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import WishModal from "@/components/WishModal";
 import WishCardModal from "@/components/WishCardModal";
@@ -26,9 +27,11 @@ type Star = {
 
 export default function Index() {
   const { playCoin, playSplash, playMagic, playStarAppear } = useSound();
+  const { id: starIdParam } = useParams<{ id: string }>();
+  const focusStarId = starIdParam ? Number(starIdParam) : undefined;
 
   const [showModal, setShowModal] = useState(false);
-  const [showMap, setShowMap] = useState(false);
+  const [showMap, setShowMap] = useState(!!focusStarId);
   const [coinAnim, setCoinAnim] = useState(false);
   const [smokeAnim, setSmokeAnim] = useState(false);
   const [rippleAnim, setRippleAnim] = useState(false);
@@ -289,7 +292,13 @@ export default function Index() {
       />
 
       {showMap && (
-        <StarMap onClose={() => setShowMap(false)} />
+        <StarMap
+          onClose={() => {
+            setShowMap(false);
+            if (focusStarId) window.history.replaceState({}, "", "/");
+          }}
+          focusStarId={focusStarId}
+        />
       )}
 
       {showModal && (

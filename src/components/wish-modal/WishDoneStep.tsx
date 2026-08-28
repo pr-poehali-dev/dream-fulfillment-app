@@ -4,10 +4,11 @@ interface Props {
   tier: { label: string; icon: string; desc: string };
   numAmount: number;
   wish: string;
+  starId: number | null;
   onClose: () => void;
 }
 
-export default function WishDoneStep({ tier, numAmount, wish, onClose }: Props) {
+export default function WishDoneStep({ tier, numAmount, wish, starId, onClose }: Props) {
   const navigate = useNavigate();
 
   const handleGoToCabinet = () => {
@@ -16,11 +17,16 @@ export default function WishDoneStep({ tier, numAmount, wish, onClose }: Props) 
   };
 
   const handleShareVk = () => {
+    const starUrl = starId
+      ? `https://zagadai.online/star/${starId}`
+      : "https://zagadai.online";
     const shareText = encodeURIComponent(
-      `✨ Я только что зажёг ${tier.label} на «Загадай Онлайн»!\n\nМоё желание: ${wish}\n\nПрисоединяйтесь: https://zagadai.online\n\n#ЗагадайОнлайн #КолодецЖеланий`,
+      starId
+        ? `Я зажёг звезду №${starId} на zagadai.online! Моё желание: ${wish}. Смотри: ${starUrl}`
+        : `Я зажёг звезду на zagadai.online! Моё желание: ${wish}. Присоединяйся: ${starUrl}`,
     );
     window.open(
-      `https://vk.com/share.php?url=https://zagadai.online&title=${shareText}`,
+      `https://vk.com/share.php?url=${starUrl}&title=${shareText}`,
       "_blank",
     );
     onClose();
