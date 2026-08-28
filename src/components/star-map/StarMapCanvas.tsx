@@ -1,9 +1,13 @@
 import { RefObject } from "react";
+import StarMapTooltip from "./StarMapTooltip";
+import { StarData } from "./constants";
 
 interface Props {
   canvasRef: RefObject<HTMLCanvasElement>;
   dragRef: RefObject<{ active: boolean; startX: number; startY: number; camX: number; camY: number }>;
   loading: boolean;
+  tooltip: { star: StarData; sx: number; sy: number; pinned: boolean } | null;
+  onCloseTooltip: () => void;
   onMouseMove: (e: React.MouseEvent<HTMLCanvasElement>) => void;
   onMouseDown: (e: React.MouseEvent<HTMLCanvasElement>) => void;
   onMouseUp: (e: React.MouseEvent<HTMLCanvasElement>) => void;
@@ -17,6 +21,8 @@ export default function StarMapCanvas({
   canvasRef,
   dragRef,
   loading,
+  tooltip,
+  onCloseTooltip,
   onMouseMove,
   onMouseDown,
   onMouseUp,
@@ -26,7 +32,7 @@ export default function StarMapCanvas({
   onTouchEnd,
 }: Props) {
   return (
-    <>
+    <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
       {loading && (
         <div style={{
           position: "absolute",
@@ -56,6 +62,15 @@ export default function StarMapCanvas({
         onTouchEnd={onTouchEnd}
       />
 
+      {tooltip && canvasRef.current && (
+        <StarMapTooltip
+          tooltip={tooltip}
+          containerWidth={canvasRef.current.width}
+          containerHeight={canvasRef.current.height}
+          onClose={onCloseTooltip}
+        />
+      )}
+
       <div style={{
         position: "absolute",
         bottom: 20,
@@ -69,6 +84,6 @@ export default function StarMapCanvas({
       }}>
         Скролл / pinch — масштаб · тащи — перемещение
       </div>
-    </>
+    </div>
   );
 }

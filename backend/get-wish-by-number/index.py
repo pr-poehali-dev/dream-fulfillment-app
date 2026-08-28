@@ -28,7 +28,7 @@ def handler(event: dict, context) -> dict:
                 conn = psycopg2.connect(db_url)
                 cur = conn.cursor()
                 cur.execute(f"""
-                    SELECT s.id, s.wish, s.amount, s.x, s.y, u.name, u.avatar_url, s.brightness, s.created_at
+                    SELECT s.id, s.wish, s.amount, s.x, s.y, u.name, u.avatar_url, s.brightness, s.created_at, u.vk_id
                     FROM {schema}.stars s
                     JOIN {schema}.users u ON u.id = s.user_id
                     WHERE s.status = 'active'
@@ -44,8 +44,8 @@ def handler(event: dict, context) -> dict:
                         "avatar": r[6] or f"https://api.dicebear.com/7.x/adventurer/svg?seed={r[0]}",
                         "avatar_url": r[6] or f"https://api.dicebear.com/7.x/adventurer/svg?seed={r[0]}",
                         "brightness": float(r[7]) if r[7] is not None else 0.8,
-                        "vk_id": r[0],
                         "created_at": r[8].isoformat() if r[8] else None,
+                        "vk_id": r[9],
                     }
                     for r in rows
                 ]

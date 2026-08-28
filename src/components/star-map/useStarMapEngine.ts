@@ -6,19 +6,20 @@ export function useStarMapEngine() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stars, setStars] = useState<StarData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tooltip, setTooltip] = useState<{ star: StarData; sx: number; sy: number; pinned: boolean } | null>(null);
 
   const camRef = useRef({ x: MAP_W / 2, y: MAP_H / 2, zoom: 0.25 });
   const dragRef = useRef<{ active: boolean; startX: number; startY: number; camX: number; camY: number }>({
     active: false, startX: 0, startY: 0, camX: 0, camY: 0,
   });
   const hoveredRef = useRef<StarData | null>(null);
-  const tooltipRef = useRef<{ star: StarData; cx: number; cy: number } | null>(null);
   const clickedRef = useRef<StarData | null>(null);
   const rafRef = useRef<number>(0);
   const starsRef = useRef<StarData[]>([]);
   const lastClickTime = useRef(0);
   const lastClickStar = useRef<StarData | null>(null);
   const flyRef = useRef<{ tx: number; ty: number; tz: number } | null>(null);
+  const lastTooltipPos = useRef<{ sx: number; sy: number } | null>(null);
 
   useEffect(() => {
     fetch(`${func2url["get-wish-by-number"]}?action=all`)
@@ -130,59 +131,12 @@ export function useStarMapEngine() {
       ctx.arc(sx, sy, displayR, 0, Math.PI * 2);
       ctx.fill();
 
-      if ((isHovered || isClicked) && tooltipRef.current?.star.id === star.id) {
-        const t = tooltipRef.current;
-        const tx = t.cx;
-        const ty = t.cy;
-        const maxW = 220;
-        const pad = 12;
-        const name = star.name;
-        const wish = star.wish.length > 60 ? star.wish.slice(0, 57) + "…" : star.wish;
-
-        ctx.font = "bold 13px 'Golos Text', sans-serif";
-        const nameW = ctx.measureText(name).width;
-        ctx.font = "12px 'Golos Text', sans-serif";
-        const wishW = ctx.measureText(wish).width;
-        const boxW = Math.min(Math.max(nameW, wishW) + pad * 2, maxW);
-        const boxH = 56;
-
-        let bx = tx - boxW / 2;
-        let by = ty - boxH - displayR - 12;
-        if (bx < 4) bx = 4;
-        if (bx + boxW > W - 4) bx = W - boxW - 4;
-        if (by < 4) by = ty + displayR + 12;
-
-        ctx.globalAlpha = 0.93;
-        ctx.fillStyle = "rgba(6,8,20,0.97)";
-        ctx.strokeStyle = `${color}88`;
-        ctx.lineWidth = 1;
+      if (isHovered || isClicked) {
+        ctx.strokeStyle = "rgba(255,255,255,0.5)";
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.roundRect(bx, by, boxW, boxH, 10);
-        ctx.fill();
+        ctx.arc(sx, sy, displayR + 3, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.globalAlpha = 1;
-
-        ctx.fillStyle = color;
-        ctx.font = "bold 12px 'Golos Text', sans-serif";
-        ctx.fillText(name, bx + pad, by + 20);
-
-        ctx.fillStyle = "rgba(220,228,255,0.75)";
-        ctx.font = "11px 'Golos Text', sans-serif";
-        const words = wish.split(" ");
-        let line = "";
-        let lineY = by + 36;
-        for (const word of words) {
-          const test = line ? line + " " + word : word;
-          if (ctx.measureText(test).width > boxW - pad * 2) {
-            ctx.fillText(line, bx + pad, lineY);
-            line = word;
-            lineY += 14;
-            if (lineY > by + boxH - 4) { line = "…"; break; }
-          } else {
-            line = test;
-          }
-        }
-        if (line) ctx.fillText(line, bx + pad, lineY);
       }
     });
 
@@ -208,11 +162,27 @@ export function useStarMapEngine() {
         }
       }
       draw();
+
+      const pinned = clickedRef.current;
+      const active = pinned || hoveredRef.current;
+      const canvas = canvasRef.current;
+      if (active && canvas) {
+        const { sx, sy } = worldToScreen(active.x, active.y, canvas);
+        const last = lastTooltipPos.current;
+        if (!last || Math.abs(last.sx - sx) > 0.5 || Math.abs(last.sy - sy) > 0.5) {
+          lastTooltipPos.current = { sx, sy };
+          setTooltip({ star: active, sx, sy, pinned: !!pinned });
+        }
+      } else if (lastTooltipPos.current !== null) {
+        lastTooltipPos.current = null;
+        setTooltip(null);
+      }
+
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [draw]);
+  }, [draw, worldToScreen]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -257,22 +227,14 @@ export function useStarMapEngine() {
       camRef.current.x = dragRef.current.camX - (sx - dragRef.current.startX) / camRef.current.zoom;
       camRef.current.y = dragRef.current.camY - (sy - dragRef.current.startY) / camRef.current.zoom;
       hoveredRef.current = null;
-      tooltipRef.current = null;
       canvas.style.cursor = "grabbing";
       return;
     }
 
     const hit = getHitStar(sx, sy, canvas);
     hoveredRef.current = hit;
-    if (hit) {
-      const { sx: hsx, sy: hsy } = worldToScreen(hit.x, hit.y, canvas);
-      tooltipRef.current = { star: hit, cx: hsx, cy: hsy };
-      canvas.style.cursor = "pointer";
-    } else {
-      tooltipRef.current = null;
-      canvas.style.cursor = "grab";
-    }
-  }, [getHitStar, worldToScreen]);
+    canvas.style.cursor = hit ? "pointer" : "grab";
+  }, [getHitStar]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -311,8 +273,6 @@ export function useStarMapEngine() {
           lastClickTime.current = now;
           lastClickStar.current = hit;
           clickedRef.current = clickedRef.current?.id === hit.id ? null : hit;
-          const { sx: hsx, sy: hsy } = worldToScreen(hit.x, hit.y, canvas);
-          tooltipRef.current = { star: hit, cx: hsx, cy: hsy };
           flyRef.current = { tx: hit.x, ty: hit.y, tz: Math.max(camRef.current.zoom, 1.8) };
         }
       } else {
@@ -320,7 +280,7 @@ export function useStarMapEngine() {
         flyRef.current = null;
       }
     }
-  }, [getHitStar, worldToScreen]);
+  }, [getHitStar]);
 
   const handleWheel = useCallback((e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -389,23 +349,27 @@ export function useStarMapEngine() {
           lastClickTime.current = now;
           lastClickStar.current = hit;
           clickedRef.current = clickedRef.current?.id === hit.id ? null : hit;
-          const { sx: hsx, sy: hsy } = worldToScreen(hit.x, hit.y, canvas);
-          tooltipRef.current = { star: hit, cx: hsx, cy: hsy };
           flyRef.current = { tx: hit.x, ty: hit.y, tz: Math.max(camRef.current.zoom, 1.8) };
         }
       } else {
         clickedRef.current = null;
-        tooltipRef.current = null;
         flyRef.current = null;
       }
     }
-  }, [getHitStar, worldToScreen]);
+  }, [getHitStar]);
+
+  const closeTooltip = useCallback(() => {
+    clickedRef.current = null;
+    hoveredRef.current = null;
+  }, []);
 
   return {
     canvasRef,
     stars,
     loading,
     dragRef,
+    tooltip,
+    closeTooltip,
     handleMouseMove,
     handleMouseDown,
     handleMouseUp,

@@ -8,6 +8,7 @@ export interface StarData {
   vk_id: number;
   avatar_url: string | null;
   created_at: string | null;
+  amount?: number;
 }
 
 export const MAP_W = 4000;

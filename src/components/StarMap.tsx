@@ -12,6 +12,8 @@ export default function StarMap({ onClose }: Props) {
     stars,
     loading,
     dragRef,
+    tooltip,
+    closeTooltip,
     handleMouseMove,
     handleMouseDown,
     handleMouseUp,
@@ -38,6 +40,8 @@ export default function StarMap({ onClose }: Props) {
         canvasRef={canvasRef}
         dragRef={dragRef}
         loading={loading}
+        tooltip={tooltip}
+        onCloseTooltip={closeTooltip}
         onMouseMove={handleMouseMove}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
