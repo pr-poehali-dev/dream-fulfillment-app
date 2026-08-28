@@ -60,7 +60,8 @@ export function useStarMapEngine() {
   }, []);
 
   const getStarRadius = (brightness: number, zoom: number) => {
-    const base = 2 + brightness * 6;
+    const safeBrightness = Number.isFinite(brightness) ? brightness : 0.8;
+    const base = 2 + safeBrightness * 6;
     return Math.max(3, base * Math.min(zoom, 2));
   };
 
