@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "name": "Missing id returns 400",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 400
+    },
+    {
+      "name": "Non-existent star returns 404",
+      "method": "GET",
+      "path": "/?id=999999999",
+      "expectedStatus": 404
+    },
+    {
+      "name": "Existing star returns 200 with og tags",
+      "method": "GET",
+      "path": "/?id=1",
+      "expectedStatus": 200
+    }
+  ]
+}
