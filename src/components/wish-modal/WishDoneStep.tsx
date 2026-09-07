@@ -22,7 +22,7 @@ export default function WishDoneStep({ tier, numAmount, wish, starId, onClose }:
       ? `https://zagadai.online/star/${starId}`
       : "https://zagadai.online";
     const shareUrl = starId
-      ? `${func2url["star-preview"]}?id=${starId}`
+      ? `${func2url["star-preview"]}?id=${starId}&v=2`
       : starUrl;
     const shareText = encodeURIComponent(
       starId
