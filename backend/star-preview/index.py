@@ -1,3 +1,4 @@
+import base64
 import io
 import json
 import os
@@ -7,14 +8,20 @@ import boto3
 import psycopg2
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+from fonts_data import NOTO_SANS_BOLD_B64, NOTO_SERIF_ITALIC_B64
+
 CORS_HEADERS = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
 }
 
-FONT_DIR = os.path.join(os.path.dirname(__file__), "fonts")
 SITE_URL = "https://zagadai.online"
+
+
+def load_font(b64_data: str, size: int) -> ImageFont.FreeTypeFont:
+    """Загружает шрифт из base64, встроенного в код (без файлов на диске)."""
+    return ImageFont.truetype(io.BytesIO(base64.b64decode(b64_data)), size)
 
 
 def get_tier(amount: float) -> str:
@@ -81,10 +88,10 @@ def generate_preview_image(star_id: int, wish: str, tier_label: str) -> bytes:
     white = (240, 232, 208)
     grey = (200, 210, 240)
 
-    f_logo = ImageFont.truetype(f"{FONT_DIR}/NotoSans-Bold.ttf", 26)
-    f_number = ImageFont.truetype(f"{FONT_DIR}/NotoSans-Bold.ttf", 68)
-    f_tier = ImageFont.truetype(f"{FONT_DIR}/NotoSans-Bold.ttf", 22)
-    f_wish = ImageFont.truetype(f"{FONT_DIR}/NotoSerif-Italic.ttf", 32)
+    f_logo = load_font(NOTO_SANS_BOLD_B64, 26)
+    f_number = load_font(NOTO_SANS_BOLD_B64, 68)
+    f_tier = load_font(NOTO_SANS_BOLD_B64, 22)
+    f_wish = load_font(NOTO_SERIF_ITALIC_B64, 32)
 
     def center_text(y: int, text: str, font: ImageFont.FreeTypeFont, fill):
         bbox = draw.textbbox((0, 0), text, font=font)

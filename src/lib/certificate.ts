@@ -1,3 +1,7 @@
+import func2url from "../../backend/func2url.json";
+
+const STAR_PREVIEW_URL = func2url["star-preview"];
+
 interface CertificateData {
   starId: number;
   wish: string;
@@ -30,6 +34,7 @@ export function generateCertificateHtml(data: CertificateData): string {
       .replace(/"/g, "&quot;");
 
   const starUrl = `https://zagadai.online/star/${starId}`;
+  const previewUrl = `${STAR_PREVIEW_URL}?id=${starId}`;
   const shareText = `Я зажёг звезду №${starId} на zagadai.online! Моё желание: ${wish}. Смотри: ${starUrl}`;
 
   return `<!DOCTYPE html>
@@ -232,7 +237,7 @@ export function generateCertificateHtml(data: CertificateData): string {
 
     <div class="actions no-print">
       <button class="print-btn" onclick="window.print()">🖨 Распечатать</button>
-      <button class="share-btn" id="share-vk-btn" data-share-text="${escape(shareText)}" data-share-url="${escape(starUrl)}">📢 Поделиться ВКонтакте</button>
+      <button class="share-btn" id="share-vk-btn" data-share-text="${escape(shareText)}" data-share-url="${escape(previewUrl)}">📢 Поделиться ВКонтакте</button>
     </div>
   </div>
   <script>
