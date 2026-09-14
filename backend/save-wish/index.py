@@ -17,6 +17,26 @@ W1_CURRENCY_RUB = "643"
 SUCCESS_URL = "https://zagadai.online/?paid=1"
 FAIL_URL = "https://zagadai.online/?paid=0"
 
+# Зона неба, где разрешено размещать звёзды (в % от фонового квадрата),
+# заданная пользователем: прямоугольник с вырезом под луну в правом верхнем углу.
+STAR_ZONE_X_MIN, STAR_ZONE_X_MAX = 3.0, 97.0
+STAR_ZONE_Y_MIN, STAR_ZONE_Y_MAX = 8.0, 63.0
+MOON_NOTCH_X_MIN, MOON_NOTCH_X_MAX = 67.0, 90.0
+MOON_NOTCH_Y_MAX = 24.0
+
+
+def random_star_position():
+    """Случайные координаты звезды строго внутри разрешённой зоны неба,
+    без попадания в область луны (правый верхний угол)."""
+    while True:
+        x = round(random.uniform(STAR_ZONE_X_MIN, STAR_ZONE_X_MAX), 2)
+        y = round(random.uniform(STAR_ZONE_Y_MIN, STAR_ZONE_Y_MAX), 2)
+        in_moon_notch = (
+            MOON_NOTCH_X_MIN <= x <= MOON_NOTCH_X_MAX and y <= MOON_NOTCH_Y_MAX
+        )
+        if not in_moon_notch:
+            return x, y
+
 
 def get_conn():
     return psycopg2.connect(os.environ["DATABASE_URL"])
@@ -155,8 +175,7 @@ def handler(event: dict, context) -> dict:
             return {"statusCode": 400, "headers": CORS, "body": json.dumps({"error": "Некорректная сумма"})}
 
         angel_fund = round(amount * 0.5, 2)
-        x = round(random.uniform(2, 98), 2)
-        y = round(random.uniform(2, 98), 2)
+        x, y = random_star_position()
 
         conn = get_conn()
         cur = conn.cursor()

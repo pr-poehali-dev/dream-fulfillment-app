@@ -247,8 +247,8 @@ export default function Index() {
       amount >= 1000 ? 3.5 : amount >= 500 ? 2.8 : amount >= 100 ? 2.2 : amount >= 50 ? 1.8 : 1.3;
     const newStar: Star = {
       id: Date.now(),
-      x: starX ?? (5 + Math.random() * 85),
-      y: starY ?? (2 + Math.random() * 45),
+      x: starX ?? (5 + Math.random() * 80),
+      y: starY ?? (8 + Math.random() * 40),
       size: baseSize + Math.random() * 0.5,
       delay: Math.random() * 3,
       lit: true,
