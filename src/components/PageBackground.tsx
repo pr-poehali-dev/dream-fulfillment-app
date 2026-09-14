@@ -11,27 +11,47 @@ interface Props {
 
 export default function PageBackground({ stars }: Props) {
   return (
-    <div className="bg-root fixed inset-0 z-0" style={{ background: '#060810' }}>
-      {/* Картинка — прибита к низу */}
-      <img
-        src={BG_IMAGE}
-        alt=""
+    <div
+      className="bg-root fixed inset-0 z-0"
+      style={{
+        background: '#060810',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {/* Квадратный бокс с фиксированным соотношением сторон 1:1 — так картинка
+          и координаты звёзд (%) всегда совпадают, на любом экране */}
+      <div
         style={{
-          position: 'absolute',
-          inset: 0,
+          position: 'relative',
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'bottom center',
-          display: 'block',
-          filter: 'brightness(0.8) contrast(1.05)',
+          maxWidth: '100vh',
+          maxHeight: '100vw',
+          aspectRatio: '1 / 1',
+          margin: 'auto',
         }}
-      />
+      >
+        <img
+          src={BG_IMAGE}
+          alt=""
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            display: 'block',
+            filter: 'brightness(0.8) contrast(1.05)',
+          }}
+        />
 
-      {/* Звёзды поверх фона */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <WishesGallery />
-        <StarsCanvas stars={stars} />
+        {/* Звёзды поверх фона */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+          <WishesGallery />
+          <StarsCanvas stars={stars} />
+        </div>
       </div>
     </div>
   );
