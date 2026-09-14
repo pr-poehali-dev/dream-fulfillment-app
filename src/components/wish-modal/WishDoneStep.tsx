@@ -18,16 +18,13 @@ export default function WishDoneStep({ tier, numAmount, wish, starId, onClose }:
   };
 
   const handleShareVk = () => {
-    const starUrl = starId
-      ? `https://zagadai.online/star/${starId}`
-      : "https://zagadai.online";
     const shareUrl = starId
       ? `${func2url["star-preview"]}?id=${starId}&v=${Date.now()}`
-      : starUrl;
+      : "https://zagadai.online";
     const shareText = encodeURIComponent(
       starId
-        ? `Я зажёг звезду №${starId} на zagadai.online! Моё желание: ${wish}. Смотри: ${starUrl}`
-        : `Я зажёг звезду на zagadai.online! Моё желание: ${wish}. Присоединяйся: ${starUrl}`,
+        ? `Я зажёг звезду №${starId} на zagadai.online! Моё желание: ${wish}`
+        : `Я зажёг звезду на zagadai.online! Моё желание: ${wish}`,
     );
     window.open(
       `https://vk.com/share.php?url=${encodeURIComponent(shareUrl)}&title=${shareText}`,
