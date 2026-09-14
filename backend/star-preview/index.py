@@ -17,6 +17,7 @@ CORS_HEADERS = {
 }
 
 SITE_URL = "https://zagadai.online"
+FUNCTION_URL = "https://functions.poehali.dev/443189d2-cd36-46fb-a7b2-4f7221ef8fd2"
 
 
 def load_font(b64_data: str, size: int) -> ImageFont.FreeTypeFont:
@@ -154,13 +155,14 @@ def escape_html(s: str) -> str:
     )
 
 
-def render_html(star_id: int, wish: str, tier_label: str, image_url: str) -> str:
+def render_html(star_id: int, wish: str, tier_label: str, image_url: str, page_url: str) -> str:
     star_url = f"{SITE_URL}/star/{star_id}"
     title = f"Звезда №{star_id} на Загадай.Онлайн"
     description = wish if len(wish) <= 300 else wish[:297].rstrip() + "…"
     title_e = escape_html(title)
     description_e = escape_html(description)
     star_url_e = escape_html(star_url)
+    page_url_e = escape_html(page_url)
 
     return f"""<!DOCTYPE html>
 <html lang="ru">
@@ -174,7 +176,7 @@ def render_html(star_id: int, wish: str, tier_label: str, image_url: str) -> str
 <meta property="og:image" content="{escape_html(image_url)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="{star_url_e}">
+<meta property="og:url" content="{page_url_e}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{title_e}">
 <meta name="twitter:description" content="{description_e}">
@@ -224,6 +226,12 @@ def handler(event: dict, context) -> dict:
 
     tier_label = get_tier(star["amount"])
     image_url = get_or_create_image_url(star_id, star["wish"], tier_label)
-    html = render_html(star_id, star["wish"], tier_label, image_url)
+
+    v_param = params.get("v")
+    page_url = f"{FUNCTION_URL}?id={star_id}"
+    if v_param:
+        page_url += f"&v={v_param}"
+
+    html = render_html(star_id, star["wish"], tier_label, image_url, page_url)
 
     return {"statusCode": 200, "headers": html_headers, "body": html}
