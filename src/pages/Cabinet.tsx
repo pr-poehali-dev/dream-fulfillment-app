@@ -148,7 +148,7 @@ export default function Cabinet() {
   };
 
   const handleShareVk = (w: Wish) => {
-    const previewUrl = `${func2url["star-preview"]}?id=${w.id}&v=${Date.now()}`;
+    const previewUrl = `${func2url["star-preview"]}?id=${w.id}`;
     const shareText = encodeURIComponent(
       `Я зажёг звезду №${w.id} на zagadai.online! Моё желание: ${w.wish}`,
     );

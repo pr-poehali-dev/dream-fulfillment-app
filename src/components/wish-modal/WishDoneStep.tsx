@@ -19,7 +19,7 @@ export default function WishDoneStep({ tier, numAmount, wish, starId, onClose }:
 
   const handleShareVk = () => {
     const shareUrl = starId
-      ? `${func2url["star-preview"]}?id=${starId}&v=${Date.now()}`
+      ? `${func2url["star-preview"]}?id=${starId}`
       : "https://zagadai.online";
     const shareText = encodeURIComponent(
       starId

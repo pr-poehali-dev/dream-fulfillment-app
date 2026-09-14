@@ -33,7 +33,7 @@ export function generateCertificateHtml(data: CertificateData): string {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
 
-  const previewUrl = `${STAR_PREVIEW_URL}?id=${starId}&v=${Date.now()}`;
+  const previewUrl = `${STAR_PREVIEW_URL}?id=${starId}`;
   const shareText = `Я зажёг звезду №${starId} на zagadai.online! Моё желание: ${wish}`;
 
   return `<!DOCTYPE html>
