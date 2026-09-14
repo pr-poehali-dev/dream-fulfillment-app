@@ -34,7 +34,6 @@ export function generateCertificateHtml(data: CertificateData): string {
       .replace(/"/g, "&quot;");
 
   const previewUrl = `${STAR_PREVIEW_URL}?id=${starId}`;
-  const shareText = `Я зажёг звезду №${starId} на zagadai.online! Моё желание: ${wish}`;
 
   return `<!DOCTYPE html>
 <html lang="ru">
@@ -236,14 +235,13 @@ export function generateCertificateHtml(data: CertificateData): string {
 
     <div class="actions no-print">
       <button class="print-btn" onclick="window.print()">🖨 Распечатать</button>
-      <button class="share-btn" id="share-vk-btn" data-share-text="${escape(shareText)}" data-share-url="${escape(previewUrl)}">📢 Поделиться ВКонтакте</button>
+      <button class="share-btn" id="share-vk-btn" data-share-url="${escape(previewUrl)}">📢 Поделиться ВКонтакте</button>
     </div>
   </div>
   <script>
     document.getElementById('share-vk-btn').addEventListener('click', function () {
-      var text = this.getAttribute('data-share-text');
       var shareUrl = this.getAttribute('data-share-url');
-      var url = 'https://vk.com/share.php?url=' + encodeURIComponent(shareUrl) + '&title=' + encodeURIComponent(text);
+      var url = 'https://vk.com/share.php?url=' + encodeURIComponent(shareUrl);
       window.open(url, '_blank');
     });
   </script>
