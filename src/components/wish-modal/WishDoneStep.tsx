@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import func2url from "../../../backend/func2url.json";
 
 interface Props {
   tier: { label: string; icon: string; desc: string };
@@ -18,7 +19,7 @@ export default function WishDoneStep({ tier, numAmount, wish, starId, onClose }:
 
   const handleShareVk = () => {
     const shareUrl = starId
-      ? `https://zagadai.online/star/${starId}`
+      ? `${func2url["star-preview"]}?id=${starId}`
       : "https://zagadai.online";
     window.open(
       `https://vk.com/share.php?url=${encodeURIComponent(shareUrl)}`,
