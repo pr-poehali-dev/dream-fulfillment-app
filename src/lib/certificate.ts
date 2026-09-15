@@ -1,7 +1,3 @@
-import func2url from "../../backend/func2url.json";
-
-const STAR_PREVIEW_URL = func2url["star-preview"];
-
 interface CertificateData {
   starId: number;
   wish: string;
@@ -33,7 +29,7 @@ export function generateCertificateHtml(data: CertificateData): string {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
 
-  const previewUrl = `${STAR_PREVIEW_URL}?id=${starId}`;
+  const previewUrl = `https://zagadai.online/star/${starId}`;
 
   return `<!DOCTYPE html>
 <html lang="ru">

@@ -148,7 +148,7 @@ export default function Cabinet() {
   };
 
   const handleShareVk = (w: Wish) => {
-    const previewUrl = `${func2url["star-preview"]}?id=${w.id}`;
+    const previewUrl = `https://zagadai.online/star/${w.id}`;
     window.open(
       `https://vk.com/share.php?url=${encodeURIComponent(previewUrl)}`,
       "_blank",

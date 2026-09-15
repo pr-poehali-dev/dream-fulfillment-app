@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import os
+import re
 import textwrap
 
 import boto3
@@ -17,7 +18,30 @@ CORS_HEADERS = {
 }
 
 SITE_URL = "https://zagadai.online"
-FUNCTION_URL = "https://functions.poehali.dev/443189d2-cd36-46fb-a7b2-4f7221ef8fd2"
+
+
+def extract_star_id(event: dict):
+    """Достаёт id звезды либо из query (?id=123, старый способ),
+    либо из пути запроса /star/123 (боты соцсетей попадают сюда напрямую
+    по правилу маршрутизации на уровне домена)."""
+    params = event.get("queryStringParameters") or {}
+    raw = params.get("id")
+    if raw:
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            pass
+
+    path = event.get("path") or event.get("rawPath") or ""
+    if not path:
+        request_context = event.get("requestContext") or {}
+        http_ctx = request_context.get("http") or {}
+        path = http_ctx.get("path", "")
+
+    match = re.search(r"/star/(\d+)", path) or re.search(r"(\d+)/?$", path)
+    if match:
+        return int(match.group(1))
+    return None
 
 
 def load_font(b64_data: str, size: int) -> ImageFont.FreeTypeFont:
@@ -155,14 +179,14 @@ def escape_html(s: str) -> str:
     )
 
 
-def render_html(star_id: int, wish: str, tier_label: str, image_url: str, page_url: str) -> str:
+def render_html(star_id: int, wish: str, tier_label: str, image_url: str) -> str:
     star_url = f"{SITE_URL}/star/{star_id}"
     title = f"Звезда №{star_id} на Загадай.Онлайн"
     description = wish if len(wish) <= 300 else wish[:297].rstrip() + "…"
     title_e = escape_html(title)
     description_e = escape_html(description)
     star_url_e = escape_html(star_url)
-    page_url_e = escape_html(page_url)
+    page_url_e = star_url_e
 
     return f"""<!DOCTYPE html>
 <html lang="ru">
@@ -192,23 +216,18 @@ def render_html(star_id: int, wish: str, tier_label: str, image_url: str, page_u
 
 def handler(event: dict, context) -> dict:
     """Отдаёт HTML-страницу с og:title/og:description/og:image для конкретной звезды
-    (нужно для корректного репоста ссылки в ВКонтакте) и мгновенно перенаправляет
-    обычных посетителей на настоящую страницу zagadai.online/star/{id}."""
+    (эту страницу видят только боты соцсетей вроде ВКонтакте — платформа направляет
+    их сюда при заходе на zagadai.online/star/{id} по User-Agent, обычные посетители
+    сразу получают SPA-страницу без редиректов). id звезды берём из пути запроса
+    /star/{id}, с фолбэком на старый ?id= для обратной совместимости."""
     if event.get("httpMethod") == "OPTIONS":
         return {"statusCode": 200, "headers": CORS_HEADERS, "body": ""}
 
-    params = event.get("queryStringParameters") or {}
-    star_id_raw = params.get("id")
-
     html_headers = {**CORS_HEADERS, "Content-Type": "text/html; charset=utf-8"}
 
-    if not star_id_raw:
+    star_id = extract_star_id(event)
+    if star_id is None:
         return {"statusCode": 400, "headers": html_headers, "body": "<h1>Не указан id звезды</h1>"}
-
-    try:
-        star_id = int(star_id_raw)
-    except (TypeError, ValueError):
-        return {"statusCode": 400, "headers": html_headers, "body": "<h1>Некорректный id звезды</h1>"}
 
     star = fetch_star(star_id)
     if not star:
@@ -227,11 +246,6 @@ def handler(event: dict, context) -> dict:
     tier_label = get_tier(star["amount"])
     image_url = get_or_create_image_url(star_id, star["wish"], tier_label)
 
-    v_param = params.get("v")
-    page_url = f"{FUNCTION_URL}?id={star_id}"
-    if v_param:
-        page_url += f"&v={v_param}"
-
-    html = render_html(star_id, star["wish"], tier_label, image_url, page_url)
+    html = render_html(star_id, star["wish"], tier_label, image_url)
 
     return {"statusCode": 200, "headers": html_headers, "body": html}
