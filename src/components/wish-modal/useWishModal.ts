@@ -11,7 +11,10 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
   const [amountInput, setAmountInput] = useState("100");
   const [step, setStep] = useState<"form" | "paying" | "done">("form");
   const [saving, setSaving] = useState(false);
-  const [pendingStarId, setPendingStarId] = useState<number | null>(null);
+  // Номер ЗАЯВКИ на оплату (не номер звезды — тот появится только после
+  // подтверждения оплаты, чтобы неудачные заявки не пропускали номера звёзд)
+  const [pendingOrderNo, setPendingOrderNo] = useState<number | null>(null);
+  const [realStarId, setRealStarId] = useState<number | null>(null);
   const [pendingCoords, setPendingCoords] = useState<{
     x: number;
     y: number;
@@ -58,8 +61,8 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
         }),
       });
       const data = await res.json();
-      if (data.id && data.payment) {
-        setPendingStarId(data.id);
+      if (data.order_no && data.payment) {
+        setPendingOrderNo(data.order_no);
         setPendingCoords({ x: data.x, y: data.y });
 
         const form = document.createElement("form");
@@ -91,16 +94,17 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
   };
 
   const handleCheckStatus = async () => {
-    if (!pendingStarId) return;
+    if (!pendingOrderNo) return;
     setCheckingStatus(true);
     try {
       const res = await fetch(func2url["save-wish"], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "status", star_id: pendingStarId }),
+        body: JSON.stringify({ action: "status", order_no: pendingOrderNo }),
       });
       const data = await res.json();
       if (data.status === "active") {
+        setRealStarId(data.star_id ?? null);
         setStep("done");
         onSent(numAmount, wish, pendingCoords?.x, pendingCoords?.y);
       } else {
@@ -135,7 +139,7 @@ export function useWishModal(onSent: (amount: number, wish: string, x?: number, 
     tier,
     isEmailValid,
     isValid,
-    pendingStarId,
+    realStarId,
     handleAmountInput,
     handleQuick,
     handleSubmit,

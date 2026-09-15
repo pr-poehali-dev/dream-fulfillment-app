@@ -50,7 +50,7 @@ export default function Index() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paid = params.get("paid");
-    const starId = params.get("star_id");
+    const orderNo = params.get("order_no");
 
     if (paid === "fail") {
       window.history.replaceState({}, "", window.location.pathname);
@@ -59,15 +59,15 @@ export default function Index() {
       return;
     }
 
-    if (paid === "ok" && starId) {
+    if (paid === "ok" && orderNo) {
       window.history.replaceState({}, "", window.location.pathname);
       setPayNotice("success");
 
-      const lightUpStar = (data: { x: number; y: number; amount: number; wish: string; name?: string; avatar?: string }) => {
+      const lightUpStar = (data: { star_id?: number; x: number; y: number; amount: number; wish: string; name?: string; avatar?: string }) => {
         const amt = data.amount ?? 100;
         const baseSize = amt >= 1000 ? 3.5 : amt >= 500 ? 2.8 : amt >= 100 ? 2.2 : amt >= 50 ? 1.8 : 1.3;
         const newStar: Star = {
-          id: Date.now(),
+          id: data.star_id ?? Date.now(),
           x: data.x,
           y: data.y,
           size: baseSize + Math.random() * 0.5,
@@ -89,7 +89,7 @@ export default function Index() {
         fetch(func2url["save-wish"], {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "confirm", star_id: Number(starId) }),
+          body: JSON.stringify({ action: "confirm", order_no: Number(orderNo) }),
         })
           .then((r) => r.json())
           .then((raw) => {

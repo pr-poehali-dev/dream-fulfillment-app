@@ -14,8 +14,8 @@ CORS = {
 }
 
 W1_CURRENCY_RUB = "643"
-SUCCESS_URL = "https://zagadai.online/?paid=1"
-FAIL_URL = "https://zagadai.online/?paid=0"
+SUCCESS_URL_BASE = "https://zagadai.online/?paid=ok"
+FAIL_URL = "https://zagadai.online/?paid=fail"
 
 # Зона неба, где разрешено размещать звёзды (в % от ширины/высоты экрана).
 # Новая полноэкранная раскладка фона: небо занимает весь экран, полоса
@@ -103,20 +103,19 @@ def handler(event: dict, context) -> dict:
                 "body": "WMI_RESULT=RETRY&WMI_DESCRIPTION=bad_signature",
             }
 
-        pending_id = params.get("WMI_PAYMENT_NO")
+        order_no = params.get("WMI_PAYMENT_NO")
         payment_id = params.get("WMI_ORDER_ID", "")
 
         conn = get_conn()
         cur = conn.cursor()
-        cur.execute(
-            f"SELECT id, user_id, wish, story, amount, angel_fund, x, y "
-            f"FROM {SCHEMA}.pending_payments WHERE id = %s",
-            (pending_id,),
-        )
-        row = cur.fetchone()
 
-        if not row:
-            # Уже обработано ранее (повторное уведомление) — просто подтверждаем
+        # Если по этому заказу звезда уже создана раньше (повторное
+        # уведомление от W1) — просто подтверждаем, ничего не дублируя.
+        cur.execute(
+            f"SELECT id FROM {SCHEMA}.stars WHERE order_no = %s",
+            (order_no,),
+        )
+        if cur.fetchone():
             cur.close()
             conn.close()
             return {
@@ -125,19 +124,42 @@ def handler(event: dict, context) -> dict:
                 "body": "WMI_RESULT=OK",
             }
 
-        star_id, user_id, wish, story, amount, angel_fund, x, y = row
-
         cur.execute(
-            f"INSERT INTO {SCHEMA}.stars (id, user_id, wish, story, amount, angel_fund, status, x, y, paid_at) "
-            f"VALUES (%s, %s, %s, %s, %s, %s, 'active', %s, %s, now())",
-            (star_id, user_id, wish, story, amount, angel_fund, x, y),
+            f"SELECT id, user_id, wish, story, amount, angel_fund, x, y "
+            f"FROM {SCHEMA}.pending_payments WHERE id = %s",
+            (order_no,),
         )
+        row = cur.fetchone()
+
+        if not row:
+            # Заявка не найдена (уже обработана и удалена, либо просрочена) —
+            # просто подтверждаем, чтобы W1 не повторял вебхук бесконечно.
+            cur.close()
+            conn.close()
+            return {
+                "statusCode": 200,
+                "headers": {**CORS, "Content-Type": "text/plain"},
+                "body": "WMI_RESULT=OK",
+            }
+
+        _pending_id, user_id, wish, story, amount, angel_fund, x, y = row
+
+        # Номер звезды выдаётся только сейчас, в момент подтверждённой оплаты —
+        # из stars_id_seq, независимо от номера заявки (order_no). Так неудачные
+        # или брошенные заявки на оплату больше не пропускают номера звёзд.
+        cur.execute(
+            f"INSERT INTO {SCHEMA}.stars "
+            f"(user_id, wish, story, amount, angel_fund, status, x, y, paid_at, order_no) "
+            f"VALUES (%s, %s, %s, %s, %s, 'active', %s, %s, now(), %s) RETURNING id",
+            (user_id, wish, story, amount, angel_fund, x, y, order_no),
+        )
+        star_id = cur.fetchone()[0]
         cur.execute(
             f"INSERT INTO {SCHEMA}.transactions (user_id, star_id, amount, angel_fund, status, payment_id) "
             f"VALUES (%s, %s, %s, %s, 'paid', %s)",
             (user_id, star_id, amount, angel_fund, payment_id),
         )
-        cur.execute(f"DELETE FROM {SCHEMA}.pending_payments WHERE id = %s", (pending_id,))
+        cur.execute(f"DELETE FROM {SCHEMA}.pending_payments WHERE id = %s", (order_no,))
         conn.commit()
         cur.close()
         conn.close()
@@ -191,7 +213,11 @@ def handler(event: dict, context) -> dict:
             f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
             (user_id, wish, story, amount, angel_fund, email, x, y),
         )
-        star_id = cur.fetchone()[0]
+        # order_no — это номер ЗАЯВКИ на оплату (свой отдельный счётчик), а не
+        # номер звезды. Настоящий номер звезды выдаётся только при успешной
+        # оплате (см. обработку WMI-уведомления выше), поэтому неудачные или
+        # брошенные заявки больше не пропускают номера звёзд.
+        order_no = cur.fetchone()[0]
         conn.commit()
         cur.close()
         conn.close()
@@ -215,15 +241,16 @@ def handler(event: dict, context) -> dict:
             ensure_ascii=False,
             separators=(",", ":"),
         )
-        description = urllib.parse.quote(f"Заказ №{star_id}", safe="")
+        description = urllib.parse.quote(f"Заказ №{order_no}", safe="")
+        success_url = f"{SUCCESS_URL_BASE}&order_no={order_no}"
 
         payment_params = {
             "WMI_MERCHANT_ID": merchant_id,
             "WMI_PAYMENT_AMOUNT": amount_str,
             "WMI_CURRENCY_ID": W1_CURRENCY_RUB,
-            "WMI_PAYMENT_NO": str(star_id),
+            "WMI_PAYMENT_NO": str(order_no),
             "WMI_DESCRIPTION": description,
-            "WMI_SUCCESS_URL": SUCCESS_URL,
+            "WMI_SUCCESS_URL": success_url,
             "WMI_FAIL_URL": FAIL_URL,
             "WMI_CUSTOMER_EMAIL": email,
             "WMI_ORDER_ITEMS": order_items,
@@ -237,7 +264,10 @@ def handler(event: dict, context) -> dict:
             "statusCode": 200,
             "headers": CORS,
             "body": json.dumps({
-                "id": star_id,
+                # order_no — номер заявки на оплату, НЕ номер будущей звезды.
+                # Настоящий номер звезды фронтенд узнает позже через
+                # action=status/confirm после подтверждения оплаты.
+                "order_no": order_no,
                 "x": x,
                 "y": y,
                 "payment": payment_params,
@@ -245,21 +275,23 @@ def handler(event: dict, context) -> dict:
         }
 
     # --- Проверка статуса (ручной фолбэк, если уведомление не пришло) ---
+    # order_no — номер ЗАЯВКИ на оплату (это то, что фронтенд получил при
+    # создании желания, ещё до того, как звезде выдан её настоящий номер).
     if action == "status":
-        star_id = body.get("star_id")
-        if not star_id:
-            return {"statusCode": 400, "headers": CORS, "body": json.dumps({"error": "star_id обязателен"})}
+        order_no = body.get("order_no") or body.get("star_id")
+        if not order_no:
+            return {"statusCode": 400, "headers": CORS, "body": json.dumps({"error": "order_no обязателен"})}
 
         conn = get_conn()
         cur = conn.cursor()
-        cur.execute(f"SELECT status FROM {SCHEMA}.stars WHERE id = %s", (star_id,))
+        cur.execute(f"SELECT id, status FROM {SCHEMA}.stars WHERE order_no = %s", (order_no,))
         row = cur.fetchone()
         if row:
             cur.close()
             conn.close()
-            return {"statusCode": 200, "headers": CORS, "body": json.dumps({"status": row[0]})}
+            return {"statusCode": 200, "headers": CORS, "body": json.dumps({"status": row[1], "star_id": row[0]})}
 
-        cur.execute(f"SELECT 1 FROM {SCHEMA}.pending_payments WHERE id = %s", (star_id,))
+        cur.execute(f"SELECT 1 FROM {SCHEMA}.pending_payments WHERE id = %s", (order_no,))
         pending_row = cur.fetchone()
         cur.close()
         conn.close()
@@ -267,35 +299,36 @@ def handler(event: dict, context) -> dict:
         if pending_row:
             return {"statusCode": 200, "headers": CORS, "body": json.dumps({"status": "pending"})}
 
-        return {"statusCode": 404, "headers": CORS, "body": json.dumps({"error": "Звезда не найдена"})}
+        return {"statusCode": 404, "headers": CORS, "body": json.dumps({"error": "Заявка не найдена"})}
 
     # --- Подтверждение после возврата с оплаты ---
     if action == "confirm":
-        star_id = body.get("star_id")
-        if not star_id:
-            return {"statusCode": 400, "headers": CORS, "body": json.dumps({"error": "star_id обязателен"})}
+        order_no = body.get("order_no") or body.get("star_id")
+        if not order_no:
+            return {"statusCode": 400, "headers": CORS, "body": json.dumps({"error": "order_no обязателен"})}
 
         conn = get_conn()
         cur = conn.cursor()
         cur.execute(
-            f"SELECT s.status, s.x, s.y, s.amount, s.wish, u.name, u.avatar_url "
+            f"SELECT s.id, s.status, s.x, s.y, s.amount, s.wish, u.name, u.avatar_url "
             f"FROM {SCHEMA}.stars s JOIN {SCHEMA}.users u ON u.id = s.user_id "
-            f"WHERE s.id = %s",
-            (star_id,),
+            f"WHERE s.order_no = %s",
+            (order_no,),
         )
         row = cur.fetchone()
         cur.close()
         conn.close()
 
         if not row:
-            return {"statusCode": 404, "headers": CORS, "body": json.dumps({"error": "Звезда не найдена"})}
+            return {"statusCode": 404, "headers": CORS, "body": json.dumps({"error": "Оплата ещё не подтверждена"})}
 
-        status, x, y, amount, wish, name, avatar = row
+        star_id, status, x, y, amount, wish, name, avatar = row
         return {
             "statusCode": 200,
             "headers": CORS,
             "body": json.dumps({
                 "status": status,
+                "star_id": star_id,
                 "x": float(x),
                 "y": float(y),
                 "amount": float(amount),
