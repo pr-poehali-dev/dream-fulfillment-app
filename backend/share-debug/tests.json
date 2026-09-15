@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Default star id returns report",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Invalid id returns 400",
+      "method": "GET",
+      "path": "/?id=abc",
+      "expectedStatus": 400
+    }
+  ]
+}
