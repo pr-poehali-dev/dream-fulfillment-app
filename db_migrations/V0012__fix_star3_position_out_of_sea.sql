@@ -1,0 +1,1 @@
+UPDATE t_p75577017_dream_fulfillment_ap.stars SET x = 9.13, y = 36.05 WHERE id = 3;
