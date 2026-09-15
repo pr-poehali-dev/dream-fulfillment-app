@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import VKCallback from "./pages/VKCallback";
 import About from "./pages/About";
 import Oferta from "./pages/Oferta";
+import DebugShare from "./pages/DebugShare";
 import { UserProvider } from "./context/UserContext";
 import BackgroundMusic from "./components/BackgroundMusic";
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/vk-callback" element={<VKCallback />} />
             <Route path="/about" element={<About />} />
             <Route path="/oferta" element={<Oferta />} />
+            <Route path="/debug-share" element={<DebugShare />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
